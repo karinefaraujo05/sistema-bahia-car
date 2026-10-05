@@ -1,11 +1,20 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import ConfiguracaoLoja, Documento
+from .models import ConfiguracaoLoja, Contrato, Documento
 
 
 @admin.register(ConfiguracaoLoja)
 class ConfiguracaoLojaAdmin(SimpleHistoryAdmin):
+    def get_queryset(self, request):
+        return self.model.todos.all()
+
+
+@admin.register(Contrato)
+class ContratoAdmin(SimpleHistoryAdmin):
+    list_display = ("titulo", "modelo", "versao", "negocio", "consignacao", "criado_em")
+    list_filter = ("modelo",)
+
     def get_queryset(self, request):
         return self.model.todos.all()
 
