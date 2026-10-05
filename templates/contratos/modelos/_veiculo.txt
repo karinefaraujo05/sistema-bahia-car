@@ -1,0 +1,5 @@
+{% load formato contratos_extras %}Marca/Modelo: {{ v.marca }} {{ v.modelo }}
+Ano fabricação/modelo: {{ v.ano_fabricacao }}/{{ v.ano_modelo }}   Cor: {{ v.cor }}   Combustível: {{ v.get_combustivel_display|default:"—" }}
+Placa: {{ v.placa_formatada }}   Renavam: {{ v.renavam }}   Chassi: {{ v.chassi }}
+Quilometragem na entrega: {{ item.km_entrega|default:"—" }} km
+Valor atribuído neste contrato: {{ item.valor|reais }} ({{ item.valor|extenso }})

@@ -1,0 +1,23 @@
+{% load formato contratos_extras %}CONTRATO DE COMPRA E VENDA DE VEÍCULO AUTOMOTOR
+Contrato nº {{ negocio.numero_contrato }}
+
+VENDEDORA: {% include "contratos/modelos/_loja.txt" with papel_loja="VENDEDORA" %}
+
+COMPRADOR(A): {% include "contratos/modelos/_pessoa.txt" with p=comprador papel_pessoa="COMPRADOR(A)" %}
+
+CLÁUSULA 1ª — OBJETO. A VENDEDORA vende ao(à) COMPRADOR(A), de sua propriedade, o veículo:
+{% include "contratos/modelos/_veiculo.txt" with v=item.veiculo item=item %}
+
+CLÁUSULA 2ª — PREÇO E PAGAMENTO. O preço total é de {{ item.valor|reais }} ({{ item.valor|extenso }}), pago da seguinte forma: {{ negocio.detalhes_pagamento|default:"a combinar" }}.
+
+CLÁUSULA 3ª — ESTADO DO VEÍCULO. O(A) COMPRADOR(A) declara ter vistoriado o veículo, informado(a) das seguintes avarias e características: {{ item.veiculo.avarias_declaradas|default:"nenhuma" }}.
+
+CLÁUSULA 4ª — GARANTIA. O veículo conta com a garantia legal prevista no Código de Defesa do Consumidor. (Nota para o advogado: avaliar garantia contratual e exclusões; não inserir cláusula que afaste a garantia legal.)
+
+CLÁUSULA 5ª — ENTREGA E DÉBITOS. A entrega ocorre em {{ negocio.data_hora_entrega|date:"d/m/Y H:i"|default:"data a combinar" }}, no endereço {{ negocio.local_entrega|default:loja.endereco }}. Multas, tributos e encargos com fato gerador até a entrega são da VENDEDORA; a partir dela, do(a) COMPRADOR(A). IPVA e licenciamento: {{ loja.regra_ipva }}.
+
+CLÁUSULA 6ª — DOCUMENTAÇÃO. A VENDEDORA providenciará a documentação de transferência; o(a) COMPRADOR(A) fará a transferência no prazo legal de 30 dias. Chave reserva: {{ item.veiculo.tem_chave_reserva|sim_nao }}.
+
+CLÁUSULA 7ª — DESCUMPRIMENTO. A parte que descumprir qualquer obrigação pagará à outra multa de {{ loja.multa_percentual }}% sobre o valor total, sem prejuízo de perdas e danos.
+
+{% include "contratos/modelos/_rodape.txt" %}
