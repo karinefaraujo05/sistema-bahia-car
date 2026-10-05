@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load formato %}
+
+{% block titulo %}Revisão — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  {% include "negocios/partials/cabecalho_passo.html" with titulo="Confirmar" passo=4 %}
+
+  <div class="mb-5 rounded-lg border border-borda bg-superficie p-4 text-lg">
+    {% if negocio.tipo == 'venda' %}
+      Você está <strong>vendendo</strong>
+    {% else %}
+      Você está <strong>comprando</strong>
+    {% endif %}
+    {% if item %}
+      o <strong>{{ item.veiculo.marca }} {{ item.veiculo.modelo }}</strong>
+      {{ item.veiculo.cor|lower }} ({{ item.veiculo.placa_formatada }})
+      {% if negocio.tipo == 'venda' %}para{% else %}de{% endif %}
+      <strong>{% if parte %}{{ parte.pessoa.nome }}{% else %}—{% endif %}</strong>
+      por <strong>{{ item.valor|reais }}</strong>.
+    {% else %}
+      — faltam dados do carro.
+    {% endif %}
+  </div>
+
+  <dl class="mb-5 divide-y divide-borda rounded-lg border border-borda bg-superficie">
+    {% if negocio.forma_pagamento %}
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">Pagamento</dt>
+        <dd class="text-right font-medium">{{ negocio.get_forma_pagamento_display }}</dd>
+      </div>
+    {% endif %}
+    <div class="flex justify-between gap-4 px-4 py-3">
+      <dt class="text-tinta-suave">Data</dt>
+      <dd class="text-right font-medium">{{ negocio.data|date:"d/m/Y" }}</dd>
+    </div>
+    {% if negocio.data_hora_entrega %}
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">Entrega</dt>
+        <dd class="text-right font-medium">{{ negocio.data_hora_entrega|date:"d/m/Y H:i" }}</dd>
+      </div>
+    {% endif %}
+  </dl>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="flex flex-wrap gap-2">
+      <button type="submit" class="botao botao-primario">Confirmar</button>
+      <a href="{% url 'negocios:passo_pagamento' negocio.pk %}" class="botao botao-secundario">Voltar</a>
+    </div>
+  </form>
+{% endblock %}

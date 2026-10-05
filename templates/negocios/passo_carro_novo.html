@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ titulo }} — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  {% include "negocios/partials/cabecalho_passo.html" %}
+
+  <p class="mb-4 text-tinta-suave">Cadastre o carro que está entrando. As fotos podem ser adicionadas depois, na tela do carro.</p>
+
+  {% if form.non_field_errors %}
+    <div class="mb-4 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% for campo in form %}
+        {% include "negocios/partials/campo.html" with campo=campo %}
+      {% endfor %}
+    </div>
+    <div class="flex flex-wrap gap-2 pt-2">
+      <button type="submit" class="botao botao-primario">Continuar</button>
+      <button type="submit" name="rascunho" value="1" class="botao botao-secundario">
+        Salvar rascunho
+      </button>
+      <a href="{% url 'negocios:passo_pessoa' negocio.pk %}" class="botao botao-secundario">Voltar</a>
+    </div>
+  </form>
+{% endblock %}
