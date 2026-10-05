@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block titulo %}Carro deixado para vender — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-2">
+    <a href="{% url 'inicio' %}" class="text-tinta-suave">← Início</a>
+  </div>
+  <h1 class="mb-1 text-2xl">Carro deixado para vender</h1>
+  <p class="mb-5 text-tinta-suave">O carro continua do dono; a loja só vende por ele.</p>
+
+  {% if pessoa_form.non_field_errors %}
+    <div class="mb-4 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+      {{ pessoa_form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Dono do carro</legend>
+      {% include "negocios/partials/campo.html" with campo=pessoa_form.pessoa %}
+      <p class="text-center text-sm text-tinta-suave">ou</p>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "negocios/partials/campo.html" with campo=pessoa_form.nome_novo %}
+        {% include "negocios/partials/campo.html" with campo=pessoa_form.telefone_novo %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">O carro</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% for campo in veiculo_form %}
+          {% include "negocios/partials/campo.html" with campo=campo %}
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Combinado da consignação</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% for campo in termos_form %}
+          {% include "negocios/partials/campo.html" with campo=campo %}
+        {% endfor %}
+      </div>
+    </fieldset>
+
+    <div class="flex gap-2">
+      <button type="submit" class="botao botao-primario">Receber em consignação</button>
+      <a href="{% url 'inicio' %}" class="botao botao-secundario">Cancelar</a>
+    </div>
+  </form>
+{% endblock %}
