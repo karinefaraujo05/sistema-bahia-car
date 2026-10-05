@@ -436,3 +436,122 @@ def test_detalhe_do_negocio_abre(client):
     item(negocio, carro, "25000", para=comprador)
     services.concluir_negocio(negocio)
     assert client.get(reverse("negocios:detalhe", args=[negocio.pk])).status_code == 200
+
+
+def _dados_veiculo(placa, **extra):
+    dados = {
+        "placa": placa,
+        "marca": "Fiat",
+        "modelo": "Uno",
+        "ano_fabricacao": "2012",
+        "ano_modelo": "2013",
+        "cor": "Branco",
+        "situacao": Situacao.PROPRIO,
+        "status": StatusVeiculo.EM_ESTOQUE,
+    }
+    dados.update(extra)
+    return dados
+
+
+def test_fluxo_de_troca_pelas_telas(client):
+    logar(client)
+    da_loja = veiculo("UUU2121")
+
+    client.get(reverse("negocios:iniciar", args=["troca"]))
+    negocio = ultimo_negocio()
+
+    client.post(
+        reverse("negocios:passo_pessoa", args=[negocio.pk]),
+        {"nome_novo": "Cliente Troca", "telefone_novo": ""},
+    )
+    client.post(reverse("negocios:troca_carro_loja", args=[negocio.pk]), {"veiculo": da_loja.pk})
+    client.post(
+        reverse("negocios:troca_carro_cliente", args=[negocio.pk]), _dados_veiculo("VVV2222")
+    )
+    client.post(
+        reverse("negocios:troca_valores", args=[negocio.pk]),
+        {"valor_loja": "40000", "valor_cliente": "15000", "data": "2026-10-05"},
+    )
+    client.post(reverse("negocios:revisao", args=[negocio.pk]))
+
+    negocio.refresh_from_db()
+    da_loja.refresh_from_db()
+    do_cliente = Veiculo.objetos.get(placa="VVV2222")
+    assert negocio.status == StatusNegocio.CONCLUIDO
+    assert da_loja.status == StatusVeiculo.VENDIDO
+    assert do_cliente.situacao == Situacao.PROPRIO
+    assert do_cliente.valor_compra == Decimal("15000")
+
+
+def test_consignacao_pela_tela(client):
+    logar(client)
+    dados = {
+        "nome_novo": "Dono Consignante",
+        "telefone_novo": "71988887777",
+        **_dados_veiculo("WWW2323"),
+        "valor_liquido_minimo": "28000",
+        "comissao_tipo": ComissaoTipo.PERCENTUAL,
+        "comissao_valor": "5",
+        "prazo_dias": "90",
+        "aviso_dias": "15",
+        "prazo_repasse_dias": "5",
+        "documentos_entregues": "CRLV e chave reserva",
+    }
+    resp = client.post(reverse("negocios:consignar"), dados)
+    assert resp.status_code == 302
+    carro = Veiculo.objetos.get(placa="WWW2323")
+    assert carro.situacao == Situacao.CONSIGNADO
+    assert carro.consignacoes.first().status == StatusConsignacao.ATIVA
+
+
+def test_venda_de_consignado_e_repasse_pelas_telas(client):
+    logar(client)
+    consignacao, carro, dono = consignar("XXX2424")
+
+    client.get(reverse("negocios:iniciar_consignado", args=[consignacao.pk]))
+    negocio = ultimo_negocio()
+    client.post(
+        reverse("negocios:consignado_comprador", args=[negocio.pk]),
+        {"nome_novo": "Comprador Final", "telefone_novo": ""},
+    )
+    client.post(
+        reverse("negocios:consignado_valores", args=[negocio.pk]),
+        {"valor": "30000", "data": "2026-10-05"},
+    )
+    client.post(reverse("negocios:revisao", args=[negocio.pk]))
+
+    carro.refresh_from_db()
+    consignacao.refresh_from_db()
+    assert carro.status == StatusVeiculo.VENDIDO
+    assert consignacao.status == StatusConsignacao.VENDIDA
+
+    # Repasse ao dono pela tela.
+    client.post(reverse("negocios:repasse", args=[consignacao.pk]))
+    consignacao.refresh_from_db()
+    assert consignacao.status == StatusConsignacao.ENCERRADA
+    assert consignacao.repasse_feito_em is not None
+
+
+def test_devolver_consignado_pela_tela(client):
+    logar(client)
+    consignacao, carro, dono = consignar("YYY2525")
+    client.post(reverse("negocios:devolver", args=[consignacao.pk]))
+    carro.refresh_from_db()
+    consignacao.refresh_from_db()
+    assert carro.status == StatusVeiculo.DEVOLVIDO
+    assert consignacao.status == StatusConsignacao.ENCERRADA
+
+
+def test_paginas_novas_renderizam_em_get(client):
+    logar(client)
+    # Página de consignação (três formulários).
+    assert client.get(reverse("negocios:consignar")).status_code == 200
+
+    # Passo de valores da troca precisa dos dois carros no rascunho.
+    cliente = pessoa("Cliente")
+    negocio = rascunho(TipoNegocio.TROCA)
+    ParteNegocio.objetos.create(negocio=negocio, pessoa=cliente, papel=PapelParte.PERMUTANTE)
+    item(negocio, veiculo("ZZZ2626"), "40000", para=cliente)
+    item(negocio, veiculo("ZZZ2627", situacao=Situacao.TERCEIRO), "15000", de=cliente)
+    assert client.get(reverse("negocios:troca_valores", args=[negocio.pk])).status_code == 200
+    assert client.get(reverse("negocios:revisao", args=[negocio.pk])).status_code == 200
