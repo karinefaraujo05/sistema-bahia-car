@@ -1,0 +1,15 @@
+CLÁUSULA — DADOS PESSOAIS. Os dados pessoais das partes serão tratados exclusivamente para a execução deste contrato e o cumprimento de obrigações legais, nos termos da Lei nº 13.709/2018 (LGPD).
+
+CLÁUSULA — FORO. Fica eleito o foro da comarca de {{ loja.cidade }}/{{ loja.uf }} para dirimir quaisquer questões decorrentes deste contrato.
+
+E por estarem justas e contratadas, as partes assinam o presente instrumento em {{ loja.numero_vias }} vias de igual teor, na presença das testemunhas abaixo.
+
+{{ loja.cidade }}/{{ loja.uf }}, {{ negocio.data|date:"j \d\e F \d\e Y" }}.
+
+
+__________________________________        __________________________________
+
+
+Testemunhas:
+1. ______________________________  Nome:                              CPF:
+2. ______________________________  Nome:                              CPF:

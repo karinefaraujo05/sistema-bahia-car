@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block titulo %}Editar contrato — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-2">
+    {% if contrato.negocio_id %}
+      <a href="{% url 'negocios:detalhe' contrato.negocio_id %}" class="text-tinta-suave">← Voltar ao negócio</a>
+    {% else %}
+      <a href="{% url 'veiculos:detalhe' contrato.consignacao.veiculo_id %}" class="text-tinta-suave">← Voltar ao carro</a>
+    {% endif %}
+  </div>
+
+  <h1 class="mb-1 text-2xl">{{ contrato.titulo }}</h1>
+  <p class="mb-3 text-tinta-suave">Versão {{ contrato.versao }}</p>
+
+  <div class="mb-4 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3 text-sm">
+    Modelo provisório — revise o texto e, antes de usar com clientes, passe por um advogado.
+    Ajuste o que quiser abaixo e baixe em PDF ou Word.
+  </div>
+
+  <form method="post" class="space-y-3">
+    {% csrf_token %}
+    <textarea name="corpo" rows="24" class="campo w-full font-mono text-sm">{{ contrato.corpo }}</textarea>
+    <div class="flex flex-wrap gap-2">
+      <button type="submit" class="botao botao-primario">Salvar alterações</button>
+      <a href="{% url 'contratos:baixar_pdf' contrato.pk %}" class="botao botao-secundario">Baixar PDF</a>
+      <a href="{% url 'contratos:baixar_docx' contrato.pk %}" class="botao botao-secundario">Baixar Word (.docx)</a>
+    </div>
+  </form>
+{% endblock %}

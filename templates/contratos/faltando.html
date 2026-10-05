@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block titulo %}Faltam dados — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <h1 class="mb-3 text-2xl">Faltam dados para gerar o contrato</h1>
+  <p class="mb-4 text-tinta-suave">Preencha os itens abaixo e tente gerar de novo.</p>
+
+  <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+    {% for item in faltando %}
+      <li class="flex items-center justify-between gap-3 px-4 py-3">
+        <span>{{ item.texto }}</span>
+        <a href="{{ item.url }}" class="shrink-0 text-petroleo-700">Preencher</a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <p class="mt-4">
+    <a href="{% url 'inicio' %}" class="botao botao-secundario">Voltar ao início</a>
+  </p>
+{% endblock %}

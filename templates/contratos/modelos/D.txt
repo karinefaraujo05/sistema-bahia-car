@@ -1,0 +1,35 @@
+{% load formato contratos_extras %}CONTRATO DE CONSIGNAÇÃO DE VEÍCULO PARA VENDA
+Contrato nº {{ consignacao.numero_contrato }}
+
+CONSIGNANTE: {% include "contratos/modelos/_pessoa.txt" with p=proprietario papel_pessoa="CONSIGNANTE" %}
+
+CONSIGNATÁRIA: {% include "contratos/modelos/_loja.txt" with papel_loja="CONSIGNATÁRIA" %}
+
+CLÁUSULA 1ª — OBJETO. O(A) CONSIGNANTE entrega à CONSIGNATÁRIA, em consignação, para intermediar a venda a terceiros, o veículo abaixo. A propriedade permanece com o(a) CONSIGNANTE até a venda.
+Marca/Modelo: {{ v.marca }} {{ v.modelo }}
+Ano fabricação/modelo: {{ v.ano_fabricacao }}/{{ v.ano_modelo }}   Cor: {{ v.cor }}
+Placa: {{ v.placa_formatada }}   Renavam: {{ v.renavam }}   Chassi: {{ v.chassi }}
+
+CLÁUSULA 2ª — VALOR E REMUNERAÇÃO. O(A) CONSIGNANTE receberá, no mínimo, {{ consignacao.valor_liquido_minimo|reais }} ({{ consignacao.valor_liquido_minimo|extenso }}) líquidos pela venda. A remuneração da CONSIGNATÁRIA será {% if consignacao.comissao_tipo == 'percentual' %}de {{ consignacao.comissao_valor }}% sobre o preço de venda{% elif consignacao.comissao_tipo == 'fixa' %}de {{ consignacao.comissao_valor|reais }}{% else %}o valor que exceder o mínimo líquido acima{% endif %}. Venda por valor inferior ao mínimo depende de autorização escrita do(a) CONSIGNANTE.
+
+CLÁUSULA 3ª — REPASSE. A CONSIGNATÁRIA repassará o valor devido em até {{ consignacao.prazo_repasse_dias }} dias úteis após o recebimento integral do preço.
+
+CLÁUSULA 4ª — PRAZO. A consignação vigora por {{ consignacao.prazo_dias }} dias a partir de {{ consignacao.data_entrada|date:"d/m/Y" }}, com aviso de {{ consignacao.aviso_dias }} dias para encerramento por qualquer parte.
+
+CLÁUSULA 5ª — GUARDA. Enquanto o veículo estiver em seu poder, a CONSIGNATÁRIA responde pela guarda e conservação, e fica autorizada a realizar testes de rodagem acompanhados por seu preposto.
+
+CLÁUSULA 6ª — DOCUMENTAÇÃO. O(A) CONSIGNANTE entrega nesta data: {{ consignacao.documentos_entregues|default:"—" }}. Concluída a venda, assinará a ATPV-e em favor do comprador em até {{ loja.prazo_assinatura_dias }} dias úteis.
+
+CLÁUSULA 7ª — DADOS PESSOAIS. Os dados pessoais serão tratados para a execução deste contrato e o cumprimento de obrigações legais, nos termos da Lei nº 13.709/2018 (LGPD).
+
+CLÁUSULA 8ª — FORO. Fica eleito o foro da comarca de {{ loja.cidade }}/{{ loja.uf }} para dirimir questões deste contrato.
+
+{{ loja.cidade }}/{{ loja.uf }}, {{ consignacao.data_entrada|date:"j \d\e F \d\e Y" }}.
+
+
+__________________________________        __________________________________
+CONSIGNANTE                                CONSIGNATÁRIA
+
+Testemunhas:
+1. ______________________________  CPF:
+2. ______________________________  CPF:

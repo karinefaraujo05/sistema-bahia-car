@@ -1,0 +1,23 @@
+{% load formato contratos_extras %}CONTRATO DE COMPRA E VENDA DE VEÍCULO AUTOMOTOR
+Contrato nº {{ negocio.numero_contrato }}
+
+VENDEDOR(A): {% include "contratos/modelos/_pessoa.txt" with p=vendedor papel_pessoa="VENDEDOR(A)" %}
+
+COMPRADORA: {% include "contratos/modelos/_loja.txt" with papel_loja="COMPRADORA" %}
+
+CLÁUSULA 1ª — OBJETO. O(A) VENDEDOR(A) vende à COMPRADORA, livre de ônus salvo o aqui declarado, o veículo:
+{% include "contratos/modelos/_veiculo.txt" with v=item.veiculo item=item %}
+
+CLÁUSULA 2ª — PREÇO E PAGAMENTO. O preço total é de {{ item.valor|reais }} ({{ item.valor|extenso }}), pago da seguinte forma: {{ negocio.detalhes_pagamento|default:"a combinar" }}.
+{% if item.veiculo.alienado %}O veículo possui financiamento ativo junto a {{ item.veiculo.credor_alienacao }}, com saldo devedor declarado de {{ item.veiculo.saldo_devedor|reais }}. As partes declaram ciência de que a transferência depende da quitação ou da anuência do credor.{% endif %}
+
+CLÁUSULA 3ª — DECLARAÇÕES DO(A) VENDEDOR(A). Declara ser legítimo possuidor do veículo, que não pesam sobre ele restrições além das aqui descritas, e responde pela evicção e por vícios ocultos preexistentes não declarados, nos termos da lei civil.
+Avarias declaradas: {{ item.veiculo.avarias_declaradas|default:"nenhuma declarada" }}.
+
+CLÁUSULA 4ª — ENTREGA E DÉBITOS. A entrega ocorre em {{ negocio.data_hora_entrega|date:"d/m/Y H:i"|default:"data a combinar" }}, no endereço {{ negocio.local_entrega|default:loja.endereco }}. Multas, tributos e encargos com fato gerador até a entrega são de responsabilidade do(a) VENDEDOR(A); a partir dela, da COMPRADORA. IPVA e licenciamento: {{ loja.regra_ipva }}.
+
+CLÁUSULA 5ª — DOCUMENTAÇÃO. O(A) VENDEDOR(A) assinará a ATPV-e em até {{ loja.prazo_assinatura_dias }} dias úteis e entregará os documentos do veículo. Chave reserva: {{ item.veiculo.tem_chave_reserva|sim_nao }}.
+
+CLÁUSULA 6ª — DESCUMPRIMENTO. A parte que descumprir qualquer obrigação pagará à outra multa de {{ loja.multa_percentual }}% sobre o valor total, sem prejuízo de perdas e danos.
+
+{% include "contratos/modelos/_rodape.txt" %}

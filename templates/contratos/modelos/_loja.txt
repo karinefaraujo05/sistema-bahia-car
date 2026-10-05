@@ -1,0 +1,1 @@
+{{ loja.razao_social }}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{ loja.cnpj }}, com sede em {{ loja.endereco }}, {{ loja.cidade }}/{{ loja.uf }}, CEP {{ loja.cep }}, neste ato representada por {{ loja.representante_nome }}, inscrito no CPF sob o nº {{ loja.representante_cpf }}, doravante denominada {{ papel_loja }}.

@@ -1,0 +1,26 @@
+{% load formato contratos_extras %}CONTRATO DE PERMUTA DE VEÍCULOS COM COMPLEMENTAÇÃO DE PREÇO
+Contrato nº {{ negocio.numero_contrato }}
+
+LOJA: {% include "contratos/modelos/_loja.txt" with papel_loja="LOJA" %}
+
+CLIENTE: {% include "contratos/modelos/_pessoa.txt" with p=permutante papel_pessoa="CLIENTE" %}
+
+CLÁUSULA 1ª — OBJETO. As partes permutam entre si os veículos abaixo.
+
+Veículo entregue pela LOJA ao CLIENTE:
+{% include "contratos/modelos/_veiculo.txt" with v=saida.veiculo item=saida %}
+{% for e in entradas %}
+Veículo entregue pelo CLIENTE à LOJA:
+{% include "contratos/modelos/_veiculo.txt" with v=e.veiculo item=e %}
+{% endfor %}
+CLÁUSULA 2ª — VALORES E DIFERENÇA. O veículo da LOJA é avaliado em {{ saida.valor|reais }}. {% if diferenca > 0 %}O CLIENTE pagará à LOJA a diferença de {{ diferenca|reais }} ({{ diferenca|extenso }}), da forma: {{ negocio.detalhes_pagamento|default:"a combinar" }}.{% elif diferenca < 0 %}A LOJA pagará ao CLIENTE a diferença de {{ diferenca|reais }}.{% else %}Os valores são equivalentes, sem complementação de preço.{% endif %}
+
+CLÁUSULA 3ª — DECLARAÇÕES. Cada parte, quanto ao veículo que entrega, declara legítima posse, ausência de restrições não informadas e responde por vícios ocultos preexistentes não declarados, nos termos da lei civil.
+
+CLÁUSULA 4ª — ENTREGA E DÉBITOS. A entrega ocorre em {{ negocio.data_hora_entrega|date:"d/m/Y H:i"|default:"data a combinar" }}. Multas, tributos e encargos com fato gerador até a entrega são de quem entrega cada veículo; a partir dela, de quem recebe. IPVA e licenciamento: {{ loja.regra_ipva }}.
+
+CLÁUSULA 5ª — DOCUMENTAÇÃO. Cada parte assinará a ATPV-e do veículo que entrega em até {{ loja.prazo_assinatura_dias }} dias úteis.
+
+CLÁUSULA 6ª — DESCUMPRIMENTO. A parte que descumprir qualquer obrigação pagará à outra multa de {{ loja.multa_percentual }}% sobre o valor total, sem prejuízo de perdas e danos.
+
+{% include "contratos/modelos/_rodape.txt" %}

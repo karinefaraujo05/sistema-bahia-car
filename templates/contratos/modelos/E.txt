@@ -1,0 +1,26 @@
+{% load formato contratos_extras %}CONTRATO DE COMPRA E VENDA DE VEÍCULO AUTOMOTOR COM INTERVENIÊNCIA DE INTERMEDIÁRIA
+Contrato nº {{ negocio.numero_contrato }}
+
+VENDEDOR(A): {% include "contratos/modelos/_pessoa.txt" with p=vendedor papel_pessoa="VENDEDOR(A)" %}
+
+COMPRADOR(A): {% include "contratos/modelos/_pessoa.txt" with p=comprador papel_pessoa="COMPRADOR(A)" %}
+
+INTERVENIENTE INTERMEDIÁRIA: {% include "contratos/modelos/_loja.txt" with papel_loja="INTERVENIENTE INTERMEDIÁRIA" %}
+
+CLÁUSULA 1ª — OBJETO. O(A) VENDEDOR(A) vende ao(à) COMPRADOR(A) o veículo abaixo, com a interveniência da INTERMEDIÁRIA:
+{% include "contratos/modelos/_veiculo.txt" with v=item.veiculo item=item %}
+
+CLÁUSULA 2ª — PAPEL DA INTERMEDIÁRIA. A INTERVENIENTE atua na aproximação das partes e na organização documental do negócio, não sendo proprietária do veículo. (Nota para o advogado: avaliar os limites da responsabilidade da revenda na intermediação/consignação.)
+
+CLÁUSULA 3ª — PREÇO E PAGAMENTO. O preço total é de {{ item.valor|reais }} ({{ item.valor|extenso }}), pago da forma: {{ negocio.detalhes_pagamento|default:"a combinar" }}.
+
+CLÁUSULA 4ª — REMUNERAÇÃO DA INTERMEDIÁRIA. A remuneração da INTERVENIENTE é de {{ negocio.comissao_valor|reais }}{% if negocio.comissao_pagador %}, paga por {{ negocio.comissao_pagador.nome }}{% endif %}.
+
+CLÁUSULA 5ª — DECLARAÇÕES. O(A) VENDEDOR(A) declara legítima posse do veículo e responde por vícios ocultos preexistentes não declarados. Avarias: {{ item.veiculo.avarias_declaradas|default:"nenhuma declarada" }}.
+{% if item.veiculo.proprietario_registral %}O veículo está registrado em nome de {{ item.veiculo.proprietario_registral }}{% if anuente %}, que assina este contrato como anuente{% endif %}.{% endif %}
+
+CLÁUSULA 6ª — ENTREGA E DÉBITOS. A entrega ocorre em {{ negocio.data_hora_entrega|date:"d/m/Y H:i"|default:"data a combinar" }}. Débitos com fato gerador até a entrega são do(a) VENDEDOR(A); a partir dela, do(a) COMPRADOR(A). IPVA e licenciamento: {{ loja.regra_ipva }}.
+
+CLÁUSULA 7ª — DESCUMPRIMENTO. A parte que descumprir qualquer obrigação pagará à outra multa de {{ loja.multa_percentual }}% sobre o valor total, sem prejuízo de perdas e danos.
+
+{% include "contratos/modelos/_rodape.txt" %}
