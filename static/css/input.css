@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+/* Onde o Tailwind procura as classes usadas (templates do Django). */
+@source "../../templates";
+@source "../../core";
+@source "../../contas";
+
+/*
+  Tema do sistema. Paleta sóbria e quente, uma cor de destaque só (azul-petróleo).
+  Proibido o visual "de IA": sem gradientes roxo/azul, sem glassmorphism.
+*/
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* Superfícies */
+  --color-fundo: #f6f4ef; /* off-white quente */
+  --color-superficie: #ffffff;
+  --color-borda: #e4e0d7;
+
+  /* Tinta (texto) */
+  --color-tinta: #1b1b19; /* quase preto */
+  --color-tinta-suave: #5c594f;
+
+  /* Destaque: azul-petróleo */
+  --color-petroleo-50: #ecf4f6;
+  --color-petroleo-100: #d4e7eb;
+  --color-petroleo-200: #a9d0d7;
+  --color-petroleo-300: #76b2bd;
+  --color-petroleo-400: #448f9d;
+  --color-petroleo-500: #2a7784;
+  --color-petroleo-600: #1d6472;
+  --color-petroleo-700: #174f5b;
+  --color-petroleo-800: #153f49;
+  --color-petroleo-900: #12343c;
+
+  /* Status discretos */
+  --color-verde: #2f7d46;
+  --color-verde-fundo: #e7f1e9;
+  --color-ambar: #9c5d00;
+  --color-ambar-fundo: #f6edda;
+  --color-cinza: #6b685f;
+  --color-cinza-fundo: #ece9e2;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-fundo);
+    color: var(--color-tinta);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem; /* 17px: corpo mínimo no celular */
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    color: var(--color-tinta);
+    font-weight: 650;
+    line-height: 1.25;
+  }
+
+  /* Área de toque confortável para campos e botões no celular. */
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 1.0625rem;
+  }
+}
+
+@layer components {
+  /* Botão grande (altura mínima 48px), sempre com texto. */
+  .botao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 48px;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-align: center;
+    transition: background-color 0.15s ease;
+  }
+
+  .botao-primario {
+    background-color: var(--color-petroleo-600);
+    color: #ffffff;
+  }
+  .botao-primario:hover {
+    background-color: var(--color-petroleo-700);
+  }
+
+  .botao-secundario {
+    background-color: var(--color-superficie);
+    color: var(--color-tinta);
+    border: 1px solid var(--color-borda);
+  }
+  .botao-secundario:hover {
+    background-color: var(--color-petroleo-50);
+  }
+
+  /* Cartão de ação grande da tela inicial. */
+  .cartao-acao {
+    display: flex;
+    align-items: center;
+    min-height: 64px;
+    padding: 1rem 1.25rem;
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borda);
+    border-radius: 0.625rem;
+    font-weight: 600;
+    color: var(--color-tinta);
+  }
+  .cartao-acao:hover {
+    border-color: var(--color-petroleo-300);
+    background-color: var(--color-petroleo-50);
+  }
+
+  .campo {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.625rem 0.875rem;
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borda);
+    border-radius: 0.5rem;
+    color: var(--color-tinta);
+  }
+  .campo:focus {
+    outline: 2px solid var(--color-petroleo-500);
+    outline-offset: 1px;
+    border-color: var(--color-petroleo-500);
+  }
+}
