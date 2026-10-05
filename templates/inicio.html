@@ -20,8 +20,8 @@
   <nav class="grid gap-3" aria-label="Ações">
     <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao">Cadastrar carro que entrou</a>
     <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao">Registrar venda</a>
-    <a href="#" class="cartao-acao">Registrar troca</a>
-    <a href="#" class="cartao-acao">Carro deixado para vender</a>
+    <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao">Registrar troca</a>
+    <a href="{% url 'negocios:consignar' %}" class="cartao-acao">Carro deixado para vender</a>
   </nav>
 
   <p class="mt-3 flex gap-4">
