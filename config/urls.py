@@ -10,6 +10,7 @@ from core.views import inicio
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     path("conta/", include("contas.urls")),
+    path("", include("veiculos.urls")),
     path("", inicio, name="inicio"),
 ]
 
