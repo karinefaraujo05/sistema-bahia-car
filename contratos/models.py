@@ -1,0 +1,132 @@
+from django.db import models
+from django.db.models import Q
+
+from core.models import ModeloBase
+
+# Campos da loja que o contrato precisa ter preenchidos.
+CAMPOS_OBRIGATORIOS_CONTRATO = [
+    "razao_social",
+    "cnpj",
+    "endereco",
+    "cidade",
+    "uf",
+    "representante_nome",
+    "representante_cpf",
+    "multa_percentual",
+    "regra_ipva",
+    "numero_vias",
+]
+
+
+class ConfiguracaoLoja(ModeloBase):
+    """Dados da loja usados nos contratos. Registro único (singleton)."""
+
+    razao_social = models.CharField("razão social", max_length=160, blank=True)
+    cnpj = models.CharField("CNPJ", max_length=14, blank=True)
+    endereco = models.CharField("endereço", max_length=200, blank=True)
+    cidade = models.CharField("cidade", max_length=100, blank=True)
+    uf = models.CharField("UF", max_length=2, blank=True)
+    cep = models.CharField("CEP", max_length=9, blank=True)
+    representante_nome = models.CharField("representante", max_length=160, blank=True)
+    representante_cpf = models.CharField("CPF do representante", max_length=11, blank=True)
+
+    multa_percentual = models.DecimalField(
+        "multa por descumprimento (%)", max_digits=5, decimal_places=2, null=True, blank=True
+    )
+    regra_ipva = models.CharField(
+        "regra padrão de IPVA e licenciamento", max_length=200, blank=True
+    )
+    prazo_assinatura_dias = models.PositiveSmallIntegerField(
+        "prazo para assinar a ATPV-e (dias úteis)", default=5
+    )
+    prazo_repasse_dias = models.PositiveSmallIntegerField(
+        "prazo de repasse ao consignante (dias úteis)", default=5
+    )
+    numero_vias = models.PositiveSmallIntegerField("número de vias", default=2)
+
+    class Meta(ModeloBase.Meta):
+        verbose_name = "configuração da loja"
+        verbose_name_plural = "configuração da loja"
+
+    def __str__(self):
+        return self.razao_social or "Configuração da loja"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1  # registro único
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def carregar(cls):
+        obj, _ = cls.todos.get_or_create(pk=1)
+        return obj
+
+    def campos_faltando(self):
+        """Lista os campos ainda não preenchidos que o contrato exige."""
+        faltando = []
+        for campo in CAMPOS_OBRIGATORIOS_CONTRATO:
+            valor = getattr(self, campo)
+            if valor in (None, ""):
+                faltando.append(self._meta.get_field(campo).verbose_name)
+        return faltando
+
+    @property
+    def completa_para_contrato(self):
+        return not self.campos_faltando()
+
+
+class TipoDocumento(models.TextChoices):
+    CONTRATO = "contrato", "Contrato"
+    TERMO_VISTORIA = "termo_vistoria", "Termo de vistoria e entrega"
+    RECIBO = "recibo", "Recibo"
+    CONSULTA = "consulta", "Consulta de situação do veículo"
+    PROCURACAO = "procuracao", "Procuração/autorização"
+    DOC_VEICULO = "doc_veiculo", "Documento do veículo (CRV/CRLV)"
+    DOC_PESSOAL = "doc_pessoal", "Documento pessoal"
+    OUTRO = "outro", "Outro"
+
+
+def documento_upload_para(instance, filename):
+    if instance.negocio_id:
+        return f"documentos/negocio-{instance.negocio_id}/{filename}"
+    return f"documentos/consignacao-{instance.consignacao_id}/{filename}"
+
+
+class Documento(ModeloBase):
+    negocio = models.ForeignKey(
+        "negocios.Negocio",
+        verbose_name="negócio",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="documentos",
+    )
+    consignacao = models.ForeignKey(
+        "negocios.Consignacao",
+        verbose_name="consignação",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="documentos",
+    )
+    tipo = models.CharField("tipo", max_length=16, choices=TipoDocumento.choices)
+    arquivo = models.FileField("arquivo", upload_to=documento_upload_para)
+    gerado_pelo_sistema = models.BooleanField("gerado pelo sistema", default=False)
+    descricao = models.CharField("descrição", max_length=200, blank=True)
+
+    class Meta(ModeloBase.Meta):
+        verbose_name = "documento"
+        verbose_name_plural = "documentos"
+        ordering = ["-criado_em"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(negocio__isnull=False) | Q(consignacao__isnull=False),
+                name="documento_pertence_a_negocio_ou_consignacao",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} ({self.arquivo.name})"
+
+    @property
+    def nome_arquivo(self):
+        return self.arquivo.name.rsplit("/", 1)[-1]
