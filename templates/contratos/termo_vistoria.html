@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @page { size: A4; margin: 1.5cm; }
+      body { font-family: "DejaVu Sans", "Helvetica", sans-serif; font-size: 10pt; color: #000; }
+      h1 { font-size: 14pt; text-align: center; margin: 0 0 6pt; }
+      h2 { font-size: 11pt; border-bottom: 1px solid #999; margin: 14pt 0 4pt; }
+      .cab { font-size: 9pt; color: #333; }
+      table { width: 100%; border-collapse: collapse; }
+      td { padding: 2pt 0; vertical-align: top; }
+      .itens { margin: 4pt 0; }
+      .fotos { margin-top: 6pt; }
+      .fotos img { width: 31%; margin: 1%; border: 1px solid #ccc; vertical-align: top; }
+      .assin { margin-top: 20pt; width: 100%; }
+      .linha { border-top: 1px solid #000; padding-top: 3pt; text-align: center; font-size: 9pt; }
+    </style>
+  </head>
+  <body>
+    <div class="cab">
+      {{ loja.razao_social|default:"(configurar dados da loja)" }} — {{ loja.cidade }}/{{ loja.uf }}
+    </div>
+    <h1>TERMO DE VISTORIA E ENTREGA</h1>
+    <p>
+      Entrega em
+      {{ negocio.data_hora_entrega|date:"d/m/Y H:i"|default:"____/____/______  ____:____" }}
+      — Local: {{ negocio.local_entrega|default:loja.endereco }}
+    </p>
+
+    {% for b in blocos %}
+      <h2>{{ b.veiculo.marca }} {{ b.veiculo.modelo }} — {{ b.veiculo.placa_formatada }}</h2>
+      <table>
+        <tr>
+          <td>Ano: {{ b.veiculo.ano_fabricacao }}/{{ b.veiculo.ano_modelo }}</td>
+          <td>Cor: {{ b.veiculo.cor }}</td>
+        </tr>
+        <tr>
+          <td>Chassi: {{ b.veiculo.chassi|default:"—" }}</td>
+          <td>Renavam: {{ b.veiculo.renavam|default:"—" }}</td>
+        </tr>
+        <tr>
+          <td>Km na entrega: {{ b.item.km_entrega|default:"____________" }}</td>
+          <td>Nível de combustível: ____________</td>
+        </tr>
+      </table>
+
+      <p class="itens">
+        Itens entregues: chave reserva
+        ({% if b.veiculo.tem_chave_reserva %}sim{% elif b.veiculo.tem_chave_reserva == False %}não{% else %}☐{% endif %})
+        · manual ☐ · estepe ☐ · macaco ☐ · triângulo ☐ · chave de roda ☐
+      </p>
+      <p>Avarias observadas: {{ b.veiculo.avarias_declaradas|default:"________________________________________" }}</p>
+
+      {% if b.fotos %}
+        <div class="fotos">
+          {% for f in b.fotos %}<img src="{{ f }}" alt="" />{% endfor %}
+        </div>
+      {% endif %}
+
+      <table class="assin">
+        <tr>
+          <td style="width: 45%;">
+            <div class="linha">
+              Quem entrega{% if b.item.de_pessoa %}: {{ b.item.de_pessoa.nome }}{% else %} (a loja){% endif %}
+            </div>
+          </td>
+          <td style="width: 10%;"></td>
+          <td style="width: 45%;">
+            <div class="linha">
+              Quem recebe{% if b.item.para_pessoa %}: {{ b.item.para_pessoa.nome }}{% else %} (a loja){% endif %}
+            </div>
+          </td>
+        </tr>
+      </table>
+    {% endfor %}
+  </body>
+</html>

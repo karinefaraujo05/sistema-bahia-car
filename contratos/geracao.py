@@ -193,6 +193,50 @@ def renderizar_pdf(contrato):
     return HTML(string=html).write_pdf()
 
 
+def _foto_datauri(foto):
+    import base64
+
+    arquivo = foto.miniatura if foto.miniatura else foto.imagem
+    arquivo.open("rb")
+    try:
+        dados = arquivo.read()
+    finally:
+        arquivo.close()
+    return "data:image/jpeg;base64," + base64.b64encode(dados).decode()
+
+
+def gerar_termo_vistoria(negocio, *, usuario=None):
+    """
+    Gera o termo de vistoria e entrega (checklist + fotos do carro) em PDF e salva
+    como documento do negócio. Não é texto editável: é um documento para imprimir e assinar.
+    """
+    from django.core.files.base import ContentFile
+    from weasyprint import HTML
+
+    blocos = []
+    for item in negocio.itens.select_related("veiculo", "de_pessoa", "para_pessoa"):
+        fotos = [_foto_datauri(ft) for ft in item.veiculo.fotos.all()[:6]]
+        blocos.append({"item": item, "veiculo": item.veiculo, "fotos": fotos})
+
+    html = render_to_string(
+        "contratos/termo_vistoria.html",
+        {"loja": ConfiguracaoLoja.carregar(), "negocio": negocio, "blocos": blocos},
+    )
+    pdf = HTML(string=html).write_pdf()
+
+    doc = Documento(
+        negocio=negocio,
+        tipo=TipoDocumento.TERMO_VISTORIA,
+        gerado_pelo_sistema=True,
+        descricao="Termo de vistoria e entrega",
+        criado_por=usuario,
+        atualizado_por=usuario,
+    )
+    doc.arquivo.save("termo-vistoria.pdf", ContentFile(pdf), save=False)
+    doc.save()
+    return doc
+
+
 def renderizar_docx(contrato):
     from docx import Document as Docx
 
