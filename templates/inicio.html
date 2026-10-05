@@ -18,8 +18,8 @@
 
   {# Ações principais. #}
   <nav class="grid gap-3" aria-label="Ações">
-    <a href="{% url 'veiculos:novo' %}" class="cartao-acao">Cadastrar carro que entrou</a>
-    <a href="#" class="cartao-acao">Registrar venda</a>
+    <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao">Cadastrar carro que entrou</a>
+    <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao">Registrar venda</a>
     <a href="#" class="cartao-acao">Registrar troca</a>
     <a href="#" class="cartao-acao">Carro deixado para vender</a>
   </nav>
@@ -38,11 +38,11 @@
         <div class="text-sm text-tinta-suave">carros na loja</div>
       </div>
       <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
-        <div class="text-2xl font-bold text-petroleo-700">0</div>
+        <div class="text-2xl font-bold text-petroleo-700">{{ vendas_no_mes }}</div>
         <div class="text-sm text-tinta-suave">vendas no mês</div>
       </div>
       <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
-        <div class="text-2xl font-bold text-petroleo-700">0</div>
+        <div class="text-2xl font-bold text-petroleo-700">{{ repasses_pendentes }}</div>
         <div class="text-sm text-tinta-suave">repasses a pagar</div>
       </div>
     </div>
@@ -51,8 +51,23 @@
   {# Últimos negócios. #}
   <section class="mt-8" aria-label="Últimos negócios">
     <h2 class="mb-3 text-lg">Últimos negócios</h2>
-    <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
-      Nenhum negócio registrado ainda.
-    </p>
+    {% if ultimos_negocios %}
+      <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+        {% for negocio in ultimos_negocios %}
+          <li>
+            <a href="{% url 'negocios:detalhe' negocio.pk %}" class="flex items-center justify-between px-4 py-3 hover:bg-petroleo-50">
+              <span class="font-medium">
+                {{ negocio.get_tipo_display }}{% if negocio.numero_contrato %} nº {{ negocio.numero_contrato }}{% endif %}
+              </span>
+              <span class="text-sm text-tinta-suave">{{ negocio.data|date:"d/m/Y" }}</span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+        Nenhum negócio registrado ainda.
+      </p>
+    {% endif %}
   </section>
 {% endblock %}
