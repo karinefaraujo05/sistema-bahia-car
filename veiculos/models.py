@@ -67,10 +67,20 @@ class Veiculo(ModeloBase):
     situacao = models.CharField(
         "situação", max_length=12, choices=Situacao.choices, default=Situacao.PROPRIO
     )
-    # proprietario (FK Pessoa) entra na Fase 3; documento_autorizacao (FK Documento) na Fase 5.
+    # Dono do carro quando é consignado ou de terceiro (vazio quando é da loja).
+    # A obrigatoriedade (consignado/terceiro exigem dono) é aplicada na Fase 4.
+    proprietario = models.ForeignKey(
+        "pessoas.Pessoa",
+        verbose_name="proprietário",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="veiculos",
+    )
     proprietario_registral = models.CharField(
         "proprietário no documento", max_length=120, blank=True
     )
+    # documento_autorizacao (FK Documento) entra na Fase 5.
 
     alienado = models.BooleanField("tem financiamento ativo", default=False)
     credor_alienacao = models.CharField("credor da alienação", max_length=120, blank=True)
