@@ -401,6 +401,8 @@ def revisao(request, pk):
 
 @login_required
 def detalhe(request, pk):
+    from contratos.forms import DocumentoUploadForm
+
     negocio = get_object_or_404(Negocio.objetos, pk=pk)
     return render(
         request,
@@ -410,6 +412,8 @@ def detalhe(request, pk):
             "itens": negocio.itens.select_related("veiculo", "de_pessoa", "para_pessoa"),
             "partes": negocio.partes.select_related("pessoa"),
             "diferenca": diferenca_troca(negocio) if negocio.tipo == TipoNegocio.TROCA else None,
+            "documentos": negocio.documentos.all(),
+            "doc_form": DocumentoUploadForm(),
         },
     )
 

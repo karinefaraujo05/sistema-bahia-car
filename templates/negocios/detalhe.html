@@ -88,13 +88,78 @@
     </ul>
   </section>
 
-  {# Documentos e contrato chegam na Fase 5. #}
+  {# Documentos do negócio. #}
   <section class="mb-6" aria-label="Documentos">
     <h2 class="mb-2 text-lg">Documentos</h2>
-    <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
-      Gerar contrato em PDF e anexar a foto do contrato assinado chegam na próxima fase.
-    </p>
+
+    {% if documentos %}
+      <ul class="mb-3 divide-y divide-borda rounded-lg border border-borda bg-superficie">
+        {% for documento in documentos %}
+          <li class="flex items-center justify-between gap-3 px-4 py-3">
+            <div class="min-w-0">
+              <div class="truncate font-medium">{{ documento.get_tipo_display }}</div>
+              <div class="truncate text-sm text-tinta-suave">
+                {{ documento.nome_arquivo }}{% if documento.gerado_pelo_sistema %} · gerado pelo sistema{% endif %}
+              </div>
+            </div>
+            <div class="flex shrink-0 gap-3 text-sm">
+              <a href="{{ documento.arquivo.url }}" target="_blank" class="text-petroleo-700">Abrir</a>
+              <button
+                type="button"
+                class="text-petroleo-700"
+                data-url="{{ request.scheme }}://{{ request.get_host }}{{ documento.arquivo.url }}"
+                onclick="compartilhar(this.dataset.url, '{{ documento.get_tipo_display|escapejs }}')"
+              >
+                Compartilhar
+              </button>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="mb-3 rounded-lg border border-borda bg-superficie px-4 py-4 text-center text-tinta-suave">
+        Nenhum documento anexado ainda.
+      </p>
+    {% endif %}
+
+    <form
+      method="post"
+      action="{% url 'contratos:upload_documentos' negocio.pk %}"
+      enctype="multipart/form-data"
+      class="space-y-3 rounded-lg border border-borda bg-superficie p-4"
+    >
+      {% csrf_token %}
+      <p class="font-medium">Anexar documento</p>
+      <div>
+        <label for="{{ doc_form.tipo.id_for_label }}" class="mb-1 block text-sm">Tipo</label>
+        {{ doc_form.tipo }}
+      </div>
+      <input
+        type="file"
+        name="arquivos"
+        accept="image/*,application/pdf"
+        capture="environment"
+        multiple
+        class="block w-full text-sm"
+      />
+      <label class="flex items-center gap-2 text-sm">
+        {{ doc_form.juntar_pdf }} <span>{{ doc_form.juntar_pdf.label }}</span>
+      </label>
+      <button type="submit" class="botao botao-secundario">Anexar</button>
+    </form>
+
+    <p class="mt-3 text-sm text-tinta-suave">Gerar o contrato em PDF chega no próximo passo da Fase 5.</p>
   </section>
+
+  <script>
+    function compartilhar(url, titulo) {
+      if (navigator.share) {
+        navigator.share({ title: titulo, url: url });
+      } else {
+        window.open(url, "_blank");
+      }
+    }
+  </script>
 
   {% if negocio.status == 'concluido' %}
     <a href="{% url 'negocios:confirmar_cancelamento' negocio.pk %}" class="botao botao-secundario">
