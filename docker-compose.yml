@@ -1,0 +1,22 @@
+# Postgres para desenvolvimento. Em produção o banco é gerenciado (ver Fase 8).
+services:
+  db:
+    image: postgres:16
+    container_name: bahiacar-db
+    environment:
+      POSTGRES_USER: bahiacar
+      POSTGRES_PASSWORD: bahiacar
+      POSTGRES_DB: bahiacar
+    ports:
+      # 5433 no host para não conflitar com um Postgres local na 5432.
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bahiacar"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
