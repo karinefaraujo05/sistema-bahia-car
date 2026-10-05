@@ -13,6 +13,10 @@ up: ## Sobe o banco de dados (Postgres via Docker)
 down: ## Para o banco de dados
 	docker compose down
 
+# No macOS, o WeasyPrint acha as libs (pango/cairo) do Homebrew por este caminho.
+# No Linux (produção) a variável é ignorada.
+export DYLD_FALLBACK_LIBRARY_PATH := /opt/homebrew/lib
+
 dev: ## Roda o servidor (acessível no celular pela rede local)
 	uv run python manage.py runserver 0.0.0.0:8000
 
