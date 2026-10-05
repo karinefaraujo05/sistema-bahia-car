@@ -9,6 +9,7 @@ dependencies = [
     "django-htmx>=1.19",
     "django-simple-history>=3.7",
     "django-environ>=0.11",
+    "pillow>=12.3.0",
 ]
 
 [dependency-groups]
