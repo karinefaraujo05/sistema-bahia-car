@@ -118,11 +118,28 @@
     </dl>
   </section>
 
-  {# Linha do tempo de negócios (Fase 4). #}
+  {# Linha do tempo de negócios deste carro. #}
   <section class="mb-6" aria-label="Negócios">
     <h2 class="mb-2 text-lg">Negócios deste carro</h2>
-    <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
-      Ainda não há negócios registrados. (Compra, venda e troca chegam na próxima fase.)
-    </p>
+    <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+      {% for item in veiculo.itens_negocio.all %}
+        <li>
+          <a href="{% url 'negocios:detalhe' item.negocio.pk %}" class="block px-4 py-3 hover:bg-petroleo-50">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-medium">
+                {{ item.negocio.get_tipo_display }}{% if item.negocio.numero_contrato %} nº {{ item.negocio.numero_contrato }}{% endif %}
+              </span>
+              <span class="text-sm text-tinta-suave">{{ item.negocio.data|date:"d/m/Y" }}</span>
+            </div>
+            <div class="text-sm text-tinta-suave">
+              {{ item.de_pessoa.nome|default:"Loja" }} → {{ item.para_pessoa.nome|default:"Loja" }}
+              · {{ item.negocio.get_status_display }}
+            </div>
+          </a>
+        </li>
+      {% empty %}
+        <li class="px-4 py-6 text-center text-tinta-suave">Ainda não há negócios com este carro.</li>
+      {% endfor %}
+    </ul>
   </section>
 {% endblock %}
