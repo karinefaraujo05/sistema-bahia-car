@@ -88,6 +88,33 @@
     </ul>
   </section>
 
+  {# Contrato gerado pelo sistema. #}
+  <section class="mb-6" aria-label="Contrato">
+    <div class="mb-2 flex items-center justify-between gap-3">
+      <h2 class="text-lg">Contrato</h2>
+      <form method="post" action="{% url 'contratos:gerar' negocio.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="botao botao-secundario">Gerar contrato</button>
+      </form>
+    </div>
+    {% with contratos=negocio.contratos.all %}
+      {% if contratos %}
+        <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+          {% for contrato in contratos %}
+            <li class="flex items-center justify-between gap-3 px-4 py-3">
+              <span>{{ contrato.titulo }} <span class="text-tinta-suave">(v{{ contrato.versao }})</span></span>
+              <a href="{% url 'contratos:editar_contrato' contrato.pk %}" class="shrink-0 text-petroleo-700">Abrir / editar</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="rounded-lg border border-borda bg-superficie px-4 py-4 text-center text-tinta-suave">
+          Nenhum contrato gerado ainda.
+        </p>
+      {% endif %}
+    {% endwith %}
+  </section>
+
   {# Documentos do negócio. #}
   <section class="mb-6" aria-label="Documentos">
     <h2 class="mb-2 text-lg">Documentos</h2>
@@ -148,7 +175,6 @@
       <button type="submit" class="botao botao-secundario">Anexar</button>
     </form>
 
-    <p class="mt-3 text-sm text-tinta-suave">Gerar o contrato em PDF chega no próximo passo da Fase 5.</p>
   </section>
 
   <script>
