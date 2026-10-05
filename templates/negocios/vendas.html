@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load formato %}
+
+{% block titulo %}Vendas — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-4 flex items-center justify-between gap-3">
+    <h1 class="text-2xl">Vendas</h1>
+    {% if eh_admin %}
+      <a href="{% url 'negocios:exportar_excel' %}" class="botao botao-secundario">Exportar Excel</a>
+    {% endif %}
+  </div>
+
+  {# Navegação por mês. #}
+  <div class="mb-4 flex items-center justify-between gap-2">
+    <a href="?ano={{ ano_anterior }}&mes={{ mes_anterior }}&tipo={{ tipo }}" class="botao botao-secundario">←</a>
+    <span class="font-medium capitalize">{{ mes_ref|date:"F Y" }}</span>
+    <a href="?ano={{ ano_proximo }}&mes={{ mes_proximo }}&tipo={{ tipo }}" class="botao botao-secundario">→</a>
+  </div>
+
+  {# Filtro por tipo. #}
+  <nav class="mb-5 flex gap-2 overflow-x-auto" aria-label="Tipo">
+    <a href="?ano={{ mes_ref|date:'Y' }}&mes={{ mes_ref|date:'n' }}"
+      class="whitespace-nowrap rounded-full border px-4 py-2 text-sm{% if not tipo %} border-petroleo-600 bg-petroleo-600 text-white{% else %} border-borda bg-superficie{% endif %}">Todos</a>
+    {% for valor, rotulo in tipos %}
+      <a href="?ano={{ mes_ref|date:'Y' }}&mes={{ mes_ref|date:'n' }}&tipo={{ valor }}"
+        class="whitespace-nowrap rounded-full border px-4 py-2 text-sm{% if tipo == valor %} border-petroleo-600 bg-petroleo-600 text-white{% else %} border-borda bg-superficie{% endif %}">{{ rotulo }}</a>
+    {% endfor %}
+  </nav>
+
+  {% if resumo %}
+    <div class="mb-5 grid grid-cols-2 gap-3">
+      <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
+        <div class="text-xl font-bold text-petroleo-700">{{ resumo.total_vendido|reais }}</div>
+        <div class="text-sm text-tinta-suave">vendido no mês</div>
+      </div>
+      <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
+        <div class="text-xl font-bold text-petroleo-700">{{ resumo.lucro_bruto|reais }}</div>
+        <div class="text-sm text-tinta-suave">lucro bruto no mês</div>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if linhas %}
+    <ul class="divide-y divide-borda overflow-hidden rounded-lg border border-borda bg-superficie">
+      {% for linha in linhas %}
+        <li>
+          <a href="{% url 'negocios:detalhe' linha.negocio.pk %}" class="block px-4 py-3 hover:bg-petroleo-50">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-medium">
+                {{ linha.negocio.get_tipo_display }}{% if linha.negocio.numero_contrato %} nº {{ linha.negocio.numero_contrato }}{% endif %}
+              </span>
+              <span class="font-semibold text-petroleo-700">{{ linha.negocio.valor_total|reais }}</span>
+            </div>
+            <div class="flex items-center justify-between gap-2 text-sm text-tinta-suave">
+              <span>{{ linha.negocio.data|date:"d/m/Y" }} · {{ linha.negocio.get_modalidade_display }}</span>
+              {% if eh_admin and linha.lucro is not None %}
+                <span>lucro {{ linha.lucro|reais }}</span>
+              {% endif %}
+            </div>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="rounded-lg border border-borda bg-superficie px-4 py-8 text-center text-tinta-suave">
+      Nenhum negócio neste mês.
+    </p>
+  {% endif %}
+{% endblock %}

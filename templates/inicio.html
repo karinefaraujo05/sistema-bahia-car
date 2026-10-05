@@ -31,6 +31,7 @@
   <p class="mt-3 flex flex-wrap gap-4">
     <a href="{% url 'veiculos:estoque' %}" class="text-petroleo-700 font-medium">Ver estoque →</a>
     <a href="{% url 'pessoas:lista' %}" class="text-petroleo-700 font-medium">Ver pessoas →</a>
+    <a href="{% url 'negocios:vendas' %}" class="text-petroleo-700 font-medium">Vendas →</a>
     {% if user.eh_administrador %}
       <a href="{% url 'contratos:configuracao' %}" class="text-petroleo-700 font-medium">Configuração da loja →</a>
     {% endif %}
