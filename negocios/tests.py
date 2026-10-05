@@ -1,7 +1,9 @@
 from decimal import Decimal
 
 import pytest
+from django.urls import reverse
 
+from contas.models import Usuario
 from negocios import services
 from negocios.models import (
     ComissaoTipo,
@@ -330,3 +332,107 @@ def test_nao_cancela_rascunho():
     negocio = rascunho(TipoNegocio.COMPRA)
     with pytest.raises(RegraNegocioError):
         services.cancelar_negocio(negocio)
+
+
+# --- Fluxos pelas telas (wizard) ---
+
+
+def logar(client):
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+
+
+def ultimo_negocio():
+    return Negocio.todos.latest("criado_em")
+
+
+def test_fluxo_de_venda_pelas_telas(client):
+    logar(client)
+    comprador_existente = pessoa("Maria Compradora")
+    carro = veiculo("QQQ1717")
+
+    client.get(reverse("negocios:iniciar", args=["venda"]))
+    negocio = ultimo_negocio()
+
+    client.post(
+        reverse("negocios:passo_pessoa", args=[negocio.pk]), {"pessoa": comprador_existente.pk}
+    )
+    client.post(reverse("negocios:passo_carro", args=[negocio.pk]), {"veiculo": carro.pk})
+    client.post(
+        reverse("negocios:passo_pagamento", args=[negocio.pk]),
+        {"valor": "32000", "data": "2026-10-05"},
+    )
+    resp = client.post(reverse("negocios:revisao", args=[negocio.pk]))
+    assert resp.status_code == 302
+
+    negocio.refresh_from_db()
+    carro.refresh_from_db()
+    assert negocio.status == StatusNegocio.CONCLUIDO
+    assert negocio.valor_total == Decimal("32000")
+    assert carro.status == StatusVeiculo.VENDIDO
+
+
+def test_fluxo_de_compra_cadastrando_carro_e_pessoa(client):
+    logar(client)
+
+    client.get(reverse("negocios:iniciar", args=["compra"]))
+    negocio = ultimo_negocio()
+
+    client.post(
+        reverse("negocios:passo_pessoa", args=[negocio.pk]),
+        {"nome_novo": "Vendedor Novo", "telefone_novo": "71999990000"},
+    )
+    client.post(
+        reverse("negocios:passo_carro", args=[negocio.pk]),
+        {
+            "placa": "RRR1818",
+            "marca": "Fiat",
+            "modelo": "Uno",
+            "ano_fabricacao": "2012",
+            "ano_modelo": "2013",
+            "cor": "Branco",
+            "situacao": Situacao.PROPRIO,
+            "status": StatusVeiculo.EM_ESTOQUE,
+        },
+    )
+    client.post(
+        reverse("negocios:passo_pagamento", args=[negocio.pk]),
+        {"valor": "20000", "data": "2026-10-05"},
+    )
+    client.post(reverse("negocios:revisao", args=[negocio.pk]))
+
+    negocio.refresh_from_db()
+    assert negocio.status == StatusNegocio.CONCLUIDO
+    carro = Veiculo.objetos.get(placa="RRR1818")
+    assert carro.situacao == Situacao.PROPRIO
+    assert carro.valor_compra == Decimal("20000")
+
+
+def test_cancelar_pela_tela(client):
+    logar(client)
+    comprador = pessoa("Maria")
+    carro = veiculo("SSS1919")
+    negocio = rascunho(TipoNegocio.VENDA)
+    item(negocio, carro, "25000", para=comprador)
+    services.concluir_negocio(negocio)
+
+    # Página de confirmação abre e o POST cancela.
+    assert (
+        client.get(reverse("negocios:confirmar_cancelamento", args=[negocio.pk])).status_code == 200
+    )
+    resp = client.post(reverse("negocios:cancelar", args=[negocio.pk]))
+    assert resp.status_code == 302
+    negocio.refresh_from_db()
+    carro.refresh_from_db()
+    assert negocio.status == StatusNegocio.CANCELADO
+    assert carro.status == StatusVeiculo.EM_ESTOQUE
+
+
+def test_detalhe_do_negocio_abre(client):
+    logar(client)
+    comprador = pessoa("Maria")
+    carro = veiculo("TTT2020")
+    negocio = rascunho(TipoNegocio.VENDA)
+    item(negocio, carro, "25000", para=comprador)
+    services.concluir_negocio(negocio)
+    assert client.get(reverse("negocios:detalhe", args=[negocio.pk])).status_code == 200
