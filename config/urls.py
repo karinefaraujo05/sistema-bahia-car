@@ -12,6 +12,7 @@ urlpatterns = [
     path("conta/", include("contas.urls")),
     path("", include("veiculos.urls")),
     path("", include("pessoas.urls")),
+    path("", include("negocios.urls")),
     path("", inicio, name="inicio"),
 ]
 
