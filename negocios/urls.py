@@ -5,6 +5,8 @@ from . import views
 app_name = "negocios"
 
 urlpatterns = [
+    path("vendas/", views.vendas, name="vendas"),
+    path("vendas/exportar/", views.exportar_excel, name="exportar_excel"),
     path("negocios/novo/<str:tipo>/", views.iniciar, name="iniciar"),
     path("negocios/<int:pk>/", views.detalhe, name="detalhe"),
     path("negocios/<int:pk>/passo/quem/", views.passo_pessoa, name="passo_pessoa"),

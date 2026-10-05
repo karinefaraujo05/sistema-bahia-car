@@ -1,6 +1,11 @@
+import io
+from datetime import date
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from veiculos.forms import VeiculoForm
@@ -31,7 +36,9 @@ from .services import (
     criar_consignacao,
     devolver_consignado,
     diferenca_troca,
+    lucro_bruto,
     registrar_repasse,
+    resumo_de_vendas,
 )
 
 # Papel da pessoa principal (o cliente) em cada tipo de negócio próprio.
@@ -572,6 +579,129 @@ def repasse(request, consignacao_pk):
         return redirect("veiculos:detalhe", pk=consignacao.veiculo_id)
     messages.success(request, "Repasse ao dono registrado.")
     return redirect("veiculos:detalhe", pk=consignacao.veiculo_id)
+
+
+@login_required
+def vendas(request):
+    hoje = timezone.localdate()
+    try:
+        ano = int(request.GET.get("ano", hoje.year))
+        mes = int(request.GET.get("mes", hoje.month))
+    except ValueError:
+        ano, mes = hoje.year, hoje.month
+    tipo = request.GET.get("tipo", "")
+
+    negocios = Negocio.objetos.filter(
+        status=StatusNegocio.CONCLUIDO, data__year=ano, data__month=mes
+    )
+    if tipo:
+        negocios = negocios.filter(tipo=tipo)
+    negocios = negocios.order_by("-data", "-numero_contrato")
+
+    eh_admin = request.user.eh_administrador
+    negocios_com_lucro = [
+        {"negocio": n, "lucro": lucro_bruto(n) if eh_admin else None} for n in negocios
+    ]
+
+    contexto = {
+        "linhas": negocios_com_lucro,
+        "mes_ref": date(ano, mes, 1),
+        "tipo": tipo,
+        "tipos": TipoNegocio.choices,
+        "resumo": resumo_de_vendas(ano, mes) if eh_admin else None,
+        "eh_admin": eh_admin,
+        "ano_anterior": ano if mes > 1 else ano - 1,
+        "mes_anterior": mes - 1 if mes > 1 else 12,
+        "ano_proximo": ano if mes < 12 else ano + 1,
+        "mes_proximo": mes + 1 if mes < 12 else 1,
+    }
+    return render(request, "negocios/vendas.html", contexto)
+
+
+def _valor_planilha(valor):
+    return float(valor) if valor is not None else ""
+
+
+@login_required
+def exportar_excel(request):
+    if not request.user.eh_administrador:
+        messages.error(request, "Só o administrador exporta os dados.")
+        return redirect("inicio")
+
+    from openpyxl import Workbook
+
+    from pessoas.models import Pessoa
+
+    wb = Workbook()
+
+    aba_veiculos = wb.active
+    aba_veiculos.title = "Veículos"
+    aba_veiculos.append(
+        [
+            "Placa",
+            "Marca",
+            "Modelo",
+            "Ano fab.",
+            "Ano mod.",
+            "Cor",
+            "Situação",
+            "Status",
+            "Valor de compra",
+            "Valor anunciado",
+        ]
+    )
+    for v in Veiculo.todos.all():
+        aba_veiculos.append(
+            [
+                v.placa_formatada,
+                v.marca,
+                v.modelo,
+                v.ano_fabricacao,
+                v.ano_modelo,
+                v.cor,
+                v.get_situacao_display(),
+                v.get_status_display(),
+                _valor_planilha(v.valor_compra),
+                _valor_planilha(v.valor_anunciado),
+            ]
+        )
+
+    aba_pessoas = wb.create_sheet("Pessoas")
+    aba_pessoas.append(["Nome", "Tipo", "CPF/CNPJ", "Telefone", "Cidade", "UF"])
+    for p in Pessoa.objetos.all():
+        aba_pessoas.append(
+            [
+                p.nome,
+                p.get_tipo_display(),
+                p.cpf_cnpj_formatado,
+                p.telefone_formatado,
+                p.cidade,
+                p.uf,
+            ]
+        )
+
+    aba_negocios = wb.create_sheet("Negócios")
+    aba_negocios.append(["Contrato", "Tipo", "Modalidade", "Data", "Valor total", "Status"])
+    for n in Negocio.todos.all():
+        aba_negocios.append(
+            [
+                n.numero_contrato,
+                n.get_tipo_display(),
+                n.get_modalidade_display(),
+                n.data,
+                _valor_planilha(n.valor_total),
+                n.get_status_display(),
+            ]
+        )
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    resp = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    resp["Content-Disposition"] = 'attachment; filename="bahiacar-dados.xlsx"'
+    return resp
 
 
 @login_required
