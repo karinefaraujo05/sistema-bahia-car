@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block titulo %}{% if pessoa %}Editar pessoa{% else %}Cadastrar pessoa{% endif %} — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-2">
+    <a
+      href="{% if pessoa %}{% url 'pessoas:detalhe' pessoa.pk %}{% else %}{% url 'pessoas:lista' %}{% endif %}"
+      class="text-tinta-suave"
+      >← Voltar</a
+    >
+  </div>
+
+  <h1 class="mb-5 text-2xl">{% if pessoa %}Editar pessoa{% else %}Cadastrar pessoa{% endif %}</h1>
+
+  {% if not pessoa %}
+    <p class="mb-4 text-tinta-suave">
+      Com pressa? Use o
+      <a href="{% url 'pessoas:novo_rapido' %}" class="text-petroleo-700">cadastro rápido</a>
+      (só nome e telefone).
+    </p>
+  {% endif %}
+
+  {% if form.non_field_errors %}
+    <div class="mb-4 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Identificação</legend>
+      {% include "pessoas/partials/campo.html" with campo=form.tipo %}
+      {% include "pessoas/partials/campo.html" with campo=form.nome %}
+      {% include "pessoas/partials/campo.html" with campo=form.cpf_cnpj %}
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Contato</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "pessoas/partials/campo.html" with campo=form.telefone %}
+        {% include "pessoas/partials/campo.html" with campo=form.email %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Endereço</legend>
+      {% include "pessoas/partials/campo.html" with campo=form.endereco %}
+      <div class="grid gap-4 sm:grid-cols-3">
+        {% include "pessoas/partials/campo.html" with campo=form.cidade %}
+        {% include "pessoas/partials/campo.html" with campo=form.uf %}
+        {% include "pessoas/partials/campo.html" with campo=form.cep %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Documentos (pessoa física)</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "pessoas/partials/campo.html" with campo=form.rg %}
+        {% include "pessoas/partials/campo.html" with campo=form.rg_orgao_emissor %}
+        {% include "pessoas/partials/campo.html" with campo=form.nacionalidade %}
+        {% include "pessoas/partials/campo.html" with campo=form.estado_civil %}
+        {% include "pessoas/partials/campo.html" with campo=form.profissao %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Representante (pessoa jurídica)</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "pessoas/partials/campo.html" with campo=form.representante_nome %}
+        {% include "pessoas/partials/campo.html" with campo=form.representante_cpf %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Observações</legend>
+      {% include "pessoas/partials/campo.html" with campo=form.observacoes %}
+    </fieldset>
+
+    <div class="flex gap-2">
+      <button type="submit" class="botao botao-primario">Salvar</button>
+      <a
+        href="{% if pessoa %}{% url 'pessoas:detalhe' pessoa.pk %}{% else %}{% url 'pessoas:lista' %}{% endif %}"
+        class="botao botao-secundario"
+        >Cancelar</a
+      >
+    </div>
+  </form>
+{% endblock %}

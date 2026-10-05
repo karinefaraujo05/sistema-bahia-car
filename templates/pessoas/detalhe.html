@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ pessoa.nome }} — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-2">
+    <a href="{% url 'pessoas:lista' %}" class="text-tinta-suave">← Voltar para pessoas</a>
+  </div>
+
+  <div class="mb-4 flex items-start justify-between gap-3">
+    <div>
+      <h1 class="text-2xl">{{ pessoa.nome }}</h1>
+      <p class="text-tinta-suave">{{ pessoa.get_tipo_display }}</p>
+    </div>
+  </div>
+
+  <div class="mb-6 flex gap-2">
+    <a href="{% url 'pessoas:editar' pessoa.pk %}" class="botao botao-secundario">Editar</a>
+    <form
+      method="post"
+      action="{% url 'pessoas:arquivar' pessoa.pk %}"
+      onsubmit="return confirm('Arquivar esta pessoa? Nada é apagado.');"
+    >
+      {% csrf_token %}
+      <button type="submit" class="botao botao-secundario">Arquivar</button>
+    </form>
+  </div>
+
+  <section class="mb-6" aria-label="Dados">
+    <dl class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+      {% include "pessoas/partials/dado.html" with rotulo="CPF/CNPJ" valor=pessoa.cpf_cnpj_formatado %}
+      {% include "pessoas/partials/dado.html" with rotulo="Telefone" valor=pessoa.telefone_formatado %}
+      {% include "pessoas/partials/dado.html" with rotulo="E-mail" valor=pessoa.email %}
+      {% include "pessoas/partials/dado.html" with rotulo="Endereço" valor=pessoa.endereco %}
+      {% include "pessoas/partials/dado.html" with rotulo="Cidade/UF" valor=pessoa.cidade %}
+      {% include "pessoas/partials/dado.html" with rotulo="CEP" valor=pessoa.cep %}
+      {% include "pessoas/partials/dado.html" with rotulo="RG" valor=pessoa.rg %}
+      {% include "pessoas/partials/dado.html" with rotulo="Nacionalidade" valor=pessoa.nacionalidade %}
+      {% include "pessoas/partials/dado.html" with rotulo="Estado civil" valor=pessoa.estado_civil %}
+      {% include "pessoas/partials/dado.html" with rotulo="Profissão" valor=pessoa.profissao %}
+      {% if not pessoa.eh_fisica %}
+        {% include "pessoas/partials/dado.html" with rotulo="Representante" valor=pessoa.representante_nome %}
+      {% endif %}
+      {% include "pessoas/partials/dado.html" with rotulo="Observações" valor=pessoa.observacoes %}
+    </dl>
+  </section>
+
+  {# Negócios desta pessoa (Fase 4). #}
+  <section class="mb-6" aria-label="Negócios">
+    <h2 class="mb-2 text-lg">Negócios desta pessoa</h2>
+    <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+      Ainda não há negócios registrados. (Compra, venda e troca chegam na próxima fase.)
+    </p>
+  </section>
+{% endblock %}
