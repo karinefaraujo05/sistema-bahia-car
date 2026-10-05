@@ -11,6 +11,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     path("conta/", include("contas.urls")),
     path("", include("veiculos.urls")),
+    path("", include("pessoas.urls")),
     path("", inicio, name="inicio"),
 ]
 
