@@ -33,6 +33,38 @@
     </form>
   </div>
 
+  {# Consignação (se o carro foi deixado para vender). #}
+  {% with c=veiculo.consignacoes.first %}
+    {% if c %}
+      <section class="mb-6" aria-label="Consignação">
+        <h2 class="mb-2 text-lg">Consignação</h2>
+        <div class="rounded-lg border border-borda bg-superficie p-4">
+          <p>Dono: <strong>{{ c.proprietario.nome }}</strong></p>
+          <p>Valor mínimo ao dono: <strong>{{ c.valor_liquido_minimo|reais }}</strong></p>
+          <p class="text-tinta-suave">Situação: {{ c.get_status_display }}</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            {% if c.status == 'ativa' %}
+              <a href="{% url 'negocios:iniciar_consignado' c.pk %}" class="botao botao-primario">
+                Registrar venda deste carro
+              </a>
+              <form method="post" action="{% url 'negocios:devolver' c.pk %}"
+                onsubmit="return confirm('Confirmar que o dono retirou o carro?');">
+                {% csrf_token %}
+                <button type="submit" class="botao botao-secundario">Dono retirou o carro</button>
+              </form>
+            {% elif c.status == 'vendida' and not c.repasse_feito_em %}
+              <form method="post" action="{% url 'negocios:repasse' c.pk %}"
+                onsubmit="return confirm('Confirmar o repasse ao dono?');">
+                {% csrf_token %}
+                <button type="submit" class="botao botao-primario">Registrar repasse ao dono</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+    {% endif %}
+  {% endwith %}
+
   {# Fotos #}
   <section class="mb-6" aria-label="Fotos">
     <h2 class="mb-2 text-lg">Fotos</h2>
