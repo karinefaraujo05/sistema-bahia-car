@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load pessoas_extras %}
+
+{% block titulo %}Pessoas — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-4 flex items-center justify-between gap-3">
+    <h1 class="text-2xl">Pessoas</h1>
+    <a href="{% url 'pessoas:novo' %}" class="botao botao-primario">Cadastrar pessoa</a>
+  </div>
+
+  <form method="get" role="search" class="mb-5">
+    <label for="q" class="sr-only">Buscar pessoa</label>
+    <input
+      type="search"
+      id="q"
+      name="q"
+      value="{{ termo }}"
+      class="campo"
+      placeholder="Buscar por nome, CPF/CNPJ ou telefone"
+      autocomplete="off"
+    />
+  </form>
+
+  {% if pessoas %}
+    <ul class="divide-y divide-borda overflow-hidden rounded-lg border border-borda bg-superficie">
+      {% for pessoa in pessoas %}
+        <li>
+          <a href="{% url 'pessoas:detalhe' pessoa.pk %}" class="block px-4 py-3 hover:bg-petroleo-50">
+            <div class="flex items-center justify-between gap-3">
+              <span class="font-medium">{{ pessoa.nome }}</span>
+              <span class="text-sm text-tinta-suave">{{ pessoa.get_tipo_display }}</span>
+            </div>
+            <div class="mt-0.5 text-sm text-tinta-suave">
+              {% if pessoa.cpf_cnpj %}{{ pessoa.cpf_cnpj|cpf_cnpj }}{% endif %}
+              {% if pessoa.telefone %} · {{ pessoa.telefone|telefone }}{% endif %}
+            </div>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="rounded-lg border border-borda bg-superficie px-4 py-8 text-center text-tinta-suave">
+      {% if termo %}Ninguém encontrado para "{{ termo }}".{% else %}Nenhuma pessoa cadastrada ainda.{% endif %}
+    </p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block titulo %}Cadastro rápido — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-2">
+    <a href="{% url 'pessoas:lista' %}" class="text-tinta-suave">← Voltar para pessoas</a>
+  </div>
+
+  <h1 class="mb-1 text-2xl">Cadastro rápido</h1>
+  <p class="mb-5 text-tinta-suave">Só o essencial agora. O resto você completa depois.</p>
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% include "pessoas/partials/campo.html" with campo=form.tipo %}
+    {% include "pessoas/partials/campo.html" with campo=form.nome %}
+    {% include "pessoas/partials/campo.html" with campo=form.telefone %}
+
+    <div class="flex gap-2">
+      <button type="submit" class="botao botao-primario">Salvar</button>
+      <a href="{% url 'pessoas:novo' %}" class="botao botao-secundario">Cadastro completo</a>
+    </div>
+  </form>
+{% endblock %}
