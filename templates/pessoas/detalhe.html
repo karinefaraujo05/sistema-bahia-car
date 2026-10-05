@@ -45,11 +45,27 @@
     </dl>
   </section>
 
-  {# Negócios desta pessoa (Fase 4). #}
+  {# Negócios desta pessoa. #}
   <section class="mb-6" aria-label="Negócios">
     <h2 class="mb-2 text-lg">Negócios desta pessoa</h2>
-    <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
-      Ainda não há negócios registrados. (Compra, venda e troca chegam na próxima fase.)
-    </p>
+    <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+      {% for parte in pessoa.participacoes.all %}
+        <li>
+          <a href="{% url 'negocios:detalhe' parte.negocio.pk %}" class="block px-4 py-3 hover:bg-petroleo-50">
+            <div class="flex items-center justify-between gap-2">
+              <span class="font-medium">
+                {{ parte.negocio.get_tipo_display }}{% if parte.negocio.numero_contrato %} nº {{ parte.negocio.numero_contrato }}{% endif %}
+              </span>
+              <span class="text-sm text-tinta-suave">{{ parte.negocio.data|date:"d/m/Y" }}</span>
+            </div>
+            <div class="text-sm text-tinta-suave">
+              {{ parte.get_papel_display }} · {{ parte.negocio.get_status_display }}
+            </div>
+          </a>
+        </li>
+      {% empty %}
+        <li class="px-4 py-6 text-center text-tinta-suave">Ainda não há negócios com esta pessoa.</li>
+      {% endfor %}
+    </ul>
   </section>
 {% endblock %}
