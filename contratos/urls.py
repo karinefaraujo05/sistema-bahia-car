@@ -11,4 +11,13 @@ urlpatterns = [
         views.upload_documentos,
         name="upload_documentos",
     ),
+    path("negocios/<int:negocio_pk>/contrato/gerar/", views.gerar, name="gerar"),
+    path(
+        "consignacoes/<int:consignacao_pk>/contrato/gerar/",
+        views.gerar_consignacao,
+        name="gerar_consignacao",
+    ),
+    path("contratos/<int:pk>/editar/", views.editar_contrato, name="editar_contrato"),
+    path("contratos/<int:pk>/pdf/", views.baixar_pdf, name="baixar_pdf"),
+    path("contratos/<int:pk>/docx/", views.baixar_docx, name="baixar_docx"),
 ]
