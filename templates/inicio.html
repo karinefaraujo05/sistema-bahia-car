@@ -21,21 +21,18 @@
   </div>
 
   {# Ações principais. #}
-  <nav class="grid gap-3" aria-label="Ações">
+  <nav class="grid gap-3 sm:grid-cols-2" aria-label="Ações">
     <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao">Cadastrar carro que entrou</a>
     <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao">Registrar venda</a>
     <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao">Registrar troca</a>
     <a href="{% url 'negocios:consignar' %}" class="cartao-acao">Carro deixado para vender</a>
   </nav>
 
-  <p class="mt-3 flex flex-wrap gap-4">
-    <a href="{% url 'veiculos:estoque' %}" class="text-petroleo-700 font-medium">Ver estoque →</a>
-    <a href="{% url 'pessoas:lista' %}" class="text-petroleo-700 font-medium">Ver pessoas →</a>
-    <a href="{% url 'negocios:vendas' %}" class="text-petroleo-700 font-medium">Vendas →</a>
-    {% if user.eh_administrador %}
+  {% if user.eh_administrador %}
+    <p class="mt-3">
       <a href="{% url 'contratos:configuracao' %}" class="text-petroleo-700 font-medium">Configuração da loja →</a>
-    {% endif %}
-  </p>
+    </p>
+  {% endif %}
 
   {# Resumo simples. Os números chegam quando houver dados (próximas fases). #}
   <section class="mt-8" aria-label="Resumo">
