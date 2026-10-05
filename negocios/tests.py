@@ -2,6 +2,7 @@ from decimal import Decimal
 
 import pytest
 from django.urls import reverse
+from django.utils import timezone
 
 from contas.models import Usuario
 from negocios import services
@@ -555,3 +556,70 @@ def test_paginas_novas_renderizam_em_get(client):
     item(negocio, veiculo("ZZZ2627", situacao=Situacao.TERCEIRO), "15000", de=cliente)
     assert client.get(reverse("negocios:troca_valores", args=[negocio.pk])).status_code == 200
     assert client.get(reverse("negocios:revisao", args=[negocio.pk])).status_code == 200
+
+
+# --- Lucro, vendas e papéis (Fase 7) ---
+
+
+def _venda_concluida(placa="LLL3030", compra="18000", venda="25000"):
+    carro = veiculo(placa, valor_compra=Decimal(compra))
+    comprador = pessoa("Comprador Lucro")
+    negocio = rascunho(TipoNegocio.VENDA)
+    item(negocio, carro, venda, para=comprador)
+    services.concluir_negocio(negocio)
+    return negocio, carro
+
+
+def test_lucro_bruto_da_venda():
+    negocio, _ = _venda_concluida()
+    assert services.lucro_bruto(negocio) == Decimal("7000")
+
+
+def test_lucro_do_veiculo():
+    _, carro = _venda_concluida("LLL3031")
+    carro.refresh_from_db()
+    assert services.lucro_do_veiculo(carro) == Decimal("7000")
+
+
+def test_resumo_de_vendas_do_mes():
+    _venda_concluida("LLL3032")
+    hoje = timezone.localdate()
+    resumo = services.resumo_de_vendas(hoje.year, hoje.month)
+    assert resumo["total_vendido"] == Decimal("25000")
+    assert resumo["lucro_bruto"] == Decimal("7000")
+    assert resumo["quantidade"] == 1
+
+
+def test_vendas_lucro_so_para_admin(client):
+    _venda_concluida("LLL3033")
+
+    Usuario.objects.create_user(username="vend", password="x-123456", papel=Usuario.Papel.VENDEDOR)
+    client.login(username="vend", password="x-123456")
+    conteudo_vendedor = client.get(reverse("negocios:vendas")).content.decode().lower()
+    assert "lucro" not in conteudo_vendedor
+
+    client.logout()
+    Usuario.objects.create_user(
+        username="chefe", password="x-123456", papel=Usuario.Papel.ADMINISTRADOR
+    )
+    client.login(username="chefe", password="x-123456")
+    conteudo_admin = client.get(reverse("negocios:vendas")).content.decode().lower()
+    assert "lucro" in conteudo_admin
+
+
+def test_exportar_bloqueia_vendedor(client):
+    Usuario.objects.create_user(username="vend", password="x-123456", papel=Usuario.Papel.VENDEDOR)
+    client.login(username="vend", password="x-123456")
+    resp = client.get(reverse("negocios:exportar_excel"))
+    assert resp.status_code == 302  # redirecionado
+
+
+def test_exportar_admin_gera_xlsx(client):
+    _venda_concluida("LLL3034")
+    Usuario.objects.create_user(
+        username="chefe", password="x-123456", papel=Usuario.Papel.ADMINISTRADOR
+    )
+    client.login(username="chefe", password="x-123456")
+    resp = client.get(reverse("negocios:exportar_excel"))
+    assert resp.status_code == 200
+    assert resp.content[:2] == b"PK"  # xlsx é um zip
