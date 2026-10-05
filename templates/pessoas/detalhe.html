@@ -26,7 +26,8 @@
     </form>
   </div>
 
-  <section class="mb-6" aria-label="Dados">
+  <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
+  <section aria-label="Dados">
     <dl class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
       {% include "pessoas/partials/dado.html" with rotulo="CPF/CNPJ" valor=pessoa.cpf_cnpj_formatado %}
       {% include "pessoas/partials/dado.html" with rotulo="Telefone" valor=pessoa.telefone_formatado %}
@@ -68,4 +69,5 @@
       {% endfor %}
     </ul>
   </section>
+  </div>
 {% endblock %}

@@ -45,7 +45,7 @@
   </div>
 
   {% if carros %}
-    <div class="grid gap-3 sm:grid-cols-2">
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {% for carro in carros %}
         {% include "veiculos/partials/card.html" with carro=carro %}
       {% endfor %}
