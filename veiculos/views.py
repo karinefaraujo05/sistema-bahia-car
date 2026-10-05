@@ -37,8 +37,13 @@ def estoque(request):
 
 @login_required
 def detalhe(request, pk):
+    from negocios.services import lucro_do_veiculo
+
     veiculo = get_object_or_404(Veiculo.objetos, pk=pk)
-    return render(request, "veiculos/detalhe.html", {"veiculo": veiculo})
+    lucro = None
+    if request.user.eh_administrador and veiculo.status == StatusVeiculo.VENDIDO:
+        lucro = lucro_do_veiculo(veiculo)
+    return render(request, "veiculos/detalhe.html", {"veiculo": veiculo, "lucro": lucro})
 
 
 @login_required

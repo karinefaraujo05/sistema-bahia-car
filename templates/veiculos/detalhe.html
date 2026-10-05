@@ -134,6 +134,12 @@
           <dd class="text-right font-medium">{{ veiculo.valor_compra|reais }}</dd>
         </div>
       {% endif %}
+      {% if lucro is not None %}
+        <div class="flex justify-between gap-4 px-4 py-3">
+          <dt class="text-tinta-suave">Lucro bruto</dt>
+          <dd class="text-right font-medium text-verde">{{ lucro|reais }}</dd>
+        </div>
+      {% endif %}
     </dl>
   </section>
 
