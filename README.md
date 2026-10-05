@@ -91,7 +91,51 @@ bin/             binário do Tailwind (não versionado)
 Fica em uma URL não óbvia definida por `ADMIN_URL` no `.env` (padrão `painel-interno/`).
 É só para o superusuário — não é a interface do usuário final.
 
-## Deploy, backup e restauração
+## Deploy em produção (gratuito)
 
-Serão documentados na Fase 8 (produção): Dockerfile, gunicorn, storage S3, backup diário com
-`pg_dump` e restauração testada.
+Stack: **Render** (app, Docker, tier grátis) + **Neon** (banco Postgres) + **bucket S3**
+(Cloudflare R2 ou Backblaze B2) para fotos e documentos + **GitHub Actions** (backup diário).
+
+> O app roda em container (`Dockerfile`), com `gunicorn` e `WhiteNoise` para os estáticos.
+> As fotos/documentos vão para um bucket **privado**, servidos por **URL assinada com expiração**.
+
+### 1. Banco (Neon, produção)
+Crie um **projeto separado** no Neon só para produção (dados reais longe dos de teste) e copie a
+`DATABASE_URL`. O Neon aqui é **Postgres 18** — o cliente de backup precisa ser o 18 (já tratado
+no workflow e nos scripts).
+
+### 2. Bucket de arquivos (R2 ou B2)
+Crie um bucket **privado** e gere um par de chaves (Access Key / Secret). Anote o **endpoint S3**:
+- Cloudflare R2: `https://<conta>.r2.cloudflarestorage.com` (região `auto`)
+- Backblaze B2: `https://s3.<regiao>.backblazeb2.com`
+
+### 3. App no Render (Blueprint)
+1. Suba o código para um repositório no **GitHub**.
+2. No Render: **New > Blueprint** e aponte para o repositório — ele lê o `render.yaml` e cria o
+   Web Service (plano grátis) sozinho.
+3. Em **Environment**, preencha as variáveis marcadas como `sync: false`:
+   `DATABASE_URL`, `ALLOWED_HOSTS` (o domínio `.onrender.com`), `CSRF_TRUSTED_ORIGINS`
+   (`https://seu-app.onrender.com`), `ADMIN_URL`, e as do bucket: `AWS_STORAGE_BUCKET_NAME`,
+   `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_S3_ENDPOINT_URL`, `AWS_S3_REGION_NAME`.
+4. No primeiro deploy, o `start.sh` roda as migrações e coleta os estáticos; depois crie seu
+   usuário com o shell do Render: `python manage.py createsuperuser`.
+
+> O tier grátis do Render **hiberna após ~15 min** sem acesso; a primeira visita acorda em
+> alguns segundos. Para um uso de loja pequena, costuma ser suficiente.
+
+### 4. Backup diário (GitHub Actions)
+O workflow `.github/workflows/backup.yml` roda todo dia e envia um `pg_dump` compactado para o
+bucket de backup (mantém 30 diários e 12 mensais). Crie um **bucket de backup separado** e
+configure os **Secrets** no GitHub: `DATABASE_URL`, `BACKUP_BUCKET`, `AWS_S3_ENDPOINT_URL`,
+`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`.
+
+### 5. Restauração (testar sempre!)
+```bash
+# restaure sempre primeiro num banco DESCARTÁVEL para conferir:
+make restaurar ARQ=bahiacar-AAAAMMDD-HHMMSS.sql.gz DESTINO="postgres://.../banco_teste"
+```
+O ciclo backup → restauração já foi testado localmente contra um Postgres 18 descartável.
+
+### Exportação manual
+O administrador pode baixar uma planilha Excel (Veículos, Pessoas, Negócios) em **Vendas >
+Exportar Excel**, para ter uma cópia própria dos dados.
