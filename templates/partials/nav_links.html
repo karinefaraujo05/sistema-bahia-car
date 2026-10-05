@@ -1,0 +1,6 @@
+{% with ns=request.resolver_match.namespace nome=request.resolver_match.url_name %}
+  <a href="{% url 'inicio' %}" class="nav-link{% if nome == 'inicio' or nome == 'buscar' %} nav-link-ativo{% endif %}">Início</a>
+  <a href="{% url 'veiculos:estoque' %}" class="nav-link{% if ns == 'veiculos' %} nav-link-ativo{% endif %}">Estoque</a>
+  <a href="{% url 'pessoas:lista' %}" class="nav-link{% if ns == 'pessoas' %} nav-link-ativo{% endif %}">Pessoas</a>
+  <a href="{% url 'negocios:vendas' %}" class="nav-link{% if ns == 'negocios' %} nav-link-ativo{% endif %}">Vendas</a>
+{% endwith %}
