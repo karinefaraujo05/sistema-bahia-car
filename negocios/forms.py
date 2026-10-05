@@ -3,7 +3,7 @@ from django import forms
 from pessoas.models import Pessoa
 from pessoas.services import cadastrar_rapido
 
-from .models import FormaPagamento, QuitacaoOpcao
+from .models import ComissaoTipo, FormaPagamento, QuitacaoOpcao
 
 
 def _campo_classe(form):
@@ -102,3 +102,65 @@ class PagamentoEntregaForm(forms.Form):
                 "Esse carro tem financiamento: escolha como fica a quitação."
             )
         return valor
+
+
+class TrocaValoresForm(forms.Form):
+    valor_loja = forms.DecimalField(
+        label="Valor do carro da loja (R$)", max_digits=10, decimal_places=2
+    )
+    valor_cliente = forms.DecimalField(
+        label="Valor do carro do cliente (R$)", max_digits=10, decimal_places=2
+    )
+    km_loja = forms.IntegerField(label="Km do carro da loja na entrega", required=False)
+    km_cliente = forms.IntegerField(label="Km do carro do cliente na entrega", required=False)
+    forma_pagamento = forms.ChoiceField(
+        label="Forma de pagamento da diferença",
+        choices=[("", "— escolher —"), *FormaPagamento.choices],
+        required=False,
+    )
+    detalhes_pagamento = forms.CharField(
+        label="Detalhes do pagamento", widget=forms.Textarea, required=False
+    )
+    data = forms.DateField(label="Data do negócio", widget=forms.DateInput(attrs={"type": "date"}))
+    data_hora_entrega = forms.DateTimeField(
+        label="Data e hora da entrega",
+        required=False,
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
+    )
+    local_entrega = forms.CharField(label="Local da entrega", required=False)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for nome in ("valor_loja", "valor_cliente", "km_loja", "km_cliente"):
+            self.fields[nome].widget.attrs["inputmode"] = "numeric"
+        _campo_classe(self)
+
+
+class ConsignacaoTermosForm(forms.Form):
+    valor_liquido_minimo = forms.DecimalField(
+        label="Valor mínimo que o dono recebe (R$)", max_digits=10, decimal_places=2
+    )
+    comissao_tipo = forms.ChoiceField(label="Tipo de comissão", choices=ComissaoTipo.choices)
+    comissao_valor = forms.DecimalField(
+        label="Valor da comissão (R$ ou %)", max_digits=10, decimal_places=2, required=False
+    )
+    prazo_dias = forms.IntegerField(label="Prazo (dias)", initial=90)
+    aviso_dias = forms.IntegerField(label="Aviso de encerramento (dias)", initial=15)
+    prazo_repasse_dias = forms.IntegerField(label="Prazo de repasse (dias)", initial=5)
+    documentos_entregues = forms.CharField(
+        label="Documentos entregues pelo dono", widget=forms.Textarea, required=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for nome in ("valor_liquido_minimo", "comissao_valor"):
+            self.fields[nome].widget.attrs["inputmode"] = "numeric"
+        _campo_classe(self)
+
+    def clean(self):
+        dados = super().clean()
+        if dados.get("comissao_tipo") != ComissaoTipo.SOBREPRECO and not dados.get(
+            "comissao_valor"
+        ):
+            self.add_error("comissao_valor", "Informe o valor da comissão.")
+        return dados
