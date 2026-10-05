@@ -1,0 +1,34 @@
+# Blueprint do Render: ao conectar o repositório, o Render cria o serviço a partir daqui.
+# O banco é o Neon (externo) e os arquivos vão para um bucket S3 (R2/B2) — ver README.
+services:
+  - type: web
+    name: bahia-car
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: SECRET_KEY
+        generateValue: true
+      - key: TIME_ZONE
+        value: America/Bahia
+      # Preencha no painel do Render (Environment):
+      - key: DATABASE_URL
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      - key: ADMIN_URL
+        sync: false
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false
+      - key: AWS_S3_REGION_NAME
+        sync: false
