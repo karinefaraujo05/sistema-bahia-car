@@ -10,6 +10,8 @@ dependencies = [
     "django-simple-history>=3.7",
     "django-environ>=0.11",
     "pillow>=12.3.0",
+    "num2words>=0.5.14",
+    "weasyprint>=70.0",
 ]
 
 [dependency-groups]
