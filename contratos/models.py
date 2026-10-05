@@ -130,3 +130,47 @@ class Documento(ModeloBase):
     @property
     def nome_arquivo(self):
         return self.arquivo.name.rsplit("/", 1)[-1]
+
+
+class ModeloContrato(models.TextChoices):
+    A = "A", "Compra pela loja"
+    B = "B", "Venda pela loja"
+    C = "C", "Troca com a loja"
+    D = "D", "Consignação"
+    E = "E", "Intermediação"
+
+
+class Contrato(ModeloBase):
+    """
+    Contrato gerado a partir de um negócio (ou consignação). O corpo é texto editável:
+    o usuário ajusta na tela e depois baixa em PDF ou Word. Regerar cria nova versão.
+    """
+
+    negocio = models.ForeignKey(
+        "negocios.Negocio",
+        verbose_name="negócio",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="contratos",
+    )
+    consignacao = models.ForeignKey(
+        "negocios.Consignacao",
+        verbose_name="consignação",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="contratos",
+    )
+    modelo = models.CharField("modelo", max_length=1, choices=ModeloContrato.choices)
+    titulo = models.CharField("título", max_length=200)
+    versao = models.PositiveSmallIntegerField("versão", default=1)
+    corpo = models.TextField("texto do contrato")
+
+    class Meta(ModeloBase.Meta):
+        verbose_name = "contrato"
+        verbose_name_plural = "contratos"
+        ordering = ["-versao", "-criado_em"]
+
+    def __str__(self):
+        return f"{self.titulo} (v{self.versao})"
