@@ -12,6 +12,7 @@ urlpatterns = [
         name="upload_documentos",
     ),
     path("negocios/<int:negocio_pk>/contrato/gerar/", views.gerar, name="gerar"),
+    path("negocios/<int:negocio_pk>/vistoria/gerar/", views.gerar_termo, name="gerar_termo"),
     path(
         "consignacoes/<int:consignacao_pk>/contrato/gerar/",
         views.gerar_consignacao,

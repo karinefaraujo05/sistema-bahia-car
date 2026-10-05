@@ -11,6 +11,7 @@ from .geracao import (
     ContratoError,
     gerar_contrato,
     gerar_contrato_consignacao,
+    gerar_termo_vistoria,
     renderizar_docx,
     renderizar_pdf,
     salvar_pdf_como_documento,
@@ -94,6 +95,18 @@ def gerar_consignacao(request, consignacao_pk):
     except ContratoError as erro:
         return render(request, "contratos/faltando.html", {"faltando": erro.faltando})
     return redirect("contratos:editar_contrato", pk=contrato.pk)
+
+
+@login_required
+@require_POST
+def gerar_termo(request, negocio_pk):
+    negocio = get_object_or_404(Negocio.objetos, pk=negocio_pk)
+    if not negocio.itens.exists():
+        messages.error(request, "Adicione o carro ao negócio antes de gerar o termo de vistoria.")
+        return redirect("negocios:detalhe", pk=negocio.pk)
+    gerar_termo_vistoria(negocio, usuario=request.user)
+    messages.success(request, "Termo de vistoria gerado e anexado.")
+    return redirect("negocios:detalhe", pk=negocio.pk)
 
 
 @login_required
