@@ -1,0 +1,45 @@
+{% load static %}
+<div id="galeria">
+  {% if veiculo.fotos.all %}
+    <div class="grid grid-cols-3 gap-2">
+      {% for foto in veiculo.fotos.all %}
+        <div class="rounded-lg border border-borda bg-superficie p-1">
+          <img
+            src="{% if foto.miniatura %}{{ foto.miniatura.url }}{% else %}{{ foto.imagem.url }}{% endif %}"
+            alt="Foto do carro"
+            class="aspect-square w-full rounded object-cover{% if foto.capa %} ring-2 ring-petroleo-600{% endif %}"
+          />
+          <div class="mt-1 flex items-center justify-between gap-1 text-xs">
+            {% if foto.capa %}
+              <span class="text-petroleo-700">Capa</span>
+            {% else %}
+              <button
+                type="button"
+                hx-post="{% url 'veiculos:definir_capa' foto.pk %}"
+                hx-target="#galeria"
+                hx-swap="outerHTML"
+                class="text-petroleo-700"
+              >
+                Tornar capa
+              </button>
+            {% endif %}
+            <button
+              type="button"
+              hx-post="{% url 'veiculos:remover_foto' foto.pk %}"
+              hx-target="#galeria"
+              hx-swap="outerHTML"
+              hx-confirm="Remover esta foto?"
+              class="text-tinta-suave"
+            >
+              Remover
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+      Nenhuma foto ainda.
+    </p>
+  {% endif %}
+</div>

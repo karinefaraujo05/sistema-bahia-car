@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load formato %}
+
+{% block titulo %}{{ veiculo.marca }} {{ veiculo.modelo }} — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-2">
+    <a href="{% url 'veiculos:estoque' %}" class="text-tinta-suave">← Voltar ao estoque</a>
+  </div>
+
+  <div class="mb-4 flex items-start justify-between gap-3">
+    <div>
+      <h1 class="text-2xl">{{ veiculo.marca }} {{ veiculo.modelo }}</h1>
+      <p class="text-tinta-suave">
+        {{ veiculo.placa_formatada }}
+        {% if veiculo.eh_consignado %}
+          · <span class="text-cinza">Consignado</span>
+        {% endif %}
+      </p>
+    </div>
+    {% include "veiculos/partials/status_badge.html" with veiculo=veiculo %}
+  </div>
+
+  <div class="mb-6 flex gap-2">
+    <a href="{% url 'veiculos:editar' veiculo.pk %}" class="botao botao-secundario">Editar</a>
+    <form
+      method="post"
+      action="{% url 'veiculos:arquivar' veiculo.pk %}"
+      onsubmit="return confirm('Arquivar este carro? Ele sai do estoque, mas nada é apagado.');"
+    >
+      {% csrf_token %}
+      <button type="submit" class="botao botao-secundario">Arquivar</button>
+    </form>
+  </div>
+
+  {# Fotos #}
+  <section class="mb-6" aria-label="Fotos">
+    <h2 class="mb-2 text-lg">Fotos</h2>
+    <form
+      method="post"
+      action="{% url 'veiculos:adicionar_fotos' veiculo.pk %}"
+      enctype="multipart/form-data"
+      hx-post="{% url 'veiculos:adicionar_fotos' veiculo.pk %}"
+      hx-target="#galeria"
+      hx-swap="outerHTML"
+      hx-encoding="multipart/form-data"
+      class="mb-3"
+    >
+      {% csrf_token %}
+      <input
+        type="file"
+        name="fotos"
+        accept="image/*"
+        capture="environment"
+        multiple
+        class="mb-2 block w-full text-sm"
+      />
+      <button type="submit" class="botao botao-secundario">Adicionar foto</button>
+    </form>
+    {% include "veiculos/partials/galeria.html" with veiculo=veiculo %}
+  </section>
+
+  {# Dados do carro #}
+  <section class="mb-6" aria-label="Dados">
+    <h2 class="mb-2 text-lg">Dados do carro</h2>
+    <dl class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">Ano</dt>
+        <dd class="text-right font-medium">{{ veiculo.ano_fabricacao }}/{{ veiculo.ano_modelo }}</dd>
+      </div>
+      {% include "veiculos/partials/dado.html" with rotulo="Cor" valor=veiculo.cor %}
+      {% include "veiculos/partials/dado.html" with rotulo="Quilometragem" valor=veiculo.km %}
+      {% include "veiculos/partials/dado.html" with rotulo="Combustível" valor=veiculo.get_combustivel_display %}
+      {% include "veiculos/partials/dado.html" with rotulo="Câmbio" valor=veiculo.get_cambio_display %}
+      {% include "veiculos/partials/dado.html" with rotulo="Chassi" valor=veiculo.chassi %}
+      {% include "veiculos/partials/dado.html" with rotulo="Renavam" valor=veiculo.renavam %}
+      {% include "veiculos/partials/dado.html" with rotulo="Situação" valor=veiculo.get_situacao_display %}
+      {% include "veiculos/partials/dado.html" with rotulo="Proprietário no documento" valor=veiculo.proprietario_registral %}
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">Valor anunciado</dt>
+        <dd class="text-right font-medium">{{ veiculo.valor_anunciado|reais }}</dd>
+      </div>
+      {% if user.eh_administrador %}
+        <div class="flex justify-between gap-4 px-4 py-3">
+          <dt class="text-tinta-suave">Valor de compra</dt>
+          <dd class="text-right font-medium">{{ veiculo.valor_compra|reais }}</dd>
+        </div>
+      {% endif %}
+    </dl>
+  </section>
+
+  {# Financiamento #}
+  {% if veiculo.alienado %}
+    <section class="mb-6" aria-label="Financiamento">
+      <h2 class="mb-2 text-lg">Financiamento</h2>
+      <div class="rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+        <p>Carro com financiamento ativo em <strong>{{ veiculo.credor_alienacao|default:"—" }}</strong>.</p>
+        <p>Saldo devedor: <strong>{{ veiculo.saldo_devedor|reais }}</strong></p>
+      </div>
+    </section>
+  {% endif %}
+
+  {# Estado e observações #}
+  <section class="mb-6" aria-label="Estado">
+    <h2 class="mb-2 text-lg">Estado</h2>
+    <dl class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">Chave reserva</dt>
+        <dd class="text-right font-medium">
+          {% if veiculo.tem_chave_reserva is None %}—{% elif veiculo.tem_chave_reserva %}Sim{% else %}Não{% endif %}
+        </dd>
+      </div>
+      {% include "veiculos/partials/dado.html" with rotulo="Avarias declaradas" valor=veiculo.avarias_declaradas %}
+      {% if veiculo.sinistro_declarado %}
+        {% include "veiculos/partials/dado.html" with rotulo="Sinistro" valor=veiculo.sinistro_descricao|default:"declarado" %}
+      {% endif %}
+      {% include "veiculos/partials/dado.html" with rotulo="Observações" valor=veiculo.observacoes %}
+    </dl>
+  </section>
+
+  {# Linha do tempo de negócios (Fase 4). #}
+  <section class="mb-6" aria-label="Negócios">
+    <h2 class="mb-2 text-lg">Negócios deste carro</h2>
+    <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+      Ainda não há negócios registrados. (Compra, venda e troca chegam na próxima fase.)
+    </p>
+  </section>
+{% endblock %}

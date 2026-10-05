@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block titulo %}Estoque — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-4 flex items-center justify-between gap-3">
+    <h1 class="text-2xl">Estoque</h1>
+    <a href="{% url 'veiculos:novo' %}" class="botao botao-primario">Adicionar carro</a>
+  </div>
+
+  {# Abas por status. #}
+  <nav class="mb-3 flex gap-2 overflow-x-auto" aria-label="Status">
+    {% for valor, rotulo in abas %}
+      <a
+        href="?status={{ valor }}&origem={{ origem_atual }}&ordem={{ ordem_atual }}"
+        class="whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium{% if status_atual == valor %} border-petroleo-600 bg-petroleo-600 text-white{% else %} border-borda bg-superficie text-tinta{% endif %}"
+        >{{ rotulo }}</a
+      >
+    {% endfor %}
+  </nav>
+
+  {# Filtro por origem e ordenação. #}
+  <div class="mb-5 flex flex-wrap items-center justify-between gap-2 text-sm">
+    <div class="flex gap-2">
+      {% for valor, rotulo in origens %}
+        <a
+          href="?status={{ status_atual }}&origem={{ valor }}&ordem={{ ordem_atual }}"
+          class="rounded-full px-3 py-1{% if origem_atual == valor %} bg-petroleo-50 text-petroleo-700{% else %} text-tinta-suave{% endif %}"
+          >{{ rotulo }}</a
+        >
+      {% endfor %}
+    </div>
+    <div class="flex gap-2">
+      <a
+        href="?status={{ status_atual }}&origem={{ origem_atual }}&ordem=recentes"
+        class="rounded-full px-3 py-1{% if ordem_atual == 'recentes' %} bg-petroleo-50 text-petroleo-700{% else %} text-tinta-suave{% endif %}"
+        >Mais recentes</a
+      >
+      <a
+        href="?status={{ status_atual }}&origem={{ origem_atual }}&ordem=antigos"
+        class="rounded-full px-3 py-1{% if ordem_atual == 'antigos' %} bg-petroleo-50 text-petroleo-700{% else %} text-tinta-suave{% endif %}"
+        >Mais antigos na loja</a
+      >
+    </div>
+  </div>
+
+  {% if carros %}
+    <div class="grid gap-3 sm:grid-cols-2">
+      {% for carro in carros %}
+        {% include "veiculos/partials/card.html" with carro=carro %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="rounded-lg border border-borda bg-superficie px-4 py-8 text-center text-tinta-suave">
+      Nenhum carro aqui ainda.
+    </p>
+  {% endif %}
+{% endblock %}
