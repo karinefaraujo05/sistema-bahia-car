@@ -6,6 +6,8 @@ from negocios.models import Negocio, StatusNegocio, TipoNegocio
 from negocios.services import repasses_pendentes
 from veiculos.models import Situacao, StatusVeiculo, Veiculo
 
+from .busca import buscar as buscar_tudo
+
 
 @login_required
 def inicio(request):
@@ -32,3 +34,11 @@ def inicio(request):
         "ultimos_negocios": ultimos,
     }
     return render(request, "inicio.html", contexto)
+
+
+@login_required
+def buscar(request):
+    resultado = buscar_tudo(request.GET.get("q", ""))
+    if request.htmx:
+        return render(request, "busca/resultados.html", resultado)
+    return render(request, "busca/pagina.html", resultado)

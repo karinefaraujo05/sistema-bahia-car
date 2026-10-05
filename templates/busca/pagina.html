@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block titulo %}Busca — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <h1 class="mb-3 text-2xl">Busca</h1>
+  <input
+    type="search"
+    name="q"
+    value="{{ termo }}"
+    class="campo text-lg"
+    placeholder="Buscar por placa, carro ou pessoa"
+    autocomplete="off"
+    autofocus
+    hx-get="{% url 'buscar' %}"
+    hx-trigger="keyup changed delay:300ms, search"
+    hx-target="#resultados-busca"
+  />
+  <div id="resultados-busca" class="mt-4">
+    {% include "busca/resultados.html" %}
+  </div>
+{% endblock %}

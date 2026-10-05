@@ -1,0 +1,51 @@
+{% load formato %}
+{% if termo %}
+  {% if not carros and not pessoas %}
+    <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+      Nada encontrado para "{{ termo }}".
+    </p>
+  {% endif %}
+
+  {% if carros %}
+    <h2 class="mb-2 text-lg">Carros</h2>
+    <ul class="mb-5 divide-y divide-borda overflow-hidden rounded-lg border border-borda bg-superficie">
+      {% for carro in carros %}
+        <li>
+          <a href="{% url 'veiculos:detalhe' carro.pk %}" class="flex items-center gap-3 px-3 py-2 hover:bg-petroleo-50">
+            <span class="h-12 w-16 shrink-0 overflow-hidden rounded bg-cinza-fundo">
+              {% if carro.foto_capa %}
+                <img
+                  src="{% if carro.foto_capa.miniatura %}{{ carro.foto_capa.miniatura.url }}{% else %}{{ carro.foto_capa.imagem.url }}{% endif %}"
+                  alt=""
+                  class="h-full w-full object-cover"
+                />
+              {% endif %}
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate font-medium">{{ carro.marca }} {{ carro.modelo }}</span>
+              <span class="block text-sm text-tinta-suave">{{ carro.placa_formatada }}</span>
+            </span>
+            {% include "veiculos/partials/status_badge.html" with veiculo=carro %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if pessoas %}
+    <h2 class="mb-2 text-lg">Pessoas</h2>
+    <ul class="divide-y divide-borda overflow-hidden rounded-lg border border-borda bg-superficie">
+      {% for pessoa in pessoas %}
+        <li>
+          <a href="{% url 'pessoas:detalhe' pessoa.pk %}" class="block px-3 py-2 hover:bg-petroleo-50">
+            <span class="block font-medium">{{ pessoa.nome }}</span>
+            <span class="block text-sm text-tinta-suave">
+              {% if pessoa.cpf_cnpj %}{{ pessoa.cpf_cnpj_formatado }}{% endif %}
+              {% if pessoa.telefone %} · {{ pessoa.telefone_formatado }}{% endif %}
+            </span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endif %}
