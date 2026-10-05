@@ -404,3 +404,48 @@ def test_gerar_sem_dados_mostra_faltando(client):
     resp = client.post(reverse("contratos:gerar", args=[negocio.pk]))
     assert resp.status_code == 200
     assert b"Faltam dados" in resp.content
+
+
+def test_gerar_termo_de_vistoria(settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    from contratos.geracao import gerar_termo_vistoria
+    from veiculos import services as vserv
+
+    comprador = pessoa_completa("João Silva", CPF_A)
+    carro = veiculo_completo("ABC1D23")
+    vserv.adicionar_foto(carro, imagem("f.jpg"))  # exercita as fotos embutidas
+    negocio = Negocio.objetos.create(tipo=TipoNegocio.VENDA, status=StatusNegocio.RASCUNHO)
+    ParteNegocio.objetos.create(negocio=negocio, pessoa=comprador, papel=PapelParte.COMPRADOR)
+    ItemNegocio.objetos.create(
+        negocio=negocio,
+        veiculo=carro,
+        para_pessoa=comprador,
+        valor=Decimal("32000"),
+        km_entrega=50000,
+    )
+
+    doc = gerar_termo_vistoria(negocio)
+    assert doc.tipo == "termo_vistoria"
+    assert doc.arquivo.name.endswith(".pdf")
+    doc.arquivo.open("rb")
+    try:
+        assert doc.arquivo.read()[:4] == b"%PDF"
+    finally:
+        doc.arquivo.close()
+
+
+def test_gerar_termo_pela_tela(client, settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    Usuario.objects.create_user(username="karine", password="x-123456")
+    client.login(username="karine", password="x-123456")
+    comprador = pessoa_completa("João Silva", CPF_A)
+    carro = veiculo_completo("ABC1D23")
+    negocio = Negocio.objetos.create(tipo=TipoNegocio.VENDA, status=StatusNegocio.RASCUNHO)
+    ParteNegocio.objetos.create(negocio=negocio, pessoa=comprador, papel=PapelParte.COMPRADOR)
+    ItemNegocio.objetos.create(
+        negocio=negocio, veiculo=carro, para_pessoa=comprador, valor=Decimal("1")
+    )
+
+    resp = client.post(reverse("contratos:gerar_termo", args=[negocio.pk]))
+    assert resp.status_code == 302
+    assert Documento.objetos.filter(negocio=negocio, tipo="termo_vistoria").exists()
