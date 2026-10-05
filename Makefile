@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help instalar up down dev migrar migracoes admin teste lint formatar css css-watch
+.PHONY: help instalar up down dev migrar migracoes admin teste lint formatar css css-watch backup restaurar
 
 help: ## Mostra os comandos disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  make %-14s %s\n", $$1, $$2}'
@@ -43,3 +43,9 @@ css: ## Gera o CSS do Tailwind uma vez
 
 css-watch: ## Gera o CSS e fica observando mudanças
 	./bin/tailwindcss -i static/css/input.css -o static/css/output.css --watch
+
+backup: ## Faz backup do banco (precisa de DATABASE_URL e credenciais do bucket no ambiente)
+	bash scripts/backup.sh
+
+restaurar: ## Restaura um backup: make restaurar ARQ=backup.sql.gz DESTINO="postgres://..."
+	bash scripts/restore.sh "$(ARQ)" "$(DESTINO)"
