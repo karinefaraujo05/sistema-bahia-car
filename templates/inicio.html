@@ -3,8 +3,8 @@
 {% block titulo %}Início — Bahia Car{% endblock %}
 
 {% block conteudo %}
-  {# Busca grande no topo (ainda não funcional — a busca é a Fase 6). #}
-  <form class="mb-6" role="search" onsubmit="return false">
+  {# Busca grande no topo, enquanto digita (HTMX). #}
+  <div class="mb-6">
     <label for="busca" class="sr-only">Buscar</label>
     <input
       type="search"
@@ -13,8 +13,12 @@
       class="campo text-lg"
       placeholder="Buscar por placa, carro ou pessoa"
       autocomplete="off"
+      hx-get="{% url 'buscar' %}"
+      hx-trigger="keyup changed delay:300ms, search"
+      hx-target="#resultados-busca"
     />
-  </form>
+    <div id="resultados-busca" class="mt-3"></div>
+  </div>
 
   {# Ações principais. #}
   <nav class="grid gap-3" aria-label="Ações">
