@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ titulo }} — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  {% include "negocios/partials/cabecalho_passo.html" %}
+
+  {% if form.non_field_errors %}
+    <div class="mb-4 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% include "negocios/partials/campo.html" with campo=form.pessoa %}
+
+    <p class="text-center text-sm text-tinta-suave">ou</p>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% include "negocios/partials/campo.html" with campo=form.nome_novo %}
+      {% include "negocios/partials/campo.html" with campo=form.telefone_novo %}
+    </div>
+
+    <div class="flex flex-wrap gap-2 pt-2">
+      <button type="submit" class="botao botao-primario">Continuar</button>
+      <button type="submit" name="rascunho" value="1" class="botao botao-secundario">
+        Salvar rascunho
+      </button>
+    </div>
+  </form>
+{% endblock %}

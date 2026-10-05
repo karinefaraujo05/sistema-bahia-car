@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ titulo }} — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  {% include "negocios/partials/cabecalho_passo.html" %}
+
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% include "negocios/partials/campo.html" with campo=form.valor %}
+    {% include "negocios/partials/campo.html" with campo=form.km_entrega %}
+
+    {% if form.quitacao_opcao %}
+      <div class="rounded-lg border border-ambar bg-ambar-fundo p-3">
+        <p class="mb-2 text-sm">Esse carro tem financiamento ativo.</p>
+        {% include "negocios/partials/campo.html" with campo=form.quitacao_opcao %}
+      </div>
+    {% endif %}
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% include "negocios/partials/campo.html" with campo=form.forma_pagamento %}
+      {% include "negocios/partials/campo.html" with campo=form.data %}
+    </div>
+    {% include "negocios/partials/campo.html" with campo=form.detalhes_pagamento %}
+    <div class="grid gap-4 sm:grid-cols-2">
+      {% include "negocios/partials/campo.html" with campo=form.data_hora_entrega %}
+      {% include "negocios/partials/campo.html" with campo=form.local_entrega %}
+    </div>
+
+    <div class="flex flex-wrap gap-2 pt-2">
+      <button type="submit" class="botao botao-primario">Continuar</button>
+      <button type="submit" name="rascunho" value="1" class="botao botao-secundario">
+        Salvar rascunho
+      </button>
+      <a href="{% url 'negocios:passo_carro' negocio.pk %}" class="botao botao-secundario">Voltar</a>
+    </div>
+  </form>
+{% endblock %}
