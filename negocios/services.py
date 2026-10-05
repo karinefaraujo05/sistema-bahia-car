@@ -328,3 +328,66 @@ def repasses_pendentes():
     return Consignacao.objetos.filter(
         status=StatusConsignacao.VENDIDA, repasse_feito_em__isnull=True
     )
+
+
+# ---------------------------------------------------------------------------
+# Lucro e vendas (números sensíveis: só o administrador vê)
+# ---------------------------------------------------------------------------
+
+
+def lucro_bruto(negocio):
+    """
+    Lucro bruto de um negócio concluído:
+    - venda própria: preço de venda menos valor de compra;
+    - troca própria: preço do carro da loja menos o valor de compra dele;
+    - intermediação: a comissão da loja;
+    - compra: não há lucro (é aquisição).
+    Devolve None quando não dá para calcular (ex.: falta o valor de compra).
+    """
+    if negocio.status != StatusNegocio.CONCLUIDO:
+        return None
+    if negocio.modalidade == Modalidade.INTERMEDIACAO:
+        return negocio.comissao_valor or Decimal("0")
+
+    itens = list(negocio.itens.select_related("veiculo"))
+    if negocio.tipo == TipoNegocio.VENDA and itens:
+        item = itens[0]
+        if item.veiculo.valor_compra is None:
+            return None
+        return item.valor - item.veiculo.valor_compra
+    if negocio.tipo == TipoNegocio.TROCA:
+        saida = next((i for i in itens if i.sai_da_loja), None)
+        if not saida or saida.veiculo.valor_compra is None:
+            return None
+        return saida.valor - saida.veiculo.valor_compra
+    return None
+
+
+def lucro_do_veiculo(veiculo):
+    """Lucro do veículo quando já foi vendido pela loja (None caso contrário)."""
+    item = (
+        veiculo.itens_negocio.filter(
+            de_pessoa__isnull=True,
+            negocio__status=StatusNegocio.CONCLUIDO,
+            negocio__tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA],
+        )
+        .select_related("negocio")
+        .order_by("-negocio__data")
+        .first()
+    )
+    if not item or veiculo.valor_compra is None:
+        return None
+    return item.valor - veiculo.valor_compra
+
+
+def resumo_de_vendas(ano, mes):
+    """Total vendido e lucro bruto das vendas e trocas concluídas no mês."""
+    vendas = Negocio.objetos.filter(
+        status=StatusNegocio.CONCLUIDO,
+        tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA],
+        data__year=ano,
+        data__month=mes,
+    )
+    total = sum((n.valor_total or Decimal("0") for n in vendas), Decimal("0"))
+    lucro = sum((lucro_bruto(n) or Decimal("0") for n in vendas), Decimal("0"))
+    return {"total_vendido": total, "lucro_bruto": lucro, "quantidade": vendas.count()}
