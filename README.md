@@ -23,28 +23,34 @@ Pré-requisitos: [uv](https://docs.astral.sh/uv/getting-started/installation/) e
 # 1. Instalar as dependências
 make instalar            # (uv sync)
 
-# 2. Copiar as variáveis de ambiente e ajustar se precisar
+# 2. Copiar as variáveis de ambiente e ajustar
 cp .env.example .env
 # gere uma SECRET_KEY nova:
 uv run python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+# e cole no .env a DATABASE_URL do seu banco (ver "Banco de dados" abaixo).
 
-# 3. Subir o banco de dados
-make up
-
-# 4. Aplicar as migrações
+# 3. Aplicar as migrações
 make migrar
 
-# 5. Criar o seu usuário administrador (superusuário)
+# 4. Criar o seu usuário administrador (superusuário)
 make admin
 
-# 6. Gerar o CSS (ou use `make css-watch` enquanto desenvolve)
+# 5. Gerar o CSS (ou use `make css-watch` enquanto desenvolve)
 make css
 
-# 7. Rodar o servidor
+# 6. Rodar o servidor
 make dev
 ```
 
 Acesse em `http://localhost:8000`.
+
+### Banco de dados
+
+O desenvolvimento usa um **PostgreSQL gerenciado na nuvem (Neon)**. Basta ter a `DATABASE_URL`
+do Neon no `.env` — não precisa de Docker.
+
+Se preferir rodar o banco localmente com Docker, há um `docker-compose.yml`: rode `make up`
+(sobe o Postgres na porta 5433) e use a `DATABASE_URL` local comentada no `.env.example`.
 
 ### Testar no celular
 
