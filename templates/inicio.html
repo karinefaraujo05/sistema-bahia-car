@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block titulo %}Início — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  {# Busca grande no topo (ainda não funcional — a busca é a Fase 6). #}
+  <form class="mb-6" role="search" onsubmit="return false">
+    <label for="busca" class="sr-only">Buscar</label>
+    <input
+      type="search"
+      id="busca"
+      name="q"
+      class="campo text-lg"
+      placeholder="Buscar por placa, carro ou pessoa"
+      autocomplete="off"
+    />
+  </form>
+
+  {# Ações principais. #}
+  <nav class="grid gap-3" aria-label="Ações">
+    <a href="#" class="cartao-acao">Cadastrar carro que entrou</a>
+    <a href="#" class="cartao-acao">Registrar venda</a>
+    <a href="#" class="cartao-acao">Registrar troca</a>
+    <a href="#" class="cartao-acao">Carro deixado para vender</a>
+  </nav>
+
+  {# Resumo simples. Os números chegam quando houver dados (próximas fases). #}
+  <section class="mt-8" aria-label="Resumo">
+    <h2 class="mb-3 text-lg">Resumo</h2>
+    <div class="grid grid-cols-3 gap-3">
+      <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
+        <div class="text-2xl font-bold text-petroleo-700">0</div>
+        <div class="text-sm text-tinta-suave">carros na loja</div>
+      </div>
+      <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
+        <div class="text-2xl font-bold text-petroleo-700">0</div>
+        <div class="text-sm text-tinta-suave">vendas no mês</div>
+      </div>
+      <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
+        <div class="text-2xl font-bold text-petroleo-700">0</div>
+        <div class="text-sm text-tinta-suave">repasses a pagar</div>
+      </div>
+    </div>
+  </section>
+
+  {# Últimos negócios. #}
+  <section class="mt-8" aria-label="Últimos negócios">
+    <h2 class="mb-3 text-lg">Últimos negócios</h2>
+    <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+      Nenhum negócio registrado ainda.
+    </p>
+  </section>
+{% endblock %}
