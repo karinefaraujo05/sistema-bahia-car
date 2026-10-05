@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block titulo %}{% if veiculo %}Editar carro{% else %}Cadastrar carro{% endif %} — Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-2">
+    <a
+      href="{% if veiculo %}{% url 'veiculos:detalhe' veiculo.pk %}{% else %}{% url 'veiculos:estoque' %}{% endif %}"
+      class="text-tinta-suave"
+      >← Voltar</a
+    >
+  </div>
+
+  <h1 class="mb-5 text-2xl">{% if veiculo %}Editar carro{% else %}Cadastrar carro{% endif %}</h1>
+
+  {% if form.non_field_errors %}
+    <div class="mb-4 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="space-y-6">
+    {% csrf_token %}
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Dados principais</legend>
+      {% include "veiculos/partials/campo.html" with campo=form.placa %}
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "veiculos/partials/campo.html" with campo=form.marca %}
+        {% include "veiculos/partials/campo.html" with campo=form.modelo %}
+        {% include "veiculos/partials/campo.html" with campo=form.ano_fabricacao %}
+        {% include "veiculos/partials/campo.html" with campo=form.ano_modelo %}
+        {% include "veiculos/partials/campo.html" with campo=form.cor %}
+        {% include "veiculos/partials/campo.html" with campo=form.km %}
+        {% include "veiculos/partials/campo.html" with campo=form.combustivel %}
+        {% include "veiculos/partials/campo.html" with campo=form.cambio %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Documentação</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "veiculos/partials/campo.html" with campo=form.chassi %}
+        {% include "veiculos/partials/campo.html" with campo=form.renavam %}
+        {% include "veiculos/partials/campo.html" with campo=form.situacao %}
+        {% include "veiculos/partials/campo.html" with campo=form.proprietario_registral %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Valores</legend>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "veiculos/partials/campo.html" with campo=form.valor_anunciado %}
+        {% include "veiculos/partials/campo.html" with campo=form.valor_compra %}
+        {% include "veiculos/partials/campo.html" with campo=form.status %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Financiamento</legend>
+      <label class="flex items-center gap-2">
+        {{ form.alienado }}
+        <span>{{ form.alienado.label }}</span>
+      </label>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "veiculos/partials/campo.html" with campo=form.credor_alienacao %}
+        {% include "veiculos/partials/campo.html" with campo=form.saldo_devedor %}
+        {% include "veiculos/partials/campo.html" with campo=form.parcelas_restantes %}
+        {% include "veiculos/partials/campo.html" with campo=form.valor_parcela %}
+        {% include "veiculos/partials/campo.html" with campo=form.dia_vencimento %}
+        {% include "veiculos/partials/campo.html" with campo=form.parcelas_vencidas %}
+      </div>
+    </fieldset>
+
+    <fieldset class="space-y-4">
+      <legend class="mb-2 text-lg font-semibold">Estado</legend>
+      {% include "veiculos/partials/campo.html" with campo=form.tem_chave_reserva %}
+      {% include "veiculos/partials/campo.html" with campo=form.avarias_declaradas %}
+      <label class="flex items-center gap-2">
+        {{ form.sinistro_declarado }}
+        <span>{{ form.sinistro_declarado.label }}</span>
+      </label>
+      {% include "veiculos/partials/campo.html" with campo=form.sinistro_descricao %}
+      {% include "veiculos/partials/campo.html" with campo=form.observacoes %}
+    </fieldset>
+
+    <fieldset class="space-y-2">
+      <legend class="mb-2 text-lg font-semibold">Fotos</legend>
+      <input
+        type="file"
+        name="fotos"
+        accept="image/*"
+        capture="environment"
+        multiple
+        class="block w-full text-sm"
+      />
+      <p class="text-sm text-tinta-suave">
+        Pode tirar na hora pela câmera ou escolher várias da galeria.
+      </p>
+    </fieldset>
+
+    <div class="flex gap-2">
+      <button type="submit" class="botao botao-primario">Salvar</button>
+      <a
+        href="{% if veiculo %}{% url 'veiculos:detalhe' veiculo.pk %}{% else %}{% url 'veiculos:estoque' %}{% endif %}"
+        class="botao botao-secundario"
+        >Cancelar</a
+      >
+    </div>
+  </form>
+{% endblock %}

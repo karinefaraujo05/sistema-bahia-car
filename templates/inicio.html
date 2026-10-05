@@ -18,18 +18,22 @@
 
   {# Ações principais. #}
   <nav class="grid gap-3" aria-label="Ações">
-    <a href="#" class="cartao-acao">Cadastrar carro que entrou</a>
+    <a href="{% url 'veiculos:novo' %}" class="cartao-acao">Cadastrar carro que entrou</a>
     <a href="#" class="cartao-acao">Registrar venda</a>
     <a href="#" class="cartao-acao">Registrar troca</a>
     <a href="#" class="cartao-acao">Carro deixado para vender</a>
   </nav>
+
+  <p class="mt-3">
+    <a href="{% url 'veiculos:estoque' %}" class="text-petroleo-700 font-medium">Ver estoque →</a>
+  </p>
 
   {# Resumo simples. Os números chegam quando houver dados (próximas fases). #}
   <section class="mt-8" aria-label="Resumo">
     <h2 class="mb-3 text-lg">Resumo</h2>
     <div class="grid grid-cols-3 gap-3">
       <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
-        <div class="text-2xl font-bold text-petroleo-700">0</div>
+        <div class="text-2xl font-bold text-petroleo-700">{{ carros_na_loja }}</div>
         <div class="text-sm text-tinta-suave">carros na loja</div>
       </div>
       <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
