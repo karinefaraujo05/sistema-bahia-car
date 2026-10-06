@@ -40,7 +40,7 @@
     {% if c %}
       <section class="mb-6" aria-label="Consignação">
         <h2 class="mb-2 text-lg">Consignação</h2>
-        <div class="rounded-lg border border-borda bg-superficie p-4">
+        <div class="rounded-xl border border-borda bg-superficie shadow-sm p-4">
           <p>Dono: <strong>{{ c.proprietario.nome }}</strong></p>
           <p>Valor mínimo ao dono: <strong>{{ c.valor_liquido_minimo|reais }}</strong></p>
           <p class="text-tinta-suave">Situação: {{ c.get_status_display }}</p>
@@ -115,7 +115,7 @@
   {# Dados do carro #}
   <section class="mb-6" aria-label="Dados">
     <h2 class="mb-2 text-lg">Dados do carro</h2>
-    <dl class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+    <dl class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
       <div class="flex justify-between gap-4 px-4 py-3">
         <dt class="text-tinta-suave">Ano</dt>
         <dd class="text-right font-medium">{{ veiculo.ano_fabricacao }}/{{ veiculo.ano_modelo }}</dd>
@@ -161,7 +161,7 @@
   {# Estado e observações #}
   <section class="mb-6" aria-label="Estado">
     <h2 class="mb-2 text-lg">Estado</h2>
-    <dl class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+    <dl class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
       <div class="flex justify-between gap-4 px-4 py-3">
         <dt class="text-tinta-suave">Chave reserva</dt>
         <dd class="text-right font-medium">
@@ -179,7 +179,7 @@
   {# Linha do tempo de negócios deste carro. #}
   <section class="mb-6" aria-label="Negócios">
     <h2 class="mb-2 text-lg">Negócios deste carro</h2>
-    <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+    <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
       {% for item in veiculo.itens_negocio.all %}
         <li>
           <a href="{% url 'negocios:detalhe' item.negocio.pk %}" class="block px-4 py-3 hover:bg-petroleo-50">

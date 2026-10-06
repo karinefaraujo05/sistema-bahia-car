@@ -38,15 +38,15 @@
   <section class="mt-8" aria-label="Resumo">
     <h2 class="mb-3 text-lg">Resumo</h2>
     <div class="grid grid-cols-3 gap-3">
-      <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
+      <div class="rounded-xl border border-borda bg-superficie shadow-sm p-3 text-center">
         <div class="text-2xl font-bold text-petroleo-700">{{ carros_na_loja }}</div>
         <div class="text-sm text-tinta-suave">carros na loja</div>
       </div>
-      <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
+      <div class="rounded-xl border border-borda bg-superficie shadow-sm p-3 text-center">
         <div class="text-2xl font-bold text-petroleo-700">{{ vendas_no_mes }}</div>
         <div class="text-sm text-tinta-suave">vendas no mês</div>
       </div>
-      <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
+      <div class="rounded-xl border border-borda bg-superficie shadow-sm p-3 text-center">
         <div class="text-2xl font-bold text-petroleo-700">{{ repasses_pendentes }}</div>
         <div class="text-sm text-tinta-suave">repasses a pagar</div>
       </div>
@@ -57,7 +57,7 @@
   <section class="mt-8" aria-label="Últimos negócios">
     <h2 class="mb-3 text-lg">Últimos negócios</h2>
     {% if ultimos_negocios %}
-      <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+      <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
         {% for negocio in ultimos_negocios %}
           <li>
             <a href="{% url 'negocios:detalhe' negocio.pk %}" class="flex items-center justify-between px-4 py-3 hover:bg-petroleo-50">
@@ -70,7 +70,7 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+      <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-6 text-center text-tinta-suave">
         Nenhum negócio registrado ainda.
       </p>
     {% endif %}

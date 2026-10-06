@@ -31,7 +31,7 @@
   <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
   <div>
   <section class="mb-6" aria-label="Valores">
-    <dl class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+    <dl class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
       <div class="flex justify-between gap-4 px-4 py-3">
         <dt class="text-tinta-suave">Valor total</dt>
         <dd class="text-right font-medium">{{ negocio.valor_total|reais }}</dd>
@@ -57,7 +57,7 @@
 
   <section class="mb-6" aria-label="Carros">
     <h2 class="mb-2 text-lg">Carros</h2>
-    <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+    <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
       {% for item in itens %}
         <li class="px-4 py-3">
           <a href="{% url 'veiculos:detalhe' item.veiculo.pk %}" class="font-medium text-petroleo-700">
@@ -76,7 +76,7 @@
 
   <section class="mb-6" aria-label="Pessoas">
     <h2 class="mb-2 text-lg">Pessoas</h2>
-    <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+    <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
       {% for parte in partes %}
         <li class="flex items-center justify-between px-4 py-3">
           <a href="{% url 'pessoas:detalhe' parte.pessoa.pk %}" class="font-medium text-petroleo-700">
@@ -109,7 +109,7 @@
     </div>
     {% with contratos=negocio.contratos.all %}
       {% if contratos %}
-        <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+        <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
           {% for contrato in contratos %}
             <li class="flex items-center justify-between gap-3 px-4 py-3">
               <span>{{ contrato.titulo }} <span class="text-tinta-suave">(v{{ contrato.versao }})</span></span>
@@ -118,7 +118,7 @@
           {% endfor %}
         </ul>
       {% else %}
-        <p class="rounded-lg border border-borda bg-superficie px-4 py-4 text-center text-tinta-suave">
+        <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-4 text-center text-tinta-suave">
           Nenhum contrato gerado ainda.
         </p>
       {% endif %}
@@ -130,7 +130,7 @@
     <h2 class="mb-2 text-lg">Documentos</h2>
 
     {% if documentos %}
-      <ul class="mb-3 divide-y divide-borda rounded-lg border border-borda bg-superficie">
+      <ul class="mb-3 divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
         {% for documento in documentos %}
           <li class="flex items-center justify-between gap-3 px-4 py-3">
             <div class="min-w-0">
@@ -154,7 +154,7 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p class="mb-3 rounded-lg border border-borda bg-superficie px-4 py-4 text-center text-tinta-suave">
+      <p class="mb-3 rounded-xl border border-borda bg-superficie shadow-sm px-4 py-4 text-center text-tinta-suave">
         Nenhum documento anexado ainda.
       </p>
     {% endif %}
@@ -163,7 +163,7 @@
       method="post"
       action="{% url 'contratos:upload_documentos' negocio.pk %}"
       enctype="multipart/form-data"
-      class="space-y-3 rounded-lg border border-borda bg-superficie p-4"
+      class="space-y-3 rounded-xl border border-borda bg-superficie shadow-sm p-4"
     >
       {% csrf_token %}
       <p class="font-medium">Anexar documento</p>

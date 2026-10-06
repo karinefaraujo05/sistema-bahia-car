@@ -3,7 +3,7 @@
   {% if veiculo.fotos.all %}
     <div class="grid grid-cols-3 gap-2">
       {% for foto in veiculo.fotos.all %}
-        <div class="rounded-lg border border-borda bg-superficie p-1">
+        <div class="rounded-xl border border-borda bg-superficie shadow-sm p-1">
           <img
             src="{% if foto.miniatura %}{{ foto.miniatura.url }}{% else %}{{ foto.imagem.url }}{% endif %}"
             alt="Foto do carro"
@@ -38,7 +38,7 @@
       {% endfor %}
     </div>
   {% else %}
-    <p class="rounded-lg border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+    <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-6 text-center text-tinta-suave">
       Nenhuma foto ainda.
     </p>
   {% endif %}

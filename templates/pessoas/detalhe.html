@@ -28,7 +28,7 @@
 
   <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
   <section aria-label="Dados">
-    <dl class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+    <dl class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
       {% include "pessoas/partials/dado.html" with rotulo="CPF/CNPJ" valor=pessoa.cpf_cnpj_formatado %}
       {% include "pessoas/partials/dado.html" with rotulo="Telefone" valor=pessoa.telefone_formatado %}
       {% include "pessoas/partials/dado.html" with rotulo="E-mail" valor=pessoa.email %}
@@ -49,7 +49,7 @@
   {# Negócios desta pessoa. #}
   <section class="mb-6" aria-label="Negócios">
     <h2 class="mb-2 text-lg">Negócios desta pessoa</h2>
-    <ul class="divide-y divide-borda rounded-lg border border-borda bg-superficie">
+    <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
       {% for parte in pessoa.participacoes.all %}
         <li>
           <a href="{% url 'negocios:detalhe' parte.negocio.pk %}" class="block px-4 py-3 hover:bg-petroleo-50">
