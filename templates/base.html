@@ -27,11 +27,37 @@
 
       <div class="flex min-w-0 flex-1 flex-col">
         {% if user.is_authenticated %}
-          <header class="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-borda bg-superficie px-4 md:hidden">
-            <button type="button" onclick="abrirMenu()" aria-label="Abrir menu" class="-ml-1 rounded-lg p-2 text-tinta-suave hover:bg-petroleo-50">
+          <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-borda bg-superficie px-4 sm:px-6">
+            <button type="button" onclick="abrirMenu()" aria-label="Abrir menu" class="-ml-1 shrink-0 rounded-lg p-2 text-tinta-suave hover:bg-petroleo-50 md:hidden">
               <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
             </button>
-            <a href="{% url 'inicio' %}" class="text-lg font-extrabold tracking-tight text-petroleo-700">Bahia Car</a>
+
+            <form action="{% url 'buscar' %}" method="get" role="search" class="relative w-full max-w-xl">
+              <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-tinta-suave">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              </span>
+              <input
+                type="search"
+                name="q"
+                class="campo pl-10"
+                placeholder="Buscar por placa, carro ou pessoa"
+                autocomplete="off"
+                hx-get="{% url 'buscar' %}"
+                hx-trigger="keyup changed delay:300ms"
+                hx-target="#busca-dropdown"
+              />
+              <div id="busca-dropdown" class="busca-dropdown"></div>
+            </form>
+
+            <div class="ml-auto flex shrink-0 items-center gap-2.5">
+              <div class="flex h-9 w-9 items-center justify-center rounded-full bg-petroleo-600 text-sm font-semibold text-white">
+                {{ user.get_full_name|default:user.username|first|upper }}
+              </div>
+              <div class="hidden leading-tight sm:block">
+                <div class="text-sm font-medium">{{ user.get_full_name|default:user.username }}</div>
+                <div class="text-xs text-tinta-suave">{% if user.eh_administrador %}Administrador{% else %}Vendedor{% endif %}</div>
+              </div>
+            </div>
           </header>
         {% endif %}
 

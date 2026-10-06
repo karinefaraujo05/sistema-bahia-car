@@ -8,28 +8,6 @@
     <p class="text-tinta-suave">Resumo da loja e atalhos do dia a dia.</p>
   </div>
 
-  {# Busca enquanto digita (HTMX). #}
-  <div class="mb-6">
-    <label for="busca" class="sr-only">Buscar</label>
-    <div class="relative">
-      <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-tinta-suave">
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      </span>
-      <input
-        type="search"
-        id="busca"
-        name="q"
-        class="campo pl-10 text-lg"
-        placeholder="Buscar por placa, carro ou pessoa"
-        autocomplete="off"
-        hx-get="{% url 'buscar' %}"
-        hx-trigger="keyup changed delay:300ms, search"
-        hx-target="#resultados-busca"
-      />
-    </div>
-    <div id="resultados-busca" class="mt-3"></div>
-  </div>
-
   {# Indicadores. #}
   <section class="mb-8 grid gap-4 sm:grid-cols-3" aria-label="Resumo">
     <div class="indicador flex items-center gap-4">
@@ -59,6 +37,29 @@
       <div>
         <div class="text-2xl font-bold">{{ repasses_pendentes }}</div>
         <div class="text-sm text-tinta-suave">repasses a pagar</div>
+      </div>
+    </div>
+  </section>
+
+  {# Gráfico de vendas dos últimos 6 meses. #}
+  <section class="mb-8" aria-label="Vendas">
+    <div class="painel p-5">
+      <h2 class="mb-1 text-lg">Vendas</h2>
+      <p class="mb-5 text-sm text-tinta-suave">Vendas e trocas nos últimos 6 meses</p>
+      <div class="flex h-40 items-end gap-3 sm:gap-6">
+        {% for m in grafico_vendas %}
+          <div class="flex flex-1 flex-col items-center">
+            <div class="flex w-full flex-1 items-end">
+              <div
+                class="w-full rounded-t-md bg-petroleo-500"
+                style="height: {{ m.altura }}%; min-height: 3px;"
+                title="{{ m.valor }} no mês"
+              ></div>
+            </div>
+            <span class="mt-2 text-xs font-medium">{{ m.valor }}</span>
+            <span class="text-xs text-tinta-suave">{{ m.rotulo }}</span>
+          </div>
+        {% endfor %}
       </div>
     </div>
   </section>
