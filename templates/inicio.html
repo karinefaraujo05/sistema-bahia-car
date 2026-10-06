@@ -3,22 +3,26 @@
 {% block titulo %}Início — Bahia Car{% endblock %}
 
 {% block conteudo %}
-  {# Busca grande no topo, enquanto digita (HTMX). #}
-  <div class="mb-6">
-    <label for="busca" class="sr-only">Buscar</label>
-    <input
-      type="search"
-      id="busca"
-      name="q"
-      class="campo text-lg"
-      placeholder="Buscar por placa, carro ou pessoa"
-      autocomplete="off"
-      hx-get="{% url 'buscar' %}"
-      hx-trigger="keyup changed delay:300ms, search"
-      hx-target="#resultados-busca"
-    />
-    <div id="resultados-busca" class="mt-3"></div>
-  </div>
+  {# Busca é o herói da tela inicial (achar um carro ou pessoa). #}
+  <section class="mb-8">
+    <h1 class="text-3xl sm:text-4xl">Busca rápida</h1>
+    <p class="mt-1 text-tinta-suave">Ache um carro ou uma pessoa pela placa, nome ou CPF.</p>
+    <div class="mt-4">
+      <label for="busca" class="sr-only">Buscar</label>
+      <input
+        type="search"
+        id="busca"
+        name="q"
+        class="campo text-lg"
+        placeholder="Buscar por placa, carro ou pessoa"
+        autocomplete="off"
+        hx-get="{% url 'buscar' %}"
+        hx-trigger="keyup changed delay:300ms, search"
+        hx-target="#resultados-busca"
+      />
+      <div id="resultados-busca" class="mt-3"></div>
+    </div>
+  </section>
 
   {# Ações principais. #}
   <nav class="grid gap-3 sm:grid-cols-2" aria-label="Ações">
