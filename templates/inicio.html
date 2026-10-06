@@ -8,8 +8,36 @@
     <p class="text-tinta-suave">Resumo da loja e atalhos do dia a dia.</p>
   </div>
 
+  {# Atalhos em destaque. #}
+  <nav class="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Ações">
+    <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao gap-4">
+      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+      </span>
+      <span>Cadastrar carro que entrou</span>
+    </a>
+    <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao gap-4">
+      <span class="indicador-icone bg-verde-fundo text-verde">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </span>
+      <span>Registrar venda</span>
+    </a>
+    <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao gap-4">
+      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+      </span>
+      <span>Registrar troca</span>
+    </a>
+    <a href="{% url 'negocios:consignar' %}" class="cartao-acao gap-4">
+      <span class="indicador-icone bg-ambar-fundo text-ambar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+      </span>
+      <span>Carro deixado para vender</span>
+    </a>
+  </nav>
+
   {# Indicadores. #}
-  <section class="mb-8 grid gap-4 sm:grid-cols-3" aria-label="Resumo">
+  <section class="mb-6 grid gap-4 sm:grid-cols-3" aria-label="Resumo">
     <div class="indicador flex items-center gap-4">
       <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
@@ -41,12 +69,12 @@
     </div>
   </section>
 
-  {# Gráfico de vendas dos últimos 6 meses. #}
-  <section class="mb-8" aria-label="Vendas">
-    <div class="painel p-5">
+  {# Gráfico de vendas ao lado dos últimos negócios. #}
+  <div class="grid gap-6 lg:grid-cols-3 lg:items-start">
+    <section class="painel p-5 lg:col-span-2" aria-label="Vendas">
       <h2 class="mb-1 text-lg">Vendas</h2>
       <p class="mb-5 text-sm text-tinta-suave">Vendas e trocas nos últimos 6 meses</p>
-      <div class="flex h-40 items-end gap-3 sm:gap-6">
+      <div class="flex h-44 gap-3 sm:gap-6">
         {% for m in grafico_vendas %}
           <div class="flex flex-1 flex-col items-center">
             <div class="flex w-full flex-1 items-end">
@@ -61,56 +89,26 @@
           </div>
         {% endfor %}
       </div>
-    </div>
-  </section>
+    </section>
 
-  {# Ações. #}
-  <h2 class="mb-3 text-lg">O que você quer fazer?</h2>
-  <nav class="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Ações">
-    <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao gap-4">
-      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
-      </span>
-      <span>Cadastrar carro que entrou</span>
-    </a>
-    <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao gap-4">
-      <span class="indicador-icone bg-verde-fundo text-verde">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </span>
-      <span>Registrar venda</span>
-    </a>
-    <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao gap-4">
-      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
-      </span>
-      <span>Registrar troca</span>
-    </a>
-    <a href="{% url 'negocios:consignar' %}" class="cartao-acao gap-4">
-      <span class="indicador-icone bg-ambar-fundo text-ambar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
-      </span>
-      <span>Carro deixado para vender</span>
-    </a>
-  </nav>
-
-  {# Últimos negócios. #}
-  <h2 class="mb-3 text-lg">Últimos negócios</h2>
-  {% if ultimos_negocios %}
-    <ul class="divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
-      {% for negocio in ultimos_negocios %}
-        <li>
-          <a href="{% url 'negocios:detalhe' negocio.pk %}" class="flex items-center justify-between px-4 py-3 hover:bg-petroleo-50">
-            <span class="font-medium">
-              {{ negocio.get_tipo_display }}{% if negocio.numero_contrato %} nº {{ negocio.numero_contrato }}{% endif %}
-            </span>
-            <span class="text-sm text-tinta-suave">{{ negocio.data|date:"d/m/Y" }}</span>
-          </a>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p class="rounded-xl border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave shadow-sm">
-      Nenhum negócio registrado ainda.
-    </p>
-  {% endif %}
+    <section class="painel p-5 lg:col-span-1" aria-label="Últimos negócios">
+      <h2 class="mb-3 text-lg">Últimos negócios</h2>
+      {% if ultimos_negocios %}
+        <ul class="-mx-2 divide-y divide-borda">
+          {% for negocio in ultimos_negocios %}
+            <li>
+              <a href="{% url 'negocios:detalhe' negocio.pk %}" class="flex items-center justify-between rounded-lg px-2 py-2.5 hover:bg-petroleo-50">
+                <span class="font-medium">
+                  {{ negocio.get_tipo_display }}{% if negocio.numero_contrato %} nº {{ negocio.numero_contrato }}{% endif %}
+                </span>
+                <span class="text-sm text-tinta-suave">{{ negocio.data|date:"d/m/Y" }}</span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="py-6 text-center text-tinta-suave">Nenhum negócio registrado ainda.</p>
+      {% endif %}
+    </section>
+  </div>
 {% endblock %}
