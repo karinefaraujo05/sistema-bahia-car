@@ -8,10 +8,39 @@ from veiculos.models import Situacao, StatusVeiculo, Veiculo
 
 from .busca import buscar as buscar_tudo
 
+MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+
+
+def _vendas_por_mes(hoje):
+    """Quantidade de vendas/trocas concluídas nos últimos 6 meses, para o gráfico."""
+    pares = []
+    ano, mes = hoje.year, hoje.month
+    for _ in range(6):
+        pares.append((ano, mes))
+        mes -= 1
+        if mes == 0:
+            mes, ano = 12, ano - 1
+    pares.reverse()
+
+    dados = []
+    for ano, mes in pares:
+        quantidade = Negocio.objetos.filter(
+            status=StatusNegocio.CONCLUIDO,
+            tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA],
+            data__year=ano,
+            data__month=mes,
+        ).count()
+        dados.append({"rotulo": MESES_ABREV[mes - 1], "valor": quantidade})
+
+    maximo = max((d["valor"] for d in dados), default=0) or 1
+    for d in dados:
+        d["altura"] = round(d["valor"] / maximo * 100)
+    return dados
+
 
 @login_required
 def inicio(request):
-    """Tela inicial com um resumo simples e atalhos para as ações principais."""
+    """Painel inicial: indicadores, gráfico de vendas e atalhos."""
     hoje = timezone.localdate()
 
     na_loja = (
@@ -25,13 +54,13 @@ def inicio(request):
         data__year=hoje.year,
         data__month=hoje.month,
     ).count()
-    ultimos = Negocio.objetos.filter(status=StatusNegocio.CONCLUIDO)[:5]
 
     contexto = {
         "carros_na_loja": na_loja,
         "vendas_no_mes": vendas_no_mes,
         "repasses_pendentes": repasses_pendentes().count(),
-        "ultimos_negocios": ultimos,
+        "ultimos_negocios": Negocio.objetos.filter(status=StatusNegocio.CONCLUIDO)[:5],
+        "grafico_vendas": _vendas_por_mes(hoje),
     }
     return render(request, "inicio.html", contexto)
 
