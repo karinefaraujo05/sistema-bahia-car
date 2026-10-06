@@ -260,6 +260,35 @@
     box-shadow: var(--shadow-md);
   }
 
+  /* Avatar circular com inicial. */
+  .avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background-color: var(--color-petroleo-50);
+    color: var(--color-petroleo-700);
+    font-weight: 600;
+  }
+
+  /* Chip de ícone pequeno (linhas de lista). */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.625rem;
+  }
+  .chip svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
   /* Cartão de indicador (dashboard). */
   .indicador {
     background-color: var(--color-superficie);
