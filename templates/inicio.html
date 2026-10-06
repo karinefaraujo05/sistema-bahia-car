@@ -3,76 +3,113 @@
 {% block titulo %}Início — Bahia Car{% endblock %}
 
 {% block conteudo %}
-  {# Busca grande no topo, enquanto digita (HTMX). #}
+  <div class="mb-6">
+    <h1 class="text-2xl">Início</h1>
+    <p class="text-tinta-suave">Resumo da loja e atalhos do dia a dia.</p>
+  </div>
+
+  {# Busca enquanto digita (HTMX). #}
   <div class="mb-6">
     <label for="busca" class="sr-only">Buscar</label>
-    <input
-      type="search"
-      id="busca"
-      name="q"
-      class="campo text-lg"
-      placeholder="Buscar por placa, carro ou pessoa"
-      autocomplete="off"
-      hx-get="{% url 'buscar' %}"
-      hx-trigger="keyup changed delay:300ms, search"
-      hx-target="#resultados-busca"
-    />
+    <div class="relative">
+      <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-tinta-suave">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
+      <input
+        type="search"
+        id="busca"
+        name="q"
+        class="campo pl-10 text-lg"
+        placeholder="Buscar por placa, carro ou pessoa"
+        autocomplete="off"
+        hx-get="{% url 'buscar' %}"
+        hx-trigger="keyup changed delay:300ms, search"
+        hx-target="#resultados-busca"
+      />
+    </div>
     <div id="resultados-busca" class="mt-3"></div>
   </div>
 
-  {# Ações principais. #}
-  <nav class="grid gap-3 sm:grid-cols-2" aria-label="Ações">
-    <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao">Cadastrar carro que entrou</a>
-    <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao">Registrar venda</a>
-    <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao">Registrar troca</a>
-    <a href="{% url 'negocios:consignar' %}" class="cartao-acao">Carro deixado para vender</a>
-  </nav>
-
-  {% if user.eh_administrador %}
-    <p class="mt-3">
-      <a href="{% url 'contratos:configuracao' %}" class="text-petroleo-700 font-medium">Configuração da loja</a>
-    </p>
-  {% endif %}
-
-  {# Resumo simples. Os números chegam quando houver dados (próximas fases). #}
-  <section class="mt-8" aria-label="Resumo">
-    <h2 class="mb-3 text-lg">Resumo</h2>
-    <div class="grid grid-cols-3 gap-3">
-      <div class="rounded-xl border border-borda bg-superficie shadow-sm p-3 text-center">
-        <div class="text-2xl font-bold text-petroleo-700">{{ carros_na_loja }}</div>
+  {# Indicadores. #}
+  <section class="mb-8 grid gap-4 sm:grid-cols-3" aria-label="Resumo">
+    <div class="indicador flex items-center gap-4">
+      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+      </span>
+      <div>
+        <div class="text-2xl font-bold">{{ carros_na_loja }}</div>
         <div class="text-sm text-tinta-suave">carros na loja</div>
       </div>
-      <div class="rounded-xl border border-borda bg-superficie shadow-sm p-3 text-center">
-        <div class="text-2xl font-bold text-petroleo-700">{{ vendas_no_mes }}</div>
+    </div>
+
+    <div class="indicador flex items-center gap-4">
+      <span class="indicador-icone bg-verde-fundo text-verde">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </span>
+      <div>
+        <div class="text-2xl font-bold">{{ vendas_no_mes }}</div>
         <div class="text-sm text-tinta-suave">vendas no mês</div>
       </div>
-      <div class="rounded-xl border border-borda bg-superficie shadow-sm p-3 text-center">
-        <div class="text-2xl font-bold text-petroleo-700">{{ repasses_pendentes }}</div>
+    </div>
+
+    <div class="indicador flex items-center gap-4">
+      <span class="indicador-icone bg-ambar-fundo text-ambar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      </span>
+      <div>
+        <div class="text-2xl font-bold">{{ repasses_pendentes }}</div>
         <div class="text-sm text-tinta-suave">repasses a pagar</div>
       </div>
     </div>
   </section>
 
+  {# Ações. #}
+  <h2 class="mb-3 text-lg">O que você quer fazer?</h2>
+  <nav class="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Ações">
+    <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao gap-4">
+      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+      </span>
+      <span>Cadastrar carro que entrou</span>
+    </a>
+    <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao gap-4">
+      <span class="indicador-icone bg-verde-fundo text-verde">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </span>
+      <span>Registrar venda</span>
+    </a>
+    <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao gap-4">
+      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+      </span>
+      <span>Registrar troca</span>
+    </a>
+    <a href="{% url 'negocios:consignar' %}" class="cartao-acao gap-4">
+      <span class="indicador-icone bg-ambar-fundo text-ambar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+      </span>
+      <span>Carro deixado para vender</span>
+    </a>
+  </nav>
+
   {# Últimos negócios. #}
-  <section class="mt-8" aria-label="Últimos negócios">
-    <h2 class="mb-3 text-lg">Últimos negócios</h2>
-    {% if ultimos_negocios %}
-      <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-        {% for negocio in ultimos_negocios %}
-          <li>
-            <a href="{% url 'negocios:detalhe' negocio.pk %}" class="flex items-center justify-between px-4 py-3 hover:bg-petroleo-50">
-              <span class="font-medium">
-                {{ negocio.get_tipo_display }}{% if negocio.numero_contrato %} nº {{ negocio.numero_contrato }}{% endif %}
-              </span>
-              <span class="text-sm text-tinta-suave">{{ negocio.data|date:"d/m/Y" }}</span>
-            </a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-6 text-center text-tinta-suave">
-        Nenhum negócio registrado ainda.
-      </p>
-    {% endif %}
-  </section>
+  <h2 class="mb-3 text-lg">Últimos negócios</h2>
+  {% if ultimos_negocios %}
+    <ul class="divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
+      {% for negocio in ultimos_negocios %}
+        <li>
+          <a href="{% url 'negocios:detalhe' negocio.pk %}" class="flex items-center justify-between px-4 py-3 hover:bg-petroleo-50">
+            <span class="font-medium">
+              {{ negocio.get_tipo_display }}{% if negocio.numero_contrato %} nº {{ negocio.numero_contrato }}{% endif %}
+            </span>
+            <span class="text-sm text-tinta-suave">{{ negocio.data|date:"d/m/Y" }}</span>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="rounded-xl border border-borda bg-superficie px-4 py-6 text-center text-tinta-suave shadow-sm">
+      Nenhum negócio registrado ainda.
+    </p>
+  {% endif %}
 {% endblock %}
