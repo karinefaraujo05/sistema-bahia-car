@@ -19,9 +19,9 @@
     {% django_htmx_script %}
   </head>
   <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-    <header class="sticky top-0 z-20 border-b border-borda bg-superficie">
-      <div class="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <a href="{% url 'inicio' %}" class="text-xl font-bold tracking-tight text-petroleo-700">
+    <header class="sticky top-0 z-20 bg-superficie shadow-sm">
+      <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <a href="{% url 'inicio' %}" class="text-xl font-extrabold tracking-tight text-petroleo-700">
           Bahia Car
         </a>
         {% if user.is_authenticated %}

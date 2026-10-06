@@ -23,7 +23,7 @@
   </form>
 
   {% if pessoas %}
-    <ul class="divide-y divide-borda overflow-hidden rounded-lg border border-borda bg-superficie">
+    <ul class="divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
       {% for pessoa in pessoas %}
         <li>
           <a href="{% url 'pessoas:detalhe' pessoa.pk %}" class="block px-4 py-3 hover:bg-petroleo-50">
@@ -40,7 +40,7 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p class="rounded-lg border border-borda bg-superficie px-4 py-8 text-center text-tinta-suave">
+    <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-8 text-center text-tinta-suave">
       {% if termo %}Ninguém encontrado para "{{ termo }}".{% else %}Nenhuma pessoa cadastrada ainda.{% endif %}
     </p>
   {% endif %}

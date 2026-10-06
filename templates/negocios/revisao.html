@@ -8,7 +8,7 @@
   {% include "negocios/partials/cabecalho_passo.html" with titulo="Confirmar" %}
 
   {% if negocio.tipo == 'troca' %}
-    <div class="mb-5 space-y-2 rounded-lg border border-borda bg-superficie p-4 text-lg">
+    <div class="mb-5 space-y-2 rounded-xl border border-borda bg-superficie shadow-sm p-4 text-lg">
       <p>Você está <strong>trocando</strong> com
         <strong>{% if parte %}{{ parte.pessoa.nome }}{% endif %}</strong>:</p>
       <ul class="list-disc pl-5 text-base">
@@ -27,7 +27,7 @@
       </p>
     </div>
   {% else %}
-    <div class="mb-5 rounded-lg border border-borda bg-superficie p-4 text-lg">
+    <div class="mb-5 rounded-xl border border-borda bg-superficie shadow-sm p-4 text-lg">
       {% if negocio.tipo == 'venda' %}Você está <strong>vendendo</strong>
       {% else %}Você está <strong>comprando</strong>{% endif %}
       {% with item=itens.0 %}

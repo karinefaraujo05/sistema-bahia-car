@@ -30,11 +30,11 @@
 
   {% if resumo %}
     <div class="mb-5 grid grid-cols-2 gap-3">
-      <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
+      <div class="rounded-xl border border-borda bg-superficie shadow-sm p-3 text-center">
         <div class="text-xl font-bold text-petroleo-700">{{ resumo.total_vendido|reais }}</div>
         <div class="text-sm text-tinta-suave">vendido no mês</div>
       </div>
-      <div class="rounded-lg border border-borda bg-superficie p-3 text-center">
+      <div class="rounded-xl border border-borda bg-superficie shadow-sm p-3 text-center">
         <div class="text-xl font-bold text-petroleo-700">{{ resumo.lucro_bruto|reais }}</div>
         <div class="text-sm text-tinta-suave">lucro bruto no mês</div>
       </div>
@@ -42,7 +42,7 @@
   {% endif %}
 
   {% if linhas %}
-    <ul class="divide-y divide-borda overflow-hidden rounded-lg border border-borda bg-superficie">
+    <ul class="divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
       {% for linha in linhas %}
         <li>
           <a href="{% url 'negocios:detalhe' linha.negocio.pk %}" class="block px-4 py-3 hover:bg-petroleo-50">
@@ -63,7 +63,7 @@
       {% endfor %}
     </ul>
   {% else %}
-    <p class="rounded-lg border border-borda bg-superficie px-4 py-8 text-center text-tinta-suave">
+    <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-8 text-center text-tinta-suave">
       Nenhum negócio neste mês.
     </p>
   {% endif %}

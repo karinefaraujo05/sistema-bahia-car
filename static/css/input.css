@@ -6,41 +6,45 @@
 @source "../../contas";
 
 /*
-  Tema do sistema. Paleta sóbria e quente, uma cor de destaque só (azul-petróleo).
-  Proibido o visual "de IA": sem gradientes roxo/azul, sem glassmorphism.
+  Tema do sistema: calmo, limpo e moderno.
+  Neutros frios, superfícies brancas com sombra suave, uma cor de destaque (azul-petróleo).
 */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 
-  /* Superfícies */
-  --color-fundo: #f6f4ef; /* off-white quente */
+  /* Superfícies — neutros frios */
+  --color-fundo: #f4f6f8;
   --color-superficie: #ffffff;
-  --color-borda: #e4e0d7;
+  --color-borda: #e6eaee;
 
   /* Tinta (texto) */
-  --color-tinta: #1b1b19; /* quase preto */
-  --color-tinta-suave: #5c594f;
+  --color-tinta: #101828;
+  --color-tinta-suave: #5b6675;
 
   /* Destaque: azul-petróleo */
-  --color-petroleo-50: #ecf4f6;
-  --color-petroleo-100: #d4e7eb;
-  --color-petroleo-200: #a9d0d7;
-  --color-petroleo-300: #76b2bd;
-  --color-petroleo-400: #448f9d;
-  --color-petroleo-500: #2a7784;
-  --color-petroleo-600: #1d6472;
-  --color-petroleo-700: #174f5b;
-  --color-petroleo-800: #153f49;
+  --color-petroleo-50: #ecf6f7;
+  --color-petroleo-100: #d2eaec;
+  --color-petroleo-200: #a7d6da;
+  --color-petroleo-300: #73b9bf;
+  --color-petroleo-400: #43969f;
+  --color-petroleo-500: #277a83;
+  --color-petroleo-600: #1a6670;
+  --color-petroleo-700: #16525c;
+  --color-petroleo-800: #15424b;
   --color-petroleo-900: #12343c;
 
   /* Status discretos */
   --color-verde: #2f7d46;
-  --color-verde-fundo: #e7f1e9;
-  --color-ambar: #9c5d00;
-  --color-ambar-fundo: #f6edda;
-  --color-cinza: #6b685f;
-  --color-cinza-fundo: #ece9e2;
+  --color-verde-fundo: #e7f3ea;
+  --color-ambar: #9a5b00;
+  --color-ambar-fundo: #f7eeda;
+  --color-cinza: #64748b;
+  --color-cinza-fundo: #eef1f4;
+
+  /* Sombras suaves e raio */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+  --shadow-md: 0 2px 4px rgba(16, 24, 40, 0.06), 0 8px 20px rgba(16, 24, 40, 0.08);
 }
 
 @layer base {
@@ -51,7 +55,6 @@
     font-size: 1.0625rem; /* 17px: corpo mínimo no celular */
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
-    /* Algarismos de mesma largura: preços, placas e datas alinham em colunas. */
     font-variant-numeric: tabular-nums;
   }
 
@@ -61,11 +64,10 @@
     color: var(--color-tinta);
     font-weight: 650;
     line-height: 1.2;
-    letter-spacing: -0.02em; /* títulos com um pouco mais de presença */
+    letter-spacing: -0.015em;
     text-wrap: balance;
   }
 
-  /* Área de toque confortável para campos e botões no celular. */
   input,
   select,
   textarea,
@@ -73,7 +75,6 @@
     font-size: 1.0625rem;
   }
 
-  /* Acabamentos do navegador na paleta do sistema. */
   ::selection {
     background-color: color-mix(in srgb, var(--color-petroleo-500) 22%, transparent);
   }
@@ -86,14 +87,12 @@
     scrollbar-color: var(--color-petroleo-300) transparent;
   }
 
-  /* Tudo que é clicável mostra a mãozinha. */
   button,
   [role="button"],
   summary {
     cursor: pointer;
   }
 
-  /* Respeita quem prefere menos movimento. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -113,16 +112,17 @@
     gap: 0.5rem;
     min-height: 48px;
     padding: 0.75rem 1.25rem;
-    border-radius: 0.5rem;
+    border-radius: 0.625rem;
     font-weight: 600;
     text-align: center;
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
   }
 
   .botao-primario {
     background-color: var(--color-petroleo-600);
     color: #ffffff;
+    box-shadow: var(--shadow-sm);
   }
   .botao-primario:hover {
     background-color: var(--color-petroleo-700);
@@ -132,28 +132,32 @@
     background-color: var(--color-superficie);
     color: var(--color-tinta);
     border: 1px solid var(--color-borda);
+    box-shadow: var(--shadow-sm);
   }
   .botao-secundario:hover {
     background-color: var(--color-petroleo-50);
+    border-color: var(--color-petroleo-200);
   }
 
   /* Cartão de ação grande da tela inicial. */
   .cartao-acao {
     display: flex;
     align-items: center;
-    min-height: 64px;
-    padding: 1rem 1.25rem;
+    min-height: 72px;
+    padding: 1.125rem 1.375rem;
     background-color: var(--color-superficie);
     border: 1px solid var(--color-borda);
-    border-radius: 0.625rem;
+    border-radius: 0.875rem;
+    box-shadow: var(--shadow-sm);
     font-weight: 600;
     color: var(--color-tinta);
     cursor: pointer;
-    transition: border-color 0.15s ease, background-color 0.15s ease;
+    transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
   }
   .cartao-acao:hover {
-    border-color: var(--color-petroleo-300);
-    background-color: var(--color-petroleo-50);
+    border-color: var(--color-petroleo-200);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
   }
 
   .campo {
@@ -162,16 +166,17 @@
     padding: 0.625rem 0.875rem;
     background-color: var(--color-superficie);
     border: 1px solid var(--color-borda);
-    border-radius: 0.5rem;
+    border-radius: 0.625rem;
     color: var(--color-tinta);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .campo:focus {
-    outline: 2px solid var(--color-petroleo-500);
-    outline-offset: 1px;
+    outline: none;
     border-color: var(--color-petroleo-500);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-petroleo-500) 18%, transparent);
   }
 
-  /* Link de navegação do cabeçalho. */
+  /* Link de navegação do cabeçalho (claro). */
   .nav-link {
     display: inline-flex;
     align-items: center;
@@ -192,5 +197,13 @@
     color: var(--color-petroleo-700);
     background-color: var(--color-petroleo-50);
     font-weight: 600;
+  }
+
+  /* Cartão/painel genérico com sombra suave (superfícies de conteúdo). */
+  .painel {
+    background-color: var(--color-superficie);
+    border: 1px solid var(--color-borda);
+    border-radius: 0.875rem;
+    box-shadow: var(--shadow-sm);
   }
 }
