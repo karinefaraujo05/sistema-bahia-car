@@ -4,13 +4,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#174f5b" />
+    <meta name="theme-color" content="#10303a" />
     <title>{% block titulo %}Bahia Car{% endblock %}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
 
@@ -18,46 +18,48 @@
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
     {% django_htmx_script %}
   </head>
-  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-    <header class="sticky top-0 z-20 bg-superficie shadow-sm">
-      <div class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <a href="{% url 'inicio' %}" class="text-xl font-extrabold tracking-tight text-petroleo-700">
-          Bahia Car
-        </a>
-        {% if user.is_authenticated %}
-          <nav class="hidden items-center gap-1 md:flex" aria-label="Seções">
-            {% include "partials/nav_links.html" %}
-          </nav>
-          <form method="post" action="{% url 'contas:sair' %}">
-            {% csrf_token %}
-            <button type="submit" class="nav-link text-tinta-suave">Sair</button>
-          </form>
-        {% endif %}
-      </div>
+  <body class="bg-fundo" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <div class="flex min-h-screen">
       {% if user.is_authenticated %}
-        <nav
-          class="flex gap-1 overflow-x-auto border-t border-borda px-2 py-1 md:hidden"
-          aria-label="Seções"
-        >
-          {% include "partials/nav_links.html" %}
-        </nav>
+        {% include "partials/sidebar.html" %}
+        <div id="overlay" onclick="fecharMenu()" class="fixed inset-0 z-30 hidden bg-black/40 md:hidden"></div>
       {% endif %}
-    </header>
 
-    <main
-      class="mx-auto w-full {% block largura %}max-w-6xl{% endblock %} px-4 py-6 sm:px-6 lg:px-8"
-    >
-      {% if messages %}
-        <div class="mb-5 space-y-2">
-          {% for mensagem in messages %}
-            <div class="rounded-lg border border-petroleo-200 bg-petroleo-50 px-4 py-3 text-petroleo-900">
-              {{ mensagem }}
+      <div class="flex min-w-0 flex-1 flex-col">
+        {% if user.is_authenticated %}
+          <header class="sticky top-0 z-20 flex h-14 items-center gap-2 border-b border-borda bg-superficie px-4 md:hidden">
+            <button type="button" onclick="abrirMenu()" aria-label="Abrir menu" class="-ml-1 rounded-lg p-2 text-tinta-suave hover:bg-petroleo-50">
+              <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </button>
+            <a href="{% url 'inicio' %}" class="text-lg font-extrabold tracking-tight text-petroleo-700">Bahia Car</a>
+          </header>
+        {% endif %}
+
+        <main class="mx-auto w-full {% block largura %}max-w-6xl{% endblock %} flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          {% if messages %}
+            <div class="mb-5 space-y-2">
+              {% for mensagem in messages %}
+                <div class="rounded-xl border border-petroleo-200 bg-petroleo-50 px-4 py-3 text-petroleo-900 shadow-sm">
+                  {{ mensagem }}
+                </div>
+              {% endfor %}
             </div>
-          {% endfor %}
-        </div>
-      {% endif %}
+          {% endif %}
 
-      {% block conteudo %}{% endblock %}
-    </main>
+          {% block conteudo %}{% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <script>
+      function abrirMenu() {
+        document.getElementById("sidebar").classList.remove("-translate-x-full");
+        document.getElementById("overlay").classList.remove("hidden");
+      }
+      function fecharMenu() {
+        document.getElementById("sidebar").classList.add("-translate-x-full");
+        document.getElementById("overlay").classList.add("hidden");
+      }
+    </script>
   </body>
 </html>
