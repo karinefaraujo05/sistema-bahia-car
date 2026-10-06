@@ -51,6 +51,8 @@
     font-size: 1.0625rem; /* 17px: corpo mínimo no celular */
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    /* Algarismos de mesma largura: preços, placas e datas alinham em colunas. */
+    font-variant-numeric: tabular-nums;
   }
 
   h1,
@@ -58,7 +60,9 @@
   h3 {
     color: var(--color-tinta);
     font-weight: 650;
-    line-height: 1.25;
+    line-height: 1.2;
+    letter-spacing: -0.02em; /* títulos com um pouco mais de presença */
+    text-wrap: balance;
   }
 
   /* Área de toque confortável para campos e botões no celular. */
