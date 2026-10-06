@@ -81,6 +81,23 @@
     caret-color: var(--color-petroleo-600);
     scrollbar-color: var(--color-petroleo-300) transparent;
   }
+
+  /* Tudo que é clicável mostra a mãozinha. */
+  button,
+  [role="button"],
+  summary {
+    cursor: pointer;
+  }
+
+  /* Respeita quem prefere menos movimento. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
 }
 
 @layer components {
@@ -95,6 +112,7 @@
     border-radius: 0.5rem;
     font-weight: 600;
     text-align: center;
+    cursor: pointer;
     transition: background-color 0.15s ease;
   }
 
@@ -126,6 +144,8 @@
     border-radius: 0.625rem;
     font-weight: 600;
     color: var(--color-tinta);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
   }
   .cartao-acao:hover {
     border-color: var(--color-petroleo-300);
@@ -157,6 +177,8 @@
     font-weight: 500;
     white-space: nowrap;
     color: var(--color-tinta-suave);
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
   .nav-link:hover {
     color: var(--color-tinta);

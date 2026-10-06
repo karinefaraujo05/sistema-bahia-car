@@ -1,7 +1,7 @@
 {% load formato %}
 <a
   href="{% url 'veiculos:detalhe' carro.pk %}"
-  class="block overflow-hidden rounded-lg border border-borda bg-superficie"
+  class="block overflow-hidden rounded-lg border border-borda bg-superficie transition-colors hover:border-petroleo-300"
 >
   <div class="aspect-video bg-cinza-fundo">
     {% if carro.foto_capa %}
