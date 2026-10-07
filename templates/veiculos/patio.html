@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load formato %}
+
+{% block titulo %}Modo pátio · Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-6">
+    <h1 class="text-2xl">Modo pátio</h1>
+    <p class="text-tinta-suave">Mostre pro cliente e mande o carro no WhatsApp num toque.</p>
+  </div>
+
+  {% if carros %}
+    <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+      {% for c in carros %}
+        <div class="overflow-hidden rounded-2xl border border-borda bg-superficie shadow-sm">
+          <a href="{% url 'veiculos:detalhe' c.pk %}" class="block">
+            {% with foto=c.foto_capa %}
+              {% if foto %}
+                <img src="{{ foto.imagem.url }}" alt="" class="aspect-[4/3] w-full object-cover" />
+              {% else %}
+                <div class="flex aspect-[4/3] w-full items-center justify-center bg-fundo text-tinta-suave">
+                  <svg class="h-16 w-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+                </div>
+              {% endif %}
+            {% endwith %}
+          </a>
+          <div class="p-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-lg font-bold text-tinta">{{ c.marca }} {{ c.modelo }}</span>
+              {% if c.eh_consignado %}<span class="rounded-full bg-ambar-fundo px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-ambar">Consignado</span>{% endif %}
+            </div>
+            <div class="mt-0.5 text-sm text-tinta-suave">
+              {{ c.ano_modelo }}{% if c.km %} · {{ c.km }} km{% endif %}{% if c.combustivel %} · {{ c.get_combustivel_display }}{% endif %}{% if c.cambio %} · {{ c.get_cambio_display }}{% endif %}
+            </div>
+            <div class="mt-2 text-3xl font-bold text-acento-700">{{ c.valor_anunciado|reais|default:"A combinar" }}</div>
+            <button type="button" class="botao-whats mt-3"
+              data-msg="{{ c.marca }} {{ c.modelo }} {{ c.ano_modelo }} — {{ c.valor_anunciado|reais|default:'A combinar' }}&#10;{% if c.km %}{{ c.km }} km · {% endif %}{% if c.combustivel %}{{ c.get_combustivel_display }}{% endif %}{% if c.cambio %} · {{ c.get_cambio_display }}{% endif %}&#10;{{ loja.nome_fantasia|default:'Bahia Car' }}{% if loja.cidade %} · {{ loja.cidade }}/{{ loja.uf }}{% endif %}">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+              Mandar no WhatsApp
+            </button>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="rounded-2xl border border-borda bg-superficie px-4 py-16 text-center shadow-sm">
+      <p class="text-tinta-suave">Nenhum carro à venda no momento.</p>
+    </div>
+  {% endif %}
+
+  <script>
+    document.querySelectorAll(".botao-whats").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var msg = btn.getAttribute("data-msg") || "";
+        if (navigator.share) {
+          navigator.share({ text: msg }).catch(function () {});
+        } else {
+          window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+        }
+      });
+    });
+  </script>
+{% endblock %}

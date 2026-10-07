@@ -320,6 +320,30 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-vermelho) 18%, transparent);
   }
 
+  /* Botão do WhatsApp (verde), usado no Modo pátio. */
+  .botao-whats {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    background-color: #1fa855;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+  .botao-whats:hover {
+    background-color: #18914a;
+  }
+  .botao-whats svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
   /* Link de navegação do cabeçalho (claro). */
   .nav-link {
     display: inline-flex;

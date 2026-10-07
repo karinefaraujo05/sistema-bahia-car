@@ -39,6 +39,21 @@ def estoque(request):
 
 
 @login_required
+def patio(request):
+    """Modo pátio: lista grande e simples dos carros à venda, pra usar no celular."""
+    from contratos.models import ConfiguracaoLoja
+
+    carros = consultar_estoque(
+        status=StatusVeiculo.EM_ESTOQUE, origem="todos", ordem="recentes"
+    )
+    return render(
+        request,
+        "veiculos/patio.html",
+        {"carros": carros, "loja": ConfiguracaoLoja.carregar()},
+    )
+
+
+@login_required
 def detalhe(request, pk):
     from negocios.services import lucro_do_veiculo
 
