@@ -31,8 +31,13 @@ SECURE_REFERRER_POLICY = "same-origin"
 # Atrás de proxy/load balancer que termina o TLS (Render).
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# CSRF_TRUSTED_ORIGINS deve ser informado no ambiente (ex.: https://seudominio.com.br).
+# CSRF_TRUSTED_ORIGINS pode ser informado no ambiente (ex.: https://seudominio.com.br).
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])  # noqa: F405
+# No Render, confia automaticamente no próprio endereço (evita erro de CSRF no login).
+if hostname_render:
+    origem_render = f"https://{hostname_render}"
+    if origem_render not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS = [*CSRF_TRUSTED_ORIGINS, origem_render]
 
 # ---------------------------------------------------------------------------
 # Arquivos: fotos e documentos em bucket S3 (R2, B2 ou S3), estáticos no WhiteNoise.
