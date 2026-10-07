@@ -89,7 +89,17 @@
               <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="font-semibold text-tinta">{{ item.veiculo.marca }} {{ item.veiculo.modelo }}</span>
-                  <span class="rounded-full bg-fundo px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-tinta-suave">Usado</span>
+                  {% if item.sai_da_loja %}
+                    <span class="inline-flex items-center gap-1 rounded-full bg-acento-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-acento-700" title="Carro da loja que foi entregue ao cliente">
+                      <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
+                      Saiu da loja
+                    </span>
+                  {% elif item.entra_na_loja %}
+                    <span class="inline-flex items-center gap-1 rounded-full bg-verde-fundo px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-verde" title="Carro que o cliente entregou e entrou no estoque">
+                      <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 7 7 17"/><path d="M17 17H7V7"/></svg>
+                      Entrou na loja
+                    </span>
+                  {% endif %}
                 </div>
                 <div class="mt-0.5 text-sm text-tinta-suave">
                   {{ item.veiculo.ano_modelo }}{% if item.veiculo.combustivel %} · {{ item.veiculo.get_combustivel_display }}{% endif %}{% if item.veiculo.cambio %} · {{ item.veiculo.get_cambio_display }}{% endif %}
