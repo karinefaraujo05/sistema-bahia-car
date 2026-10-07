@@ -148,3 +148,9 @@ def test_fipe_rejeita_tipo_invalido(client):
     client.login(username="k", password="x-123456")
     resp = client.get(reverse("fipe") + "?q=marcas&tipo=aviao")
     assert resp.status_code == 400
+
+
+def test_pagina_consulta_abre(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    assert client.get(reverse("consulta")).status_code == 200

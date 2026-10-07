@@ -108,6 +108,12 @@ def ajuda(request):
 
 
 @login_required
+def consulta(request):
+    """Aba de consultas: preço FIPE e dados de empresa (CNPJ)."""
+    return render(request, "consulta.html")
+
+
+@login_required
 def consulta_fipe(request):
     """Proxy da consulta FIPE (marcas, modelos, anos e preço), com cache."""
     from . import fipe

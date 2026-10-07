@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block titulo %}Consulta · Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-6">
+    <h1 class="text-2xl">Consulta</h1>
+    <p class="text-tinta-suave">Preço de referência (FIPE) e dados de empresa (CNPJ). Tudo grátis.</p>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
+    {# ----- FIPE ----- #}
+    <section class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm" aria-label="Preço FIPE">
+      <div class="mb-1 flex items-center gap-2">
+        <span class="chip h-8 w-8 bg-acento-50 text-acento-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </span>
+        <h2 class="text-lg">Preço do veículo (FIPE)</h2>
+      </div>
+      <p class="mb-3 text-sm text-tinta-suave">Escolha o veículo pra ver o preço de referência.</p>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <select id="fipe-tipo" class="campo" aria-label="Tipo">
+          <option value="carros">Carro</option>
+          <option value="motos">Moto</option>
+          <option value="caminhoes">Caminhão</option>
+        </select>
+        <select id="fipe-marca" class="campo" aria-label="Marca"><option value="">Marca…</option></select>
+        <select id="fipe-modelo" class="campo" aria-label="Modelo" disabled><option value="">Modelo…</option></select>
+        <select id="fipe-ano" class="campo" aria-label="Ano" disabled><option value="">Ano…</option></select>
+      </div>
+      <div id="fipe-resultado" class="mt-4 hidden rounded-xl border border-acento-200 bg-acento-50 p-4">
+        <div class="text-xs text-tinta-suave">Preço FIPE</div>
+        <div id="fipe-preco" class="text-2xl font-bold text-acento-700">—</div>
+        <dl id="fipe-detalhes" class="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-sm"></dl>
+      </div>
+      <p id="fipe-erro" class="mt-2 hidden text-sm text-ambar"></p>
+    </section>
+
+    {# ----- CNPJ ----- #}
+    <section class="rounded-2xl border border-borda bg-superficie p-5 shadow-sm" aria-label="Consulta CNPJ">
+      <div class="mb-1 flex items-center gap-2">
+        <span class="chip h-8 w-8 bg-acento-50 text-acento-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/></svg>
+        </span>
+        <h2 class="text-lg">Empresa (CNPJ)</h2>
+      </div>
+      <p class="mb-3 text-sm text-tinta-suave">Digite o CNPJ pra ver razão social, situação e endereço.</p>
+      <form id="cnpj-form" class="flex gap-2">
+        <input id="cnpj-input" inputmode="numeric" class="campo flex-1" placeholder="00.000.000/0000-00" />
+        <button type="submit" class="botao botao-primario shrink-0">Consultar</button>
+      </form>
+      <div id="cnpj-resultado" class="mt-4 hidden rounded-xl border border-borda bg-fundo p-4">
+        <div id="cnpj-nome" class="font-semibold"></div>
+        <div id="cnpj-fantasia" class="text-sm text-tinta-suave"></div>
+        <dl class="mt-3 grid grid-cols-1 gap-y-1 text-sm">
+          <div class="flex justify-between gap-3"><dt class="text-tinta-suave">Situação</dt><dd id="cnpj-situacao" class="text-right font-medium"></dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-tinta-suave">Endereço</dt><dd id="cnpj-endereco" class="text-right"></dd></div>
+          <div class="flex justify-between gap-3"><dt class="text-tinta-suave">Telefone</dt><dd id="cnpj-telefone" class="text-right"></dd></div>
+        </dl>
+      </div>
+      <p id="cnpj-erro" class="mt-2 hidden text-sm text-ambar"></p>
+    </section>
+  </div>
+
+  <script>
+    // ===== FIPE =====
+    (function () {
+      var API = "{% url 'fipe' %}";
+      var tipo = document.getElementById("fipe-tipo"), marca = document.getElementById("fipe-marca"),
+        modelo = document.getElementById("fipe-modelo"), ano = document.getElementById("fipe-ano"),
+        res = document.getElementById("fipe-resultado"), precoEl = document.getElementById("fipe-preco"),
+        det = document.getElementById("fipe-detalhes"), erroEl = document.getElementById("fipe-erro");
+      function erro(m) { erroEl.textContent = m || ""; erroEl.classList.toggle("hidden", !m); }
+      function opcoes(sel, itens, label) {
+        sel.innerHTML = '<option value="">' + label + "</option>";
+        (itens || []).forEach(function (i) { var o = document.createElement("option"); o.value = i.codigo; o.textContent = i.nome; sel.appendChild(o); });
+      }
+      function buscar(p) { return fetch(API + "?" + p).then(function (r) { return r.json(); }); }
+      function carregarMarcas() {
+        marca.innerHTML = '<option value="">Carregando…</option>'; modelo.disabled = true; ano.disabled = true; res.classList.add("hidden"); erro("");
+        buscar("q=marcas&tipo=" + tipo.value).then(function (d) {
+          if (d.erro) { erro(d.erro); opcoes(marca, [], "Marca…"); return; } opcoes(marca, d.dados, "Marca…");
+        }).catch(function () { erro("Não deu pra buscar as marcas."); });
+      }
+      tipo.addEventListener("change", carregarMarcas);
+      marca.addEventListener("change", function () {
+        modelo.disabled = true; ano.disabled = true; res.classList.add("hidden"); erro("");
+        if (!marca.value) { opcoes(modelo, [], "Modelo…"); return; }
+        modelo.innerHTML = '<option value="">Carregando…</option>';
+        buscar("q=modelos&tipo=" + tipo.value + "&marca=" + marca.value).then(function (d) { opcoes(modelo, d.dados, "Modelo…"); modelo.disabled = false; }).catch(function () { erro("Erro nos modelos."); });
+      });
+      modelo.addEventListener("change", function () {
+        ano.disabled = true; res.classList.add("hidden"); erro("");
+        if (!modelo.value) { opcoes(ano, [], "Ano…"); return; }
+        ano.innerHTML = '<option value="">Carregando…</option>';
+        buscar("q=anos&tipo=" + tipo.value + "&marca=" + marca.value + "&modelo=" + modelo.value).then(function (d) { opcoes(ano, d.dados, "Ano…"); ano.disabled = false; }).catch(function () { erro("Erro nos anos."); });
+      });
+      ano.addEventListener("change", function () {
+        res.classList.add("hidden"); erro("");
+        if (!ano.value) return;
+        buscar("q=preco&tipo=" + tipo.value + "&marca=" + marca.value + "&modelo=" + modelo.value + "&ano=" + ano.value).then(function (d) {
+          var v = d.dados;
+          if (d.erro || !v || !v.Valor) { erro("Não achei o preço."); return; }
+          precoEl.textContent = v.Valor;
+          det.innerHTML = "";
+          [["Marca", v.Marca], ["Modelo", v.Modelo], ["Ano", v.AnoModelo], ["Combustível", v.Combustivel], ["Código FIPE", v.CodigoFipe], ["Referência", v.MesReferencia]].forEach(function (par) {
+            if (!par[1]) return;
+            var dt = document.createElement("dt"); dt.className = "text-tinta-suave"; dt.textContent = par[0];
+            var dd = document.createElement("dd"); dd.className = "font-medium"; dd.textContent = par[1];
+            det.appendChild(dt); det.appendChild(dd);
+          });
+          res.classList.remove("hidden");
+        }).catch(function () { erro("Erro no preço."); });
+      });
+      carregarMarcas();
+    })();
+
+    // ===== CNPJ (BrasilAPI) =====
+    (function () {
+      var form = document.getElementById("cnpj-form"), input = document.getElementById("cnpj-input"),
+        res = document.getElementById("cnpj-resultado"), erroEl = document.getElementById("cnpj-erro");
+      function erro(m) { erroEl.textContent = m || ""; erroEl.classList.toggle("hidden", !m); res.classList.toggle("hidden", !!m); }
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var d = (input.value || "").replace(/\D/g, "");
+        if (d.length !== 14) { erro("CNPJ precisa ter 14 números."); return; }
+        erro(""); res.classList.add("hidden");
+        fetch("https://brasilapi.com.br/api/cnpj/v1/" + d).then(function (r) {
+          if (!r.ok) throw new Error(); return r.json();
+        }).then(function (c) {
+          document.getElementById("cnpj-nome").textContent = c.razao_social || "—";
+          document.getElementById("cnpj-fantasia").textContent = c.nome_fantasia || "";
+          document.getElementById("cnpj-situacao").textContent = c.descricao_situacao_cadastral || "—";
+          var end = [c.logradouro, c.numero, c.bairro, (c.municipio || "") + (c.uf ? "/" + c.uf : "")].filter(Boolean).join(", ");
+          document.getElementById("cnpj-endereco").textContent = end || "—";
+          document.getElementById("cnpj-telefone").textContent = c.ddd_telefone_1 || "—";
+          res.classList.remove("hidden");
+        }).catch(function () { erro("Não achei esse CNPJ (confira o número)."); });
+      });
+    })();
+  </script>
+{% endblock %}
