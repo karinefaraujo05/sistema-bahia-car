@@ -320,6 +320,88 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-vermelho) 18%, transparent);
   }
 
+  /* Barra do guia que acompanha o usuário pelas telas. */
+  .guia-bar {
+    position: sticky;
+    top: 4.75rem;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-acento-200);
+    border-radius: 0.875rem;
+    background-color: var(--color-acento-50);
+    box-shadow: 0 8px 22px -12px rgb(0 0 0 / 0.25);
+  }
+  .guia-bar-icone {
+    display: flex;
+    height: 2.25rem;
+    width: 2.25rem;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: var(--color-acento-600);
+    color: #ffffff;
+  }
+  .guia-bar-icone svg {
+    height: 1.25rem;
+    width: 1.25rem;
+  }
+  .guia-bar-texto {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.0625rem;
+  }
+  .guia-bar-passo {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-acento-700);
+  }
+  .guia-bar-instrucao {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: var(--color-tinta);
+  }
+  .guia-bar-sair {
+    flex-shrink: 0;
+    align-self: flex-start;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-acento-700);
+    cursor: pointer;
+  }
+  .guia-bar-sair:hover {
+    background-color: color-mix(in srgb, var(--color-acento-600) 12%, transparent);
+  }
+  .guia-foco {
+    outline: 3px solid var(--color-acento-500);
+    outline-offset: 3px;
+    border-radius: 0.6rem;
+    animation: guia-pulso 1.6s ease-in-out infinite;
+  }
+  @keyframes guia-pulso {
+    0%, 100% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-acento-500) 45%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-acento-500) 0%, transparent);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .guia-foco {
+      animation: none;
+    }
+  }
+
   /* Botão flutuante de ajuda, presente em todas as telas. */
   .botao-ajuda {
     position: fixed;

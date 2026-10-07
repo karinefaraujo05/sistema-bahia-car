@@ -160,7 +160,8 @@
             { t: "Preencha <b>os valores e a forma de pagamento</b> (à vista, financiado…). O local de entrega já vem preenchido.", dica: "Pode salvar como rascunho e continuar depois, se o cliente ainda não fechou." },
             { t: "Gere o <b>contrato</b> e confira tudo na <b>revisão</b>. Confirmou? Venda registrada! 🎉" }
           ],
-          cta: { label: "Começar uma venda agora", href: "{% url 'negocios:iniciar' 'venda' %}" }
+          tour: true,
+          cta: { label: "Fazer agora comigo", href: "{% url 'negocios:iniciar' 'venda' %}" }
         },
         consignado: {
           titulo: "Vender um carro de um cliente",
@@ -172,7 +173,8 @@
             { t: "<b>Quando vender:</b> abra a consignação (em Vendas ou pela busca) e toque em <b>Vender este carro</b>. O comprador e os valores você preenche como numa venda comum." },
             { t: "No fim, o sistema já calcula sozinho o <b>repasse pro dono</b> e a sua <b>comissão</b>. É só pagar o dono. 🎉" }
           ],
-          cta: { label: "Registrar um carro consignado agora", href: "{% url 'negocios:consignar' %}" }
+          tour: true,
+          cta: { label: "Fazer agora comigo", href: "{% url 'negocios:consignar' %}" }
         },
         compra: {
           titulo: "Comprar um carro pra loja",
@@ -183,7 +185,8 @@
             { t: "Preencha <b>quanto você pagou</b> e a forma de pagamento." },
             { t: "Confirme. O carro já entra no seu <b>estoque</b>, pronto pra vender. 🎉" }
           ],
-          cta: { label: "Registrar uma compra agora", href: "{% url 'negocios:iniciar' 'compra' %}" }
+          tour: true,
+          cta: { label: "Fazer agora comigo", href: "{% url 'negocios:iniciar' 'compra' %}" }
         },
         troca: {
           titulo: "Fazer uma troca",
@@ -194,7 +197,8 @@
             { t: "Ajuste os <b>valores</b>: quem paga a diferença e quanto.", dica: "O carro que o cliente deu entra no seu estoque automaticamente." },
             { t: "Gere o <b>contrato</b> e confira na <b>revisão</b>. Pronto! 🎉" }
           ],
-          cta: { label: "Começar uma troca agora", href: "{% url 'negocios:iniciar' 'troca' %}" }
+          tour: true,
+          cta: { label: "Fazer agora comigo", href: "{% url 'negocios:iniciar' 'troca' %}" }
         },
         carro: {
           titulo: "Cadastrar um carro",
@@ -204,7 +208,8 @@
             { t: "Adicione <b>fotos</b> pela câmera do celular." },
             { t: "Toque em <b>Salvar</b>. Dica: guarde também a <b>foto do documento</b> na ficha do carro. 🎉" }
           ],
-          cta: { label: "Cadastrar um carro agora", href: "{% url 'veiculos:novo' %}" }
+          tour: true,
+          cta: { label: "Fazer agora comigo", href: "{% url 'veiculos:novo' %}" }
         },
         cliente: {
           titulo: "Cadastrar um cliente",
@@ -213,7 +218,8 @@
             { t: "Digite o <b>CEP</b>: o endereço aparece sozinho, você só coloca o número." },
             { t: "Preencha nome, CPF e telefone e toque em <b>Salvar</b>.", dica: "Os campos vão se formatando sozinhos enquanto você digita (CPF, telefone, CEP)." }
           ],
-          cta: { label: "Cadastrar uma pessoa agora", href: "{% url 'pessoas:novo' %}" }
+          tour: true,
+          cta: { label: "Fazer agora comigo", href: "{% url 'pessoas:novo' %}" }
         },
         contrato: {
           titulo: "Gerar o contrato",
@@ -317,6 +323,14 @@
         if (idx > 0) {
           idx--;
           render();
+        }
+      });
+
+      // Ao tocar em "Fazer agora comigo", liga o guia que acompanha nas telas reais.
+      linkFazer.addEventListener("click", function () {
+        var c = CENARIOS[atual];
+        if (c && c.tour) {
+          sessionStorage.setItem("guia_tour", atual);
         }
       });
 
