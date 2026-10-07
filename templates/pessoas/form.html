@@ -5,12 +5,14 @@
 
 {% block conteudo %}
   <div class="mb-2">
-    {% if pessoa %}{% url 'pessoas:detalhe' pessoa.pk as voltar_url %}{% else %}{% url 'pessoas:lista' as voltar_url %}{% endif %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar" %}
+    {% if proximo %}{% include "partials/voltar.html" with href=proximo texto="Voltar ao negócio" %}{% elif pessoa %}{% url 'pessoas:detalhe' pessoa.pk as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar" %}{% else %}{% url 'pessoas:lista' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar" %}{% endif %}
   </div>
 
   <h1 class="mb-5 text-2xl">{% if pessoa %}Editar pessoa{% else %}Cadastrar pessoa{% endif %}</h1>
 
-  {% if not pessoa %}
+  {% if proximo %}
+    <p class="mb-4 text-tinta-suave">Cadastre a pessoa e você volta pro negócio automaticamente, já com ela selecionada.</p>
+  {% elif not pessoa %}
     <p class="mb-4 text-tinta-suave">
       Com pressa? Use o
       <a href="{% url 'pessoas:novo_rapido' %}" class="text-petroleo-700">cadastro rápido</a>
@@ -24,7 +26,7 @@
     </div>
   {% endif %}
 
-  <form method="post" class="space-y-6">
+  <form method="post" action="?{{ request.GET.urlencode }}" class="space-y-6">
     {% csrf_token %}
 
     <fieldset class="space-y-4">

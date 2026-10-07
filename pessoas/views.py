@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from .forms import PessoaForm, PessoaRapidaForm
@@ -23,6 +24,8 @@ def detalhe(request, pk):
 
 @login_required
 def novo(request):
+    # "next" (quando veio de um negócio): depois de salvar, volta pra lá já com a pessoa selecionada.
+    proximo = request.GET.get("next", "")
     if request.method == "POST":
         form = PessoaForm(request.POST)
         if form.is_valid():
@@ -31,10 +34,17 @@ def novo(request):
             pessoa.atualizado_por = request.user
             pessoa.save()
             messages.success(request, "Pessoa cadastrada.")
+            if proximo and url_has_allowed_host_and_scheme(
+                proximo, allowed_hosts={request.get_host()}
+            ):
+                separador = "&" if "?" in proximo else "?"
+                return redirect(f"{proximo}{separador}selecionar={pessoa.pk}")
             return redirect("pessoas:detalhe", pk=pessoa.pk)
     else:
         form = PessoaForm()
-    return render(request, "pessoas/form.html", {"form": form, "pessoa": None})
+    return render(
+        request, "pessoas/form.html", {"form": form, "pessoa": None, "proximo": proximo}
+    )
 
 
 @login_required

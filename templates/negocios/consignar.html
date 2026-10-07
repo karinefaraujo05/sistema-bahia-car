@@ -22,11 +22,11 @@
     <fieldset class="space-y-4">
       <legend class="mb-2 text-lg font-semibold">Dono do carro</legend>
       {% include "negocios/partials/campo.html" with campo=pessoa_form.pessoa %}
-      <p class="text-center text-sm text-tinta-suave">ou</p>
-      <div class="grid gap-4 sm:grid-cols-2">
-        {% include "negocios/partials/campo.html" with campo=pessoa_form.nome_novo %}
-        {% include "negocios/partials/campo.html" with campo=pessoa_form.telefone_novo %}
-      </div>
+      <p class="text-sm text-tinta-suave">
+        O dono ainda não está cadastrado?
+        <a href="{% url 'pessoas:novo' %}?next={% url 'negocios:consignar' %}" class="font-medium text-petroleo-700">Cadastre primeiro</a>
+        e você volta pra cá com ele já selecionado.
+      </p>
     </fieldset>
 
     <fieldset class="space-y-4">

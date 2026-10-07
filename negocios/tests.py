@@ -379,9 +379,10 @@ def test_fluxo_de_compra_cadastrando_carro_e_pessoa(client):
     client.get(reverse("negocios:iniciar", args=["compra"]))
     negocio = ultimo_negocio()
 
+    vendedor = pessoa("Vendedor Novo")
     client.post(
         reverse("negocios:passo_pessoa", args=[negocio.pk]),
-        {"nome_novo": "Vendedor Novo", "telefone_novo": "71999990000"},
+        {"pessoa": vendedor.pk},
     )
     client.post(
         reverse("negocios:passo_carro", args=[negocio.pk]),
@@ -461,9 +462,10 @@ def test_fluxo_de_troca_pelas_telas(client):
     client.get(reverse("negocios:iniciar", args=["troca"]))
     negocio = ultimo_negocio()
 
+    cliente = pessoa("Cliente Troca")
     client.post(
         reverse("negocios:passo_pessoa", args=[negocio.pk]),
-        {"nome_novo": "Cliente Troca", "telefone_novo": ""},
+        {"pessoa": cliente.pk},
     )
     client.post(reverse("negocios:troca_carro_loja", args=[negocio.pk]), {"veiculo": da_loja.pk})
     client.post(
@@ -486,9 +488,9 @@ def test_fluxo_de_troca_pelas_telas(client):
 
 def test_consignacao_pela_tela(client):
     logar(client)
+    dono = pessoa("Dono Consignante")
     dados = {
-        "nome_novo": "Dono Consignante",
-        "telefone_novo": "71988887777",
+        "pessoa": dono.pk,
         **_dados_veiculo("WWW2323"),
         "valor_liquido_minimo": "28000",
         "comissao_tipo": ComissaoTipo.PERCENTUAL,
@@ -511,9 +513,10 @@ def test_venda_de_consignado_e_repasse_pelas_telas(client):
 
     client.get(reverse("negocios:iniciar_consignado", args=[consignacao.pk]))
     negocio = ultimo_negocio()
+    comprador = pessoa("Comprador Final")
     client.post(
         reverse("negocios:consignado_comprador", args=[negocio.pk]),
-        {"nome_novo": "Comprador Final", "telefone_novo": ""},
+        {"pessoa": comprador.pk},
     )
     client.post(
         reverse("negocios:consignado_valores", args=[negocio.pk]),

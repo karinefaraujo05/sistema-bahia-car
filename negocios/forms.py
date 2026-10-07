@@ -1,7 +1,6 @@
 from django import forms
 
 from pessoas.models import Pessoa
-from pessoas.services import cadastrar_rapido
 
 from .models import ComissaoTipo, FormaPagamento, QuitacaoOpcao
 
@@ -17,37 +16,24 @@ def _campo_classe(form):
 
 
 class EscolherPessoaForm(forms.Form):
-    """Escolhe uma pessoa já cadastrada ou cria uma na hora (nome + telefone)."""
+    """Escolhe uma pessoa já cadastrada para o negócio."""
 
     pessoa = forms.ModelChoiceField(
         queryset=Pessoa.objetos.all(),
-        required=False,
+        required=True,
         label="Pessoa já cadastrada",
         empty_label="escolher…",
+        error_messages={
+            "required": "Escolha a pessoa. Se ela ainda não existe, cadastre primeiro no botão abaixo.",
+        },
     )
-    nome_novo = forms.CharField(required=False, label="Ou cadastre na hora: nome")
-    telefone_novo = forms.CharField(required=False, label="Telefone")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["telefone_novo"].widget.attrs["inputmode"] = "numeric"
         _campo_classe(self)
 
-    def clean(self):
-        dados = super().clean()
-        if not dados.get("pessoa") and not dados.get("nome_novo"):
-            raise forms.ValidationError("Escolha uma pessoa ou cadastre uma nova.")
-        return dados
-
     def resolver(self, usuario=None):
-        pessoa = self.cleaned_data.get("pessoa")
-        if pessoa:
-            return pessoa
-        return cadastrar_rapido(
-            self.cleaned_data["nome_novo"],
-            self.cleaned_data.get("telefone_novo", ""),
-            usuario=usuario,
-        )
+        return self.cleaned_data["pessoa"]
 
 
 class EscolherCarroForm(forms.Form):

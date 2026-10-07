@@ -103,7 +103,10 @@ def passo_pessoa(request, pk):
                 return redirect("negocios:troca_carro_loja", pk=negocio.pk)
             return redirect("negocios:passo_carro", pk=negocio.pk)
     else:
-        form = EscolherPessoaForm(initial={"pessoa": parte.pessoa if parte else None})
+        # Ao voltar do cadastro de uma pessoa nova, ela já vem selecionada.
+        selecionar = request.GET.get("selecionar")
+        escolhida = selecionar or (parte.pessoa if parte else None)
+        form = EscolherPessoaForm(initial={"pessoa": escolhida})
 
     titulos = {
         TipoNegocio.VENDA: "Quem está comprando?",
@@ -520,7 +523,10 @@ def consignar(request):
             messages.success(request, "Carro recebido em consignação.")
             return redirect("veiculos:detalhe", pk=veiculo.pk)
     else:
-        pessoa_form = EscolherPessoaForm()
+        selecionar = request.GET.get("selecionar")
+        pessoa_form = EscolherPessoaForm(
+            initial={"pessoa": selecionar} if selecionar else None
+        )
         veiculo_form = VeiculoForm()
         termos_form = ConsignacaoTermosForm()
     return render(
@@ -580,7 +586,9 @@ def consignado_comprador(request, pk):
                 return redirect("negocios:detalhe", pk=negocio.pk)
             return redirect("negocios:consignado_valores", pk=negocio.pk)
     else:
-        form = EscolherPessoaForm(initial={"pessoa": comprador.pessoa if comprador else None})
+        selecionar = request.GET.get("selecionar")
+        escolhida = selecionar or (comprador.pessoa if comprador else None)
+        form = EscolherPessoaForm(initial={"pessoa": escolhida})
     return render(
         request,
         "negocios/passo_pessoa.html",

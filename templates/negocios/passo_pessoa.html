@@ -16,13 +16,6 @@
     {% csrf_token %}
     {% include "negocios/partials/campo.html" with campo=form.pessoa %}
 
-    <p class="text-center text-sm text-tinta-suave">ou</p>
-
-    <div class="grid gap-4 sm:grid-cols-2">
-      {% include "negocios/partials/campo.html" with campo=form.nome_novo %}
-      {% include "negocios/partials/campo.html" with campo=form.telefone_novo %}
-    </div>
-
     <div class="flex flex-wrap gap-2 pt-2">
       <button type="submit" class="botao botao-primario">Continuar</button>
       <button type="submit" name="rascunho" value="1" class="botao botao-secundario">
@@ -30,4 +23,14 @@
       </button>
     </div>
   </form>
+
+  {# Quando a pessoa ainda não existe: cadastra e volta pra cá, já selecionada. #}
+  <div class="mt-5 rounded-xl border border-borda bg-superficie p-4 shadow-sm">
+    <p class="text-sm font-medium">Essa pessoa ainda não está cadastrada?</p>
+    <a href="{% url 'pessoas:novo' %}?next={{ request.path }}" class="botao botao-secundario mt-2">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+      Cadastrar nova pessoa
+    </a>
+    <p class="mt-2 text-xs text-tinta-suave">Você cadastra a pessoa e volta pra cá automaticamente, já com ela escolhida.</p>
+  </div>
 {% endblock %}
