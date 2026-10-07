@@ -22,6 +22,7 @@ from negocios.models import (
     ItemNegocio,
     Modalidade,
     Negocio,
+    PapelParte,
     ParteNegocio,
     StatusNegocio,
     TipoNegocio,
@@ -97,6 +98,7 @@ class Command(BaseCommand):
         admin.first_name = "Administrador"
         admin.set_password("12345")
         admin.save()
+        self.admin = admin
 
     def _config(self):
         loja = ConfiguracaoLoja.carregar()
@@ -193,12 +195,16 @@ class Command(BaseCommand):
                 tipo=TipoNegocio.VENDA, modalidade=Modalidade.PROPRIA,
                 status=StatusNegocio.RASCUNHO, data=_mes_atras(mes),
                 forma_pagamento="a_vista", detalhes_pagamento="via PIX, na entrega",
+                criado_por=self.admin,
             )
             ItemNegocio.objetos.create(
                 negocio=negocio, veiculo=carro, valor=Decimal(venda),
                 para_pessoa=pessoas[quem], km_entrega=km,
             )
-            services.concluir_negocio(negocio)
+            ParteNegocio.objetos.create(
+                negocio=negocio, pessoa=pessoas[quem], papel=PapelParte.COMPRADOR
+            )
+            services.concluir_negocio(negocio, usuario=self.admin)
 
     def _troca(self, pessoas):
         da_loja = self._carro("TRC1A10", "Nissan", "Kicks SV 1.6", 2021, "Laranja", 41000,
@@ -209,13 +215,16 @@ class Command(BaseCommand):
                                  situacao=Situacao.TERCEIRO)
         negocio = Negocio.objetos.create(
             tipo=TipoNegocio.TROCA, modalidade=Modalidade.PROPRIA,
-            status=StatusNegocio.RASCUNHO, data=_mes_atras(0),
+            status=StatusNegocio.RASCUNHO, data=_mes_atras(0), criado_por=self.admin,
         )
         ItemNegocio.objetos.create(negocio=negocio, veiculo=da_loja, valor=Decimal("104000"),
                                    para_pessoa=pessoas["Eduarda"], km_entrega=41000)
         ItemNegocio.objetos.create(negocio=negocio, veiculo=do_cliente, valor=Decimal("45000"),
                                    de_pessoa=pessoas["Eduarda"], km_entrega=72000)
-        services.concluir_negocio(negocio)
+        ParteNegocio.objetos.create(
+            negocio=negocio, pessoa=pessoas["Eduarda"], papel=PapelParte.PERMUTANTE
+        )
+        services.concluir_negocio(negocio, usuario=self.admin)
 
     def _consignacao(self, pessoas):
         carro = self._carro("CNS1A10", "Volkswagen", "T-Cross 200 TSI", 2021, "Cinza", 36000,
@@ -228,4 +237,5 @@ class Command(BaseCommand):
             comissao_tipo=ComissaoTipo.PERCENTUAL,
             comissao_valor=Decimal("5"),
             documentos_entregues="CRLV-e e chave reserva",
+            usuario=self.admin,
         )
