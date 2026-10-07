@@ -2,7 +2,7 @@
 {% block largura %}max-w-3xl{% endblock %}
 {% load formato %}
 
-{% block titulo %}Revisão — Bahia Car{% endblock %}
+{% block titulo %}Revisão · Bahia Car{% endblock %}
 
 {% block conteudo %}
   {% include "negocios/partials/cabecalho_passo.html" with titulo="Confirmar" %}
@@ -37,7 +37,7 @@
           {% if negocio.tipo == 'venda' %}para{% else %}de{% endif %}
           <strong>{% if parte %}{{ parte.pessoa.nome }}{% else %}—{% endif %}</strong>
           por <strong>{{ item.valor|reais }}</strong>.
-        {% else %}— faltam dados do carro.{% endif %}
+        {% else %}faltam dados do carro.{% endif %}
       {% endwith %}
     </div>
   {% endif %}

@@ -220,6 +220,28 @@ def passo_pagamento(request, pk):
     )
 
 
+UF_POR_EXTENSO = {
+    "AC": "Acre", "AL": "Alagoas", "AP": "Amapá", "AM": "Amazonas", "BA": "Bahia",
+    "CE": "Ceará", "DF": "Distrito Federal", "ES": "Espírito Santo", "GO": "Goiás",
+    "MA": "Maranhão", "MT": "Mato Grosso", "MS": "Mato Grosso do Sul", "MG": "Minas Gerais",
+    "PA": "Pará", "PB": "Paraíba", "PR": "Paraná", "PE": "Pernambuco", "PI": "Piauí",
+    "RJ": "Rio de Janeiro", "RN": "Rio Grande do Norte", "RS": "Rio Grande do Sul",
+    "RO": "Rondônia", "RR": "Roraima", "SC": "Santa Catarina", "SP": "São Paulo",
+    "SE": "Sergipe", "TO": "Tocantins",
+}
+
+
+def local_entrega_padrao():
+    """Local da entrega padrão: a cidade da loja (ex.: 'Vitória da Conquista - Bahia')."""
+    from contratos.models import ConfiguracaoLoja
+
+    cfg = ConfiguracaoLoja.carregar()
+    if not cfg.cidade:
+        return ""
+    estado = UF_POR_EXTENSO.get(cfg.uf, cfg.uf)
+    return f"{cfg.cidade} - {estado}" if estado else cfg.cidade
+
+
 def _inicial_pagamento(negocio, item):
     return {
         "valor": item.valor or None,
@@ -228,7 +250,7 @@ def _inicial_pagamento(negocio, item):
         "detalhes_pagamento": negocio.detalhes_pagamento,
         "data": negocio.data,
         "data_hora_entrega": negocio.data_hora_entrega,
-        "local_entrega": negocio.local_entrega,
+        "local_entrega": negocio.local_entrega or local_entrega_padrao(),
         "quitacao_opcao": item.quitacao_opcao,
     }
 
@@ -363,7 +385,7 @@ def troca_valores(request, pk):
                 "detalhes_pagamento": negocio.detalhes_pagamento,
                 "data": negocio.data,
                 "data_hora_entrega": negocio.data_hora_entrega,
-                "local_entrega": negocio.local_entrega,
+                "local_entrega": negocio.local_entrega or local_entrega_padrao(),
             }
         )
     return render(
@@ -406,11 +428,31 @@ def revisao(request, pk):
     )
 
 
+def _resumo_diff(antes, depois):
+    """Resumo do que mudou entre duas versões do contrato (linhas +/-)."""
+    import difflib
+
+    add, rem = [], []
+    for ln in difflib.unified_diff(antes.splitlines(), depois.splitlines(), lineterm="", n=0):
+        if ln[:1] == "+" and not ln.startswith("+++"):
+            if ln[1:].strip():
+                add.append(ln[1:].strip())
+        elif ln[:1] == "-" and not ln.startswith("---"):
+            if ln[1:].strip():
+                rem.append(ln[1:].strip())
+    return {"adicionadas": add[:6], "removidas": rem[:6], "sem_mudanca": not add and not rem}
+
+
 @login_required
 def detalhe(request, pk):
     from contratos.forms import DocumentoUploadForm
 
     negocio = get_object_or_404(Negocio.objetos, pk=pk)
+    contratos = list(negocio.contratos.order_by("versao"))
+    contratos_info = []
+    for i, c in enumerate(contratos):
+        contratos_info.append({"c": c, "mudancas": _resumo_diff(contratos[i - 1].corpo, c.corpo) if i else None})
+    contratos_info.reverse()  # mais recente primeiro
     return render(
         request,
         "negocios/detalhe.html",
@@ -421,6 +463,9 @@ def detalhe(request, pk):
             "diferenca": diferenca_troca(negocio) if negocio.tipo == TipoNegocio.TROCA else None,
             "documentos": negocio.documentos.all(),
             "doc_form": DocumentoUploadForm(),
+            "contratos_info": contratos_info,
+            "tem_contrato": bool(contratos),
+            "tem_termo": negocio.documentos.filter(tipo="termo_vistoria").exists(),
         },
     )
 
@@ -591,12 +636,11 @@ def vendas(request):
         ano, mes = hoje.year, hoje.month
     tipo = request.GET.get("tipo", "")
 
-    negocios = Negocio.objetos.filter(
+    base = Negocio.objetos.filter(
         status=StatusNegocio.CONCLUIDO, data__year=ano, data__month=mes
     )
-    if tipo:
-        negocios = negocios.filter(tipo=tipo)
-    negocios = negocios.order_by("-data", "-numero_contrato")
+    tipos_do_mes = list(base.values_list("tipo", flat=True))
+    negocios = (base.filter(tipo=tipo) if tipo else base).order_by("-data", "-numero_contrato")
 
     eh_admin = request.user.eh_administrador
     negocios_com_lucro = [
@@ -607,7 +651,8 @@ def vendas(request):
         "linhas": negocios_com_lucro,
         "mes_ref": date(ano, mes, 1),
         "tipo": tipo,
-        "tipos": TipoNegocio.choices,
+        "tipos_contagem": [(v, r, tipos_do_mes.count(v)) for v, r in TipoNegocio.choices],
+        "total_mes": len(tipos_do_mes),
         "resumo": resumo_de_vendas(ano, mes) if eh_admin else None,
         "eh_admin": eh_admin,
         "ano_anterior": ano if mes > 1 else ano - 1,

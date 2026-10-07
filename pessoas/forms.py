@@ -55,6 +55,9 @@ class PessoaForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         _estilizar(self)
+        self.fields["cep"].required = True
+        self.fields["cep"].help_text = "Digite o CEP e o endereço é preenchido sozinho."
+        self.fields["observacoes"].label = "Observações sobre a pessoa"
 
     def clean_cpf_cnpj(self):
         documento = so_digitos(self.cleaned_data.get("cpf_cnpj"))

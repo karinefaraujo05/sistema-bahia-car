@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load formato %}
 
-{% block titulo %}Negócio — Bahia Car{% endblock %}
+{% block titulo %}Negócio · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-2">
-    <a href="{% url 'inicio' %}" class="text-tinta-suave">← Início</a>
+    {% url 'inicio' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Início" %}
   </div>
 
   <div class="mb-4 flex items-start justify-between gap-3">
@@ -22,7 +22,7 @@
   </div>
 
   {% if negocio.status == 'rascunho' %}
-    <div class="mb-6 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+    <div class="mb-6 aviso aviso-atencao">
       Este negócio ainda é um rascunho.
       <a href="{% url 'negocios:passo_pessoa' negocio.pk %}" class="font-medium text-petroleo-700">Continuar</a>.
     </div>
@@ -99,30 +99,57 @@
       <div class="flex flex-wrap gap-2">
         <form method="post" action="{% url 'contratos:gerar' negocio.pk %}">
           {% csrf_token %}
-          <button type="submit" class="botao botao-secundario">Gerar contrato</button>
+          <button type="submit" class="botao botao-secundario{% if tem_contrato %} opacity-60{% endif %}"
+            {% if tem_contrato %}title="Já existe contrato. Gerar cria uma nova versão."{% endif %}>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+            {% if tem_contrato %}Gerar de novo{% else %}Gerar contrato{% endif %}
+          </button>
         </form>
         <form method="post" action="{% url 'contratos:gerar_termo' negocio.pk %}">
           {% csrf_token %}
-          <button type="submit" class="botao botao-secundario">Gerar termo de vistoria</button>
+          <button type="submit" class="botao botao-secundario{% if tem_termo %} opacity-60{% endif %}"
+            {% if tem_termo %}title="Termo já gerado. Gerar cria de novo."{% endif %}>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+            {% if tem_termo %}Gerar termo de novo{% else %}Gerar termo de vistoria{% endif %}
+          </button>
         </form>
       </div>
     </div>
-    {% with contratos=negocio.contratos.all %}
-      {% if contratos %}
-        <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-          {% for contrato in contratos %}
-            <li class="flex items-center justify-between gap-3 px-4 py-3">
-              <span>{{ contrato.titulo }} <span class="text-tinta-suave">(v{{ contrato.versao }})</span></span>
-              <a href="{% url 'contratos:editar_contrato' contrato.pk %}" class="shrink-0 text-petroleo-700">Abrir / editar</a>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-4 text-center text-tinta-suave">
-          Nenhum contrato gerado ainda.
-        </p>
-      {% endif %}
-    {% endwith %}
+    {% if contratos_info %}
+      <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
+        {% for info in contratos_info %}
+          <li class="px-4 py-3">
+            <div class="flex items-center justify-between gap-3">
+              <span class="flex min-w-0 items-center gap-2">
+                <svg class="h-5 w-5 shrink-0 text-petroleo-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>
+                <span class="truncate">{{ info.c.titulo }} <span class="text-tinta-suave">(v{{ info.c.versao }})</span></span>
+              </span>
+              <a href="{% url 'contratos:editar_contrato' info.c.pk %}" class="inline-flex shrink-0 items-center gap-1.5 text-petroleo-700">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                Abrir / editar
+              </a>
+            </div>
+            {% if info.mudancas %}
+              {% if info.mudancas.sem_mudanca %}
+                <p class="mt-1 text-xs text-tinta-suave">Igual à versão anterior.</p>
+              {% else %}
+                <details class="mt-2 text-sm">
+                  <summary class="text-tinta-suave">O que mudou da versão anterior</summary>
+                  <div class="mt-2 space-y-1">
+                    {% for l in info.mudancas.adicionadas %}<p class="text-verde">+ {{ l|truncatechars:90 }}</p>{% endfor %}
+                    {% for l in info.mudancas.removidas %}<p class="text-tinta-suave line-through">- {{ l|truncatechars:90 }}</p>{% endfor %}
+                  </div>
+                </details>
+              {% endif %}
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-4 text-center text-tinta-suave">
+        Nenhum contrato gerado ainda.
+      </p>
+    {% endif %}
   </section>
 
   {# Documentos do negócio. #}
@@ -139,14 +166,18 @@
                 {{ documento.nome_arquivo }}{% if documento.gerado_pelo_sistema %} · gerado pelo sistema{% endif %}
               </div>
             </div>
-            <div class="flex shrink-0 gap-3 text-sm">
-              <a href="{{ documento.arquivo.url }}" target="_blank" class="text-petroleo-700">Abrir</a>
+            <div class="flex shrink-0 items-center gap-4 text-sm">
+              <a href="{{ documento.arquivo.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-petroleo-700">
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                Abrir
+              </a>
               <button
                 type="button"
-                class="text-petroleo-700"
+                class="inline-flex items-center gap-1.5 text-petroleo-700"
                 data-url="{{ request.scheme }}://{{ request.get_host }}{{ documento.arquivo.url }}"
                 onclick="compartilhar(this.dataset.url, '{{ documento.get_tipo_display|escapejs }}')"
               >
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
                 Compartilhar
               </button>
             </div>
@@ -163,26 +194,45 @@
       method="post"
       action="{% url 'contratos:upload_documentos' negocio.pk %}"
       enctype="multipart/form-data"
-      class="space-y-3 rounded-xl border border-borda bg-superficie shadow-sm p-4"
+      class="space-y-4 rounded-2xl border border-borda bg-superficie p-5 shadow-sm"
     >
       {% csrf_token %}
-      <p class="font-medium">Anexar documento</p>
+      <div class="flex items-center gap-2.5">
+        <span class="chip bg-petroleo-50 text-petroleo-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </span>
+        <p class="font-semibold">Anexar documento</p>
+      </div>
+
       <div>
-        <label for="{{ doc_form.tipo.id_for_label }}" class="mb-1 block text-sm">Tipo</label>
+        <label for="{{ doc_form.tipo.id_for_label }}" class="mb-1 block text-sm font-medium">Tipo</label>
         {{ doc_form.tipo }}
       </div>
-      <input
-        type="file"
-        name="arquivos"
-        accept="image/*,application/pdf"
-        capture="environment"
-        multiple
-        class="block w-full text-sm"
-      />
+
+      <div id="doc-descricao" class="hidden">
+        <label for="{{ doc_form.descricao.id_for_label }}" class="mb-1 block text-sm font-medium">Nome do documento</label>
+        {{ doc_form.descricao }}
+        <p class="mt-1 text-xs text-tinta-suave">Como é “Outro”, dê um nome pra saber o que é depois.</p>
+      </div>
+
+      <div>
+        <label for="arquivos-doc" class="mb-1 block text-sm font-medium">Arquivo (foto ou PDF)</label>
+        <input
+          id="arquivos-doc"
+          type="file"
+          name="arquivos"
+          accept="image/*,application/pdf"
+          capture="environment"
+          multiple
+          class="campo-arquivo"
+        />
+      </div>
+
       <label class="flex items-center gap-2 text-sm">
         {{ doc_form.juntar_pdf }} <span>{{ doc_form.juntar_pdf.label }}</span>
       </label>
-      <button type="submit" class="botao botao-secundario">Anexar</button>
+
+      <button type="submit" class="botao botao-primario">Anexar documento</button>
     </form>
 
   </section>
@@ -197,6 +247,16 @@
         window.open(url, "_blank");
       }
     }
+
+    // Mostra o campo "Nome do documento" só quando o tipo for "Outro".
+    (function () {
+      var sel = document.getElementById("{{ doc_form.tipo.id_for_label }}");
+      var wrap = document.getElementById("doc-descricao");
+      if (!sel || !wrap) return;
+      function alternar() { wrap.classList.toggle("hidden", sel.value !== "outro"); }
+      sel.addEventListener("change", alternar);
+      alternar();
+    })();
   </script>
 
   {% if negocio.status == 'concluido' %}

@@ -3,7 +3,9 @@ from django.db.models import Q
 
 from core.models import ModeloBase
 
-# Campos da loja que o contrato precisa ter preenchidos.
+# Dados de identidade da loja que o contrato precisa ter preenchidos.
+# As regras do contrato (multa, IPVA, nº de vias, prazos) são definidas por contrato,
+# ajustáveis no editor de cada contrato — por isso não entram aqui.
 CAMPOS_OBRIGATORIOS_CONTRATO = [
     "razao_social",
     "cnpj",
@@ -12,9 +14,6 @@ CAMPOS_OBRIGATORIOS_CONTRATO = [
     "uf",
     "representante_nome",
     "representante_cpf",
-    "multa_percentual",
-    "regra_ipva",
-    "numero_vias",
 ]
 
 
@@ -22,6 +21,7 @@ class ConfiguracaoLoja(ModeloBase):
     """Dados da loja usados nos contratos. Registro único (singleton)."""
 
     razao_social = models.CharField("razão social", max_length=160, blank=True)
+    nome_fantasia = models.CharField("nome fantasia", max_length=120, blank=True)
     cnpj = models.CharField("CNPJ", max_length=14, blank=True)
     endereco = models.CharField("endereço", max_length=200, blank=True)
     cidade = models.CharField("cidade", max_length=100, blank=True)
@@ -31,10 +31,20 @@ class ConfiguracaoLoja(ModeloBase):
     representante_cpf = models.CharField("CPF do representante", max_length=11, blank=True)
 
     multa_percentual = models.DecimalField(
-        "multa por descumprimento (%)", max_digits=5, decimal_places=2, null=True, blank=True
+        "multa se não cumprir o combinado (%)",
+        max_digits=5,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text="Porcentagem cobrada de quem desistir ou descumprir o contrato. "
+        "Combine o valor com o seu advogado. Ex.: 10",
     )
     regra_ipva = models.CharField(
-        "regra padrão de IPVA e licenciamento", max_length=200, blank=True
+        "quem paga o IPVA e o licenciamento",
+        max_length=200,
+        blank=True,
+        help_text="O que vale por padrão nos contratos. Ex.: até a entrega, por conta "
+        "do vendedor; a partir da entrega, do comprador.",
     )
     prazo_assinatura_dias = models.PositiveSmallIntegerField(
         "prazo para assinar a ATPV-e (dias úteis)", default=5
@@ -88,7 +98,9 @@ class TipoDocumento(models.TextChoices):
 def documento_upload_para(instance, filename):
     if instance.negocio_id:
         return f"documentos/negocio-{instance.negocio_id}/{filename}"
-    return f"documentos/consignacao-{instance.consignacao_id}/{filename}"
+    if instance.consignacao_id:
+        return f"documentos/consignacao-{instance.consignacao_id}/{filename}"
+    return f"documentos/veiculo-{instance.veiculo_id}/{filename}"
 
 
 class Documento(ModeloBase):
@@ -108,6 +120,14 @@ class Documento(ModeloBase):
         blank=True,
         related_name="documentos",
     )
+    veiculo = models.ForeignKey(
+        "veiculos.Veiculo",
+        verbose_name="veículo",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="documentos",
+    )
     tipo = models.CharField("tipo", max_length=16, choices=TipoDocumento.choices)
     arquivo = models.FileField("arquivo", upload_to=documento_upload_para)
     gerado_pelo_sistema = models.BooleanField("gerado pelo sistema", default=False)
@@ -119,7 +139,11 @@ class Documento(ModeloBase):
         ordering = ["-criado_em"]
         constraints = [
             models.CheckConstraint(
-                condition=Q(negocio__isnull=False) | Q(consignacao__isnull=False),
+                condition=(
+                    Q(negocio__isnull=False)
+                    | Q(consignacao__isnull=False)
+                    | Q(veiculo__isnull=False)
+                ),
                 name="documento_pertence_a_negocio_ou_consignacao",
             )
         ]

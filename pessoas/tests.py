@@ -136,7 +136,12 @@ def test_lista_exige_login(client):
 @pytest.mark.django_db
 def test_cadastro_pelo_formulario(client):
     logar(client)
-    dados = {"tipo": TipoPessoa.FISICA, "nome": "José Pereira", "telefone": "71999990000"}
+    dados = {
+        "tipo": TipoPessoa.FISICA,
+        "nome": "José Pereira",
+        "telefone": "71999990000",
+        "cep": "45000000",  # CEP é obrigatório no cadastro completo
+    }
     resp = client.post(reverse("pessoas:novo"), dados)
     assert resp.status_code == 302
     assert Pessoa.objetos.filter(nome="José Pereira").exists()

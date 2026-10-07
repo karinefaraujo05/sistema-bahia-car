@@ -8,6 +8,7 @@ class ConfiguracaoLojaForm(forms.ModelForm):
         model = ConfiguracaoLoja
         fields = [
             "razao_social",
+            "nome_fantasia",
             "cnpj",
             "endereco",
             "cidade",
@@ -15,21 +16,12 @@ class ConfiguracaoLojaForm(forms.ModelForm):
             "cep",
             "representante_nome",
             "representante_cpf",
-            "multa_percentual",
-            "regra_ipva",
-            "prazo_assinatura_dias",
-            "prazo_repasse_dias",
-            "numero_vias",
         ]
 
     _NUMERICOS = {
         "cnpj",
         "cep",
         "representante_cpf",
-        "multa_percentual",
-        "prazo_assinatura_dias",
-        "prazo_repasse_dias",
-        "numero_vias",
     }
 
     def __init__(self, *args, **kwargs):
@@ -53,3 +45,10 @@ class DocumentoUploadForm(forms.Form):
         super().__init__(*args, **kwargs)
         self.fields["tipo"].widget.attrs["class"] = "campo"
         self.fields["descricao"].widget.attrs["class"] = "campo"
+        self.fields["descricao"].widget.attrs["placeholder"] = "Ex.: recibo de sinal, laudo..."
+
+    def clean(self):
+        dados = super().clean()
+        if dados.get("tipo") == TipoDocumento.OUTRO and not (dados.get("descricao") or "").strip():
+            self.add_error("descricao", "Como o tipo é “Outro”, dê um nome ao documento.")
+        return dados

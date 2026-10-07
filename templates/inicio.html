@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo %}Início — Bahia Car{% endblock %}
+{% block titulo %}Início · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-6">
@@ -8,31 +8,59 @@
     <p class="text-tinta-suave">Resumo da loja e atalhos do dia a dia.</p>
   </div>
 
+  {# Avisos acionáveis: só aparece quando há algo pra resolver. #}
+  {% if alertas %}
+    <section class="mb-6" aria-label="Precisa de atenção">
+      <div class="painel overflow-hidden">
+        <div class="border-b border-borda px-5 py-3">
+          <h2 class="text-lg">Precisa de atenção</h2>
+        </div>
+        <ul class="divide-y divide-borda">
+          {% for a in alertas %}
+            <li>
+              <a href="{{ a.url }}" class="flex items-center gap-3 px-5 py-3 hover:bg-petroleo-50">
+                <span class="chip {% if a.nivel == 'atencao' %}bg-ambar-fundo text-ambar{% else %}bg-cinza-fundo text-cinza{% endif %}">
+                  {% if a.nivel == 'atencao' %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                  {% else %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  {% endif %}
+                </span>
+                <span class="flex-1 font-medium">{{ a.texto }}</span>
+                <svg class="h-5 w-5 shrink-0 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+  {% endif %}
+
   {# Atalhos em destaque. #}
-  <nav class="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Ações">
+  <nav class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Ações">
     <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao gap-4">
       <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
       </span>
-      <span>Cadastrar carro que entrou</span>
+      <span>Comprei um carro</span>
     </a>
     <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao gap-4">
       <span class="indicador-icone bg-verde-fundo text-verde">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       </span>
-      <span>Registrar venda</span>
+      <span>Vendi um carro</span>
     </a>
     <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao gap-4">
       <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
       </span>
-      <span>Registrar troca</span>
+      <span>Fiz uma troca</span>
     </a>
     <a href="{% url 'negocios:consignar' %}" class="cartao-acao gap-4">
       <span class="indicador-icone bg-ambar-fundo text-ambar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
       </span>
-      <span>Carro deixado para vender</span>
+      <span>Peguei um carro pra vender</span>
     </a>
   </nav>
 
@@ -70,7 +98,7 @@
   </section>
 
   {# Gráfico de vendas ao lado dos últimos negócios. #}
-  <div class="grid gap-6 lg:grid-cols-3 lg:items-start">
+  <div class="grid gap-6 lg:grid-cols-3">
     <section class="painel p-5 lg:col-span-2" aria-label="Vendas">
       <h2 class="mb-1 text-lg">Vendas</h2>
       <p class="mb-5 text-sm text-tinta-suave">Vendas e trocas nos últimos 6 meses</p>

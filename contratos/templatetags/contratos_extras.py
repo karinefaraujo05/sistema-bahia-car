@@ -1,11 +1,72 @@
-"""Filtros usados nos contratos: valor por extenso e sim/não."""
+"""Filtros usados nos contratos: valor por extenso, sim/não e formatação do PDF."""
 
+import re
 from decimal import Decimal, InvalidOperation
 
 from django import template
+from django.utils.html import escape
+from django.utils.safestring import mark_safe
 from num2words import num2words
 
 register = template.Library()
+
+
+@register.filter
+def formatar_contrato(corpo):
+    """
+    Transforma o texto puro do contrato em HTML com cara de documento:
+    título, cláusulas com cabeçalho em negrito, blocos de partes e assinaturas
+    com o alinhamento preservado. Mantém o texto editável como está no banco.
+    """
+    if not corpo:
+        return ""
+
+    def por_linhas(texto):
+        return "<br>".join(escape(l) for l in texto.split("\n"))
+
+    blocos = re.split(r"\n\s*\n", corpo.strip())
+    partes = []
+    for i, bloco in enumerate(blocos):
+        bloco = bloco.strip("\n")
+        if not bloco.strip():
+            continue
+
+        # Assinaturas e testemunhas: preservar o alinhamento.
+        if "___" in bloco:
+            partes.append('<pre class="assinaturas">%s</pre>' % escape(bloco))
+            continue
+
+        # Primeiro bloco: título do contrato + número.
+        if i == 0:
+            linhas = bloco.split("\n")
+            html = '<h1 class="titulo">%s</h1>' % escape(linhas[0])
+            resto = [l for l in linhas[1:] if l.strip()]
+            if resto:
+                html += '<p class="subtitulo">%s</p>' % "<br>".join(escape(l) for l in resto)
+            partes.append(html)
+            continue
+
+        # Cláusulas: cabeçalho ("CLÁUSULA 1ª — OBJETO.") em negrito.
+        m = re.match(r"(CL[ÁA]USULA[^.]*\.)(.*)", bloco, re.S)
+        if m:
+            partes.append(
+                '<p class="clausula"><strong>%s</strong>%s</p>'
+                % (escape(m.group(1)), por_linhas(m.group(2)))
+            )
+            continue
+
+        # Blocos de parte (ex.: "VENDEDOR(A): ..."): rótulo em negrito.
+        m = re.match(r"([A-ZÀ-Ú()/\s]{2,40}:)(.*)", bloco, re.S)
+        if m:
+            partes.append(
+                '<p class="parte"><strong>%s</strong>%s</p>'
+                % (escape(m.group(1)), por_linhas(m.group(2)))
+            )
+            continue
+
+        partes.append("<p>%s</p>" % por_linhas(bloco))
+
+    return mark_safe("\n".join(partes))
 
 
 @register.filter
@@ -27,3 +88,22 @@ def sim_nao(valor):
     if valor is None:
         return "—"
     return "Sim" if valor else "Não"
+
+
+@register.filter
+def numero_extenso(valor):
+    """Número inteiro por extenso (ex.: 10 -> 'dez'). Usado na multa do contrato."""
+    try:
+        numero = int(Decimal(str(valor)))
+    except (InvalidOperation, TypeError, ValueError):
+        return ""
+    return num2words(numero, lang="pt_BR")
+
+
+@register.filter
+def cep(valor):
+    """Formata um CEP de 8 dígitos como 00000-000."""
+    digitos = "".join(ch for ch in str(valor or "") if ch.isdigit())
+    if len(digitos) == 8:
+        return f"{digitos[:5]}-{digitos[5:]}"
+    return valor or ""

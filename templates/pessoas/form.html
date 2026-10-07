@@ -1,15 +1,11 @@
 {% extends "base.html" %}
 {% block largura %}max-w-3xl{% endblock %}
 
-{% block titulo %}{% if pessoa %}Editar pessoa{% else %}Cadastrar pessoa{% endif %} — Bahia Car{% endblock %}
+{% block titulo %}{% if pessoa %}Editar pessoa{% else %}Cadastrar pessoa{% endif %} · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-2">
-    <a
-      href="{% if pessoa %}{% url 'pessoas:detalhe' pessoa.pk %}{% else %}{% url 'pessoas:lista' %}{% endif %}"
-      class="text-tinta-suave"
-      >← Voltar</a
-    >
+    {% if pessoa %}{% url 'pessoas:detalhe' pessoa.pk as voltar_url %}{% else %}{% url 'pessoas:lista' as voltar_url %}{% endif %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar" %}
   </div>
 
   <h1 class="mb-5 text-2xl">{% if pessoa %}Editar pessoa{% else %}Cadastrar pessoa{% endif %}</h1>
@@ -23,7 +19,7 @@
   {% endif %}
 
   {% if form.non_field_errors %}
-    <div class="mb-4 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+    <div class="mb-4 aviso aviso-atencao">
       {{ form.non_field_errors }}
     </div>
   {% endif %}
@@ -48,15 +44,17 @@
 
     <fieldset class="space-y-4">
       <legend class="mb-2 text-lg font-semibold">Endereço</legend>
+      <div class="grid gap-4 sm:grid-cols-3">
+        {% include "pessoas/partials/campo.html" with campo=form.cep %}
+      </div>
       {% include "pessoas/partials/campo.html" with campo=form.endereco %}
       <div class="grid gap-4 sm:grid-cols-3">
-        {% include "pessoas/partials/campo.html" with campo=form.cidade %}
+        <div class="sm:col-span-2">{% include "pessoas/partials/campo.html" with campo=form.cidade %}</div>
         {% include "pessoas/partials/campo.html" with campo=form.uf %}
-        {% include "pessoas/partials/campo.html" with campo=form.cep %}
       </div>
     </fieldset>
 
-    <fieldset class="space-y-4">
+    <fieldset id="campos-fisica" class="space-y-4">
       <legend class="mb-2 text-lg font-semibold">Documentos (pessoa física)</legend>
       <div class="grid gap-4 sm:grid-cols-2">
         {% include "pessoas/partials/campo.html" with campo=form.rg %}
@@ -67,7 +65,7 @@
       </div>
     </fieldset>
 
-    <fieldset class="space-y-4">
+    <fieldset id="campos-juridica" class="space-y-4">
       <legend class="mb-2 text-lg font-semibold">Representante (pessoa jurídica)</legend>
       <div class="grid gap-4 sm:grid-cols-2">
         {% include "pessoas/partials/campo.html" with campo=form.representante_nome %}
@@ -76,7 +74,6 @@
     </fieldset>
 
     <fieldset class="space-y-4">
-      <legend class="mb-2 text-lg font-semibold">Observações</legend>
       {% include "pessoas/partials/campo.html" with campo=form.observacoes %}
     </fieldset>
 
@@ -89,4 +86,43 @@
       >
     </div>
   </form>
+
+  <script>
+    // Mostra "Documentos (pessoa física)" ou "Representante (pessoa jurídica)" conforme o tipo.
+    (function () {
+      var sel = document.getElementById("{{ form.tipo.id_for_label }}");
+      var fisica = document.getElementById("campos-fisica");
+      var juridica = document.getElementById("campos-juridica");
+      if (!sel || !fisica || !juridica) return;
+      function atualizar() {
+        var ehFisica = sel.value === "fisica";
+        fisica.classList.toggle("hidden", !ehFisica);
+        juridica.classList.toggle("hidden", ehFisica);
+      }
+      sel.addEventListener("change", atualizar);
+      atualizar();
+    })();
+
+    // ViaCEP: ao digitar o CEP, preenche endereço, cidade e UF sozinho.
+    (function () {
+      var cep = document.getElementById("{{ form.cep.id_for_label }}");
+      var endereco = document.getElementById("{{ form.endereco.id_for_label }}");
+      var cidade = document.getElementById("{{ form.cidade.id_for_label }}");
+      var uf = document.getElementById("{{ form.uf.id_for_label }}");
+      if (!cep) return;
+      cep.addEventListener("blur", function () {
+        var v = (cep.value || "").replace(/\D/g, "");
+        if (v.length !== 8) return;
+        fetch("https://viacep.com.br/ws/" + v + "/json/")
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (d.erro) return;
+            if (endereco && !endereco.value) endereco.value = d.logradouro || "";
+            if (cidade) cidade.value = d.localidade || "";
+            if (uf) uf.value = (d.uf || "").toUpperCase();
+          })
+          .catch(function () {});
+      });
+    })();
+  </script>
 {% endblock %}
