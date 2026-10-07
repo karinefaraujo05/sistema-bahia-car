@@ -41,6 +41,8 @@
   --color-ambar-fundo: #f7eeda;
   --color-cinza: #64748b;
   --color-cinza-fundo: #eef1f4;
+  --color-vermelho: #c53030;
+  --color-vermelho-fundo: #fbeaea;
 
   /* Menu lateral claro */
   --color-sidebar: #ffffff;
@@ -308,6 +310,14 @@
     outline: none;
     border-color: var(--color-acento-500);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-acento-500) 18%, transparent);
+  }
+  /* Campo com erro de validação (ex.: CPF inválido). */
+  .campo-erro {
+    border-color: var(--color-vermelho);
+  }
+  .campo-erro:focus {
+    border-color: var(--color-vermelho);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-vermelho) 18%, transparent);
   }
 
   /* Link de navegação do cabeçalho (claro). */
