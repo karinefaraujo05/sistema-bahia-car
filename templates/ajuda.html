@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block largura %}max-w-3xl{% endblock %}
+
+{% block titulo %}Como usar · Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-6">
+    <h1 class="text-2xl">Como usar o Bahia Car</h1>
+    <p class="mt-1 text-tinta-suave">Um passo a passo simples do dia a dia da loja.</p>
+  </div>
+
+  {# Busca #}
+  <section class="painel mb-4 p-5">
+    <div class="mb-2 flex items-center gap-3">
+      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
+      <h2 class="text-lg">Encontrar qualquer coisa</h2>
+    </div>
+    <p>
+      Use a <strong>barra de busca</strong> lá em cima. Digite a <strong>placa</strong>, o
+      <strong>nome</strong> da pessoa, o <strong>CPF</strong> ou o <strong>modelo</strong> do carro.
+      Os resultados aparecem enquanto você digita. Toque num resultado pra abrir.
+    </p>
+  </section>
+
+  {# Cadastrar carro #}
+  <section class="painel mb-4 p-5">
+    <div class="mb-3 flex items-center gap-3">
+      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+      </span>
+      <h2 class="text-lg">Cadastrar um carro no estoque</h2>
+    </div>
+    <ol class="list-decimal space-y-1 pl-5">
+      <li>Vá em <strong>Estoque</strong> e toque em <strong>Adicionar carro</strong>.</li>
+      <li>Preencha os dados (placa, marca, modelo, ano, cor…).</li>
+      <li>Adicione <strong>fotos</strong> pela câmera.</li>
+      <li>Toque em <strong>Salvar</strong>.</li>
+    </ol>
+    <p class="mt-2 text-sm text-tinta-suave">
+      Dica: na ficha do carro, guarde a <strong>foto do documento</strong> em "Documentos do carro".
+    </p>
+  </section>
+
+  {# Compra / venda / troca #}
+  <section class="painel mb-4 p-5">
+    <div class="mb-3 flex items-center gap-3">
+      <span class="indicador-icone bg-verde-fundo text-verde">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </span>
+      <h2 class="text-lg">Registrar uma compra, venda ou troca</h2>
+    </div>
+    <p class="mb-2">
+      Na tela inicial, toque no atalho certo: <strong>Comprei um carro</strong>,
+      <strong>Vendi um carro</strong> ou <strong>Fiz uma troca</strong>. O sistema vai te guiando
+      em passos curtos:
+    </p>
+    <ol class="list-decimal space-y-1 pl-5">
+      <li><strong>De quem é o carro</strong> (da loja ou de outra pessoa).</li>
+      <li><strong>Quem</strong> é o cliente: busque ou cadastre na hora.</li>
+      <li><strong>Qual carro</strong>: escolha do estoque ou cadastre ali mesmo.</li>
+      <li><strong>Financiamento</strong>, se o carro ainda tem parcela de banco.</li>
+      <li><strong>Valores, pagamento e entrega</strong> (o local já vem preenchido).</li>
+      <li><strong>Contrato</strong> e, por fim, a <strong>revisão</strong> pra confirmar.</li>
+    </ol>
+    <p class="mt-2 text-sm text-tinta-suave">
+      Pode <strong>salvar como rascunho</strong> em qualquer passo e continuar depois.
+    </p>
+  </section>
+
+  {# Consignação #}
+  <section class="painel mb-4 p-5">
+    <div class="mb-3 flex items-center gap-3">
+      <span class="indicador-icone bg-ambar-fundo text-ambar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+      </span>
+      <h2 class="text-lg">Pegar um carro pra vender (de outra pessoa)</h2>
+    </div>
+    <ol class="list-decimal space-y-1 pl-5">
+      <li>Na tela inicial, toque em <strong>Peguei um carro pra vender</strong>.</li>
+      <li>Cadastre o <strong>dono</strong> e o <strong>carro</strong>.</li>
+      <li>Defina o <strong>valor mínimo</strong> pro dono e a <strong>comissão</strong>.</li>
+    </ol>
+    <p class="mt-2 text-sm text-tinta-suave">
+      O carro entra no estoque marcado como "consignado". Quando vender, o sistema lembra do
+      <strong>repasse ao dono</strong>.
+    </p>
+  </section>
+
+  {# Contrato #}
+  <section class="painel mb-4 p-5">
+    <div class="mb-3 flex items-center gap-3">
+      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+      </span>
+      <h2 class="text-lg">Gerar e baixar o contrato</h2>
+    </div>
+    <ol class="list-decimal space-y-1 pl-5">
+      <li>Abra o <strong>negócio</strong> (em Vendas ou pela busca).</li>
+      <li>Toque em <strong>Gerar contrato</strong>.</li>
+      <li>Em <strong>Abrir / editar</strong>, use os botões <strong>Multa / IPVA / Prazo</strong> pra preencher as regras e confira o texto.</li>
+      <li>Toque em <strong>Baixar PDF</strong> (ou Word). Vem com nome fácil e em uma folha.</li>
+      <li>Depois de assinado, <strong>tire uma foto</strong> do contrato e guarde no negócio.</li>
+    </ol>
+    <p class="mt-2 text-sm text-tinta-suave">
+      O modelo é provisório. Combine o texto final com um advogado.
+    </p>
+  </section>
+
+  {# Pessoas #}
+  <section class="painel mb-4 p-5">
+    <div class="mb-3 flex items-center gap-3">
+      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </span>
+      <h2 class="text-lg">Cadastrar uma pessoa</h2>
+    </div>
+    <ol class="list-decimal space-y-1 pl-5">
+      <li>Vá em <strong>Pessoas → Cadastrar pessoa</strong> (ou "cadastro rápido" se tiver pressa).</li>
+      <li>Digite o <strong>CEP</strong> e o endereço aparece sozinho; você só põe o número.</li>
+      <li>Preencha o resto e toque em <strong>Salvar</strong>.</li>
+    </ol>
+  </section>
+
+  {# Vendas #}
+  <section class="painel mb-4 p-5">
+    <div class="mb-3 flex items-center gap-3">
+      <span class="indicador-icone bg-verde-fundo text-verde">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </span>
+      <h2 class="text-lg">Ver as vendas do mês</h2>
+    </div>
+    <p>
+      Em <strong>Vendas</strong> você vê os negócios do mês, o <strong>total vendido</strong> e o
+      <strong>lucro</strong>. Use as setas pra trocar de mês e os filtros por tipo. Dá pra
+      <strong>exportar pra Excel</strong>.
+    </p>
+  </section>
+
+  {# Cancelar #}
+  <section class="painel mb-6 p-5">
+    <div class="mb-3 flex items-center gap-3">
+      <span class="indicador-icone bg-cinza-fundo text-cinza">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      </span>
+      <h2 class="text-lg">Cancelar um negócio</h2>
+    </div>
+    <p>
+      Abra o negócio e toque em <strong>Cancelar</strong>. O carro <strong>volta pro estoque</strong>
+      automaticamente, e <strong>nada é apagado</strong>: fica tudo no histórico.
+    </p>
+  </section>
+
+  {# Bom saber #}
+  <div class="aviso aviso-info">
+    <p class="mb-1 font-medium">Bom saber</p>
+    <ul class="list-disc space-y-1 pl-5 text-sm">
+      <li><strong>Nada é apagado.</strong> "Arquivar" só tira da lista; o histórico continua lá.</li>
+      <li>A <strong>Configuração da loja</strong> (nome, CNPJ…) fica no menu do seu nome, no canto de cima.</li>
+      <li>Você fica <strong>logado</strong>, não precisa entrar toda vez.</li>
+    </ul>
+  </div>
+{% endblock %}

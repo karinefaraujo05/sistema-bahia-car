@@ -23,7 +23,7 @@ class EscolherPessoaForm(forms.Form):
         queryset=Pessoa.objetos.all(),
         required=False,
         label="Pessoa já cadastrada",
-        empty_label="— escolher —",
+        empty_label="escolher…",
     )
     nome_novo = forms.CharField(required=False, label="Ou cadastre na hora: nome")
     telefone_novo = forms.CharField(required=False, label="Telefone")
@@ -53,7 +53,7 @@ class EscolherPessoaForm(forms.Form):
 class EscolherCarroForm(forms.Form):
     """Escolhe um carro de uma lista (estoque)."""
 
-    veiculo = forms.ModelChoiceField(queryset=None, label="Carro", empty_label="— escolher —")
+    veiculo = forms.ModelChoiceField(queryset=None, label="Carro", empty_label="escolher…")
 
     def __init__(self, *args, queryset=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -66,7 +66,7 @@ class PagamentoEntregaForm(forms.Form):
     km_entrega = forms.IntegerField(label="Quilometragem na entrega", required=False)
     forma_pagamento = forms.ChoiceField(
         label="Forma de pagamento",
-        choices=[("", "— escolher —"), *FormaPagamento.choices],
+        choices=[("", "escolher…"), *FormaPagamento.choices],
         required=False,
     )
     detalhes_pagamento = forms.CharField(
@@ -83,7 +83,7 @@ class PagamentoEntregaForm(forms.Form):
     # Só aparece quando o carro é alienado (preenchido pela view).
     quitacao_opcao = forms.ChoiceField(
         label="Como fica a quitação do financiamento",
-        choices=[("", "— escolher —"), *QuitacaoOpcao.choices],
+        choices=[("", "escolher…"), *QuitacaoOpcao.choices],
         required=False,
     )
 
@@ -115,7 +115,7 @@ class TrocaValoresForm(forms.Form):
     km_cliente = forms.IntegerField(label="Km do carro do cliente na entrega", required=False)
     forma_pagamento = forms.ChoiceField(
         label="Forma de pagamento da diferença",
-        choices=[("", "— escolher —"), *FormaPagamento.choices],
+        choices=[("", "escolher…"), *FormaPagamento.choices],
         required=False,
     )
     detalhes_pagamento = forms.CharField(

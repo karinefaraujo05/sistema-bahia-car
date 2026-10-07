@@ -186,10 +186,61 @@ def gerar_contrato_consignacao(consignacao, *, usuario=None):
     )
 
 
+def _nome_carro(veiculo):
+    return f"{veiculo.marca} {veiculo.modelo}".strip() if veiculo else ""
+
+
+def _cliente_do_negocio(negocio):
+    papel = {"venda": "comprador", "compra": "vendedor", "troca": "permutante"}.get(negocio.tipo)
+    parte = negocio.partes.filter(papel=papel).first() if papel else None
+    if parte is None:
+        parte = negocio.partes.exclude(papel="anuente").first()
+    return parte.pessoa.nome if parte else ""
+
+
+def nome_arquivo_contrato(contrato):
+    """
+    Nome amigável do arquivo, no padrão:
+    "[nº] Venda <carro> - <cliente>" ou "[nº] Troca <carro1> por <carro2> - <cliente>".
+    """
+    import re
+
+    negocio = contrato.negocio
+    if negocio:
+        numero = negocio.numero_contrato or "rascunho"
+        itens = list(negocio.itens.select_related("veiculo"))
+        if negocio.tipo == "troca":
+            saida = next((i for i in itens if i.de_pessoa_id is None), None)
+            entradas = [i for i in itens if i.de_pessoa_id is not None]
+            carro = _nome_carro(saida.veiculo) if saida else ""
+            if entradas:
+                carro += " por " + ", ".join(_nome_carro(e.veiculo) for e in entradas)
+        else:
+            carro = ", ".join(_nome_carro(i.veiculo) for i in itens)
+        nome = f"[{numero}] {negocio.get_tipo_display()}"
+        if carro.strip():
+            nome += f" {carro.strip()}"
+        cliente = _cliente_do_negocio(negocio)
+        if cliente:
+            nome += f" - {cliente}"
+    elif contrato.consignacao:
+        cons = contrato.consignacao
+        numero = cons.numero_contrato or "rascunho"
+        nome = f"[{numero}] Consignação {_nome_carro(cons.veiculo)} - {cons.proprietario.nome}"
+    else:
+        nome = f"contrato-{contrato.pk}"
+    nome = re.sub(r'[\\/:*?"<>|\n\r\t]+', "", nome)
+    nome = re.sub(r"\s+", " ", nome).strip()
+    return nome or f"contrato-{contrato.pk}"
+
+
 def renderizar_pdf(contrato):
     from weasyprint import HTML  # importado aqui porque depende das libs de sistema
 
-    html = render_to_string("contratos/pdf_base.html", {"contrato": contrato})
+    html = render_to_string(
+        "contratos/pdf_base.html",
+        {"contrato": contrato, "loja": ConfiguracaoLoja.carregar()},
+    )
     return HTML(string=html).write_pdf()
 
 

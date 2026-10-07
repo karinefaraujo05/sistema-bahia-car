@@ -1,15 +1,16 @@
 {% extends "base.html" %}
+{% load pessoas_extras %}
 {% block largura %}max-w-3xl{% endblock %}
 
-{% block titulo %}Configuração da loja — Bahia Car{% endblock %}
+{% block titulo %}Configuração da loja · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-2">
-    <a href="{% url 'inicio' %}" class="text-tinta-suave">← Início</a>
+    {% url 'inicio' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Início" %}
   </div>
   <h1 class="mb-3 text-2xl">Configuração da loja</h1>
 
-  <div class="mb-5 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+  <div class="mb-5 aviso aviso-atencao">
     <p class="font-medium">Atenção: o modelo de contrato é provisório.</p>
     <p class="text-sm">
       O texto dos contratos foi escrito como ponto de partida e <strong>precisa ser revisado por um
@@ -25,45 +26,95 @@
       </ul>
     </div>
   {% else %}
-    <p class="mb-5 rounded-lg border border-borda bg-verde-fundo px-4 py-3 text-verde">
+    <p class="mb-5 aviso aviso-ok">
       Dados completos para gerar contratos.
     </p>
   {% endif %}
 
-  <form method="post" class="space-y-6">
-    {% csrf_token %}
+  {% if editando %}
+    {# Modo de edição #}
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
 
-    <fieldset class="space-y-4">
-      <legend class="mb-2 text-lg font-semibold">Dados da loja</legend>
-      {% include "contratos/partials/campo.html" with campo=form.razao_social %}
-      <div class="grid gap-4 sm:grid-cols-2">
-        {% include "contratos/partials/campo.html" with campo=form.cnpj %}
-        {% include "contratos/partials/campo.html" with campo=form.endereco %}
-        {% include "contratos/partials/campo.html" with campo=form.cidade %}
-        {% include "contratos/partials/campo.html" with campo=form.uf %}
-        {% include "contratos/partials/campo.html" with campo=form.cep %}
+      <fieldset class="space-y-4">
+        <legend class="mb-2 text-lg font-semibold">Dados da loja</legend>
+        {% include "contratos/partials/campo.html" with campo=form.razao_social %}
+        {% include "contratos/partials/campo.html" with campo=form.nome_fantasia %}
+        <div class="grid gap-4 sm:grid-cols-2">
+          {% include "contratos/partials/campo.html" with campo=form.cnpj %}
+          {% include "contratos/partials/campo.html" with campo=form.endereco %}
+          {% include "contratos/partials/campo.html" with campo=form.cidade %}
+          {% include "contratos/partials/campo.html" with campo=form.uf %}
+          {% include "contratos/partials/campo.html" with campo=form.cep %}
+        </div>
+      </fieldset>
+
+      <fieldset class="space-y-4">
+        <legend class="mb-2 text-lg font-semibold">Representante</legend>
+        <div class="grid gap-4 sm:grid-cols-2">
+          {% include "contratos/partials/campo.html" with campo=form.representante_nome %}
+          {% include "contratos/partials/campo.html" with campo=form.representante_cpf %}
+        </div>
+      </fieldset>
+
+      <p class="aviso aviso-info text-sm">
+        As regras de cada contrato (multa, IPVA, prazos) você ajusta na hora, direto no
+        texto de cada contrato. Por isso não ficam aqui.
+      </p>
+
+      <div class="flex flex-wrap gap-2">
+        <button type="submit" class="botao botao-primario">Salvar alterações</button>
+        <a href="{% url 'contratos:configuracao' %}" class="botao botao-secundario">Cancelar</a>
       </div>
-    </fieldset>
+    </form>
+  {% else %}
+    {# Modo travado: só leitura, com botão para editar #}
+    <div class="mb-3 flex items-center justify-between gap-3">
+      <h2 class="text-lg font-semibold">Dados da loja</h2>
+      <a href="?editar=1" class="botao botao-secundario">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Editar
+      </a>
+    </div>
 
-    <fieldset class="space-y-4">
-      <legend class="mb-2 text-lg font-semibold">Representante</legend>
-      <div class="grid gap-4 sm:grid-cols-2">
-        {% include "contratos/partials/campo.html" with campo=form.representante_nome %}
-        {% include "contratos/partials/campo.html" with campo=form.representante_cpf %}
+    <dl class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">Razão social</dt>
+        <dd class="text-right font-medium">{{ config.razao_social|default:"não preenchido" }}</dd>
       </div>
-    </fieldset>
-
-    <fieldset class="space-y-4">
-      <legend class="mb-2 text-lg font-semibold">Regras padrão dos contratos</legend>
-      {% include "contratos/partials/campo.html" with campo=form.regra_ipva %}
-      <div class="grid gap-4 sm:grid-cols-2">
-        {% include "contratos/partials/campo.html" with campo=form.multa_percentual %}
-        {% include "contratos/partials/campo.html" with campo=form.numero_vias %}
-        {% include "contratos/partials/campo.html" with campo=form.prazo_assinatura_dias %}
-        {% include "contratos/partials/campo.html" with campo=form.prazo_repasse_dias %}
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">Nome fantasia</dt>
+        <dd class="text-right font-medium">{{ config.nome_fantasia|default:"não preenchido" }}</dd>
       </div>
-    </fieldset>
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">CNPJ</dt>
+        <dd class="text-right font-medium">{{ config.cnpj|cpf_cnpj|default:"não preenchido" }}</dd>
+      </div>
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">Endereço</dt>
+        <dd class="text-right font-medium">{{ config.endereco|default:"não preenchido" }}</dd>
+      </div>
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">Cidade / UF</dt>
+        <dd class="text-right font-medium">{{ config.cidade|default:"não preenchido" }}{% if config.uf %} / {{ config.uf }}{% endif %}</dd>
+      </div>
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">CEP</dt>
+        <dd class="text-right font-medium">{{ config.cep|default:"não preenchido" }}</dd>
+      </div>
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">Representante</dt>
+        <dd class="text-right font-medium">{{ config.representante_nome|default:"não preenchido" }}</dd>
+      </div>
+      <div class="flex justify-between gap-4 px-4 py-3">
+        <dt class="text-tinta-suave">CPF do representante</dt>
+        <dd class="text-right font-medium">{{ config.representante_cpf|cpf_cnpj|default:"não preenchido" }}</dd>
+      </div>
+    </dl>
 
-    <button type="submit" class="botao botao-primario">Salvar configuração</button>
-  </form>
+    <p class="mt-5 aviso aviso-info text-sm">
+      As regras de cada contrato (multa, IPVA, prazos) você ajusta na hora, direto no
+      texto de cada contrato. Por isso não ficam aqui.
+    </p>
+  {% endif %}
 {% endblock %}

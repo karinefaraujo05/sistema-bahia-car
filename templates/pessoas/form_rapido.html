@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block largura %}max-w-3xl{% endblock %}
 
-{% block titulo %}Cadastro rápido — Bahia Car{% endblock %}
+{% block titulo %}Cadastro rápido · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-2">
-    <a href="{% url 'pessoas:lista' %}" class="text-tinta-suave">← Voltar para pessoas</a>
+    {% url 'pessoas:lista' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar para pessoas" %}
   </div>
 
   <h1 class="mb-1 text-2xl">Cadastro rápido</h1>

@@ -1,25 +1,88 @@
 <!doctype html>
+{% load contratos_extras %}
 <html lang="pt-br">
   <head>
     <meta charset="utf-8" />
     <style>
-      @page { size: A4; margin: 2cm; }
-      body { font-family: "DejaVu Serif", "Times New Roman", serif; font-size: 11pt; color: #000; }
-      .aviso {
-        border: 1px solid #999;
-        padding: 6pt 8pt;
-        margin-bottom: 12pt;
-        font-size: 9pt;
+      /* Compacto para caber, de preferência, em uma única folha A4. */
+      @page {
+        size: A4;
+        margin: 1.4cm 1.6cm 1.2cm;
       }
-      pre { white-space: pre-wrap; font-family: inherit; font-size: 11pt; line-height: 1.4; }
+      body {
+        font-family: "DejaVu Serif", "Times New Roman", serif;
+        font-size: 9.3pt;
+        line-height: 1.28;
+        color: #1b1b1b;
+      }
+      .marca {
+        text-align: center;
+        font-family: "DejaVu Sans", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1.2pt;
+        font-size: 7.5pt;
+        font-weight: bold;
+        color: #16525c;
+        border-bottom: 1pt solid #16525c;
+        padding-bottom: 4pt;
+        margin-bottom: 8pt;
+      }
+      .aviso {
+        border: 0.75pt solid #c9a24a;
+        background: #fbf5e6;
+        color: #6b4e12;
+        padding: 4pt 7pt;
+        margin-bottom: 9pt;
+        font-family: "DejaVu Sans", sans-serif;
+        font-size: 7pt;
+      }
+      .titulo {
+        text-align: center;
+        font-size: 11pt;
+        text-transform: uppercase;
+        letter-spacing: 0.3pt;
+        margin: 0 0 1pt;
+      }
+      .subtitulo {
+        text-align: center;
+        font-size: 8.5pt;
+        color: #555;
+        margin: 0 0 9pt;
+      }
+      p {
+        text-align: justify;
+        margin: 0 0 4pt;
+      }
+      p.clausula {
+        margin-top: 5pt;
+      }
+      p.parte {
+        text-align: left;
+      }
+      .assinaturas {
+        white-space: pre-wrap;
+        font-family: inherit;
+        font-size: 9pt;
+        line-height: 1.5;
+        margin-top: 13pt;
+      }
+      strong {
+        font-weight: bold;
+      }
     </style>
   </head>
   <body>
     <!-- REVISAR COM ADVOGADO -->
+    {% if loja.nome_fantasia or loja.razao_social %}
+      <div class="marca">
+        {{ loja.nome_fantasia|default:loja.razao_social }}{% if loja.cidade %} · {{ loja.cidade }}{% if loja.uf %} - {{ loja.uf }}{% endif %}{% endif %}
+      </div>
+    {% endif %}
+
     <div class="aviso">
-      MODELO PROVISÓRIO — este documento precisa da revisão de um advogado antes de ser usado com
-      clientes.
+      MODELO PROVISÓRIO. Este documento precisa da revisão de um advogado antes de ser usado com clientes.
     </div>
-    <pre>{{ contrato.corpo }}</pre>
+
+    {{ contrato.corpo|formatar_contrato }}
   </body>
 </html>

@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load formato %}
 
-{% block titulo %}{{ veiculo.marca }} {{ veiculo.modelo }} — Bahia Car{% endblock %}
+{% block titulo %}{{ veiculo.marca }} {{ veiculo.modelo }} · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-2">
-    <a href="{% url 'veiculos:estoque' %}" class="text-tinta-suave">← Voltar ao estoque</a>
+    {% url 'veiculos:estoque' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar ao estoque" %}
   </div>
 
   <div class="mb-4 flex items-start justify-between gap-3">
@@ -23,14 +23,6 @@
 
   <div class="mb-6 flex gap-2">
     <a href="{% url 'veiculos:editar' veiculo.pk %}" class="botao botao-secundario">Editar</a>
-    <form
-      method="post"
-      action="{% url 'veiculos:arquivar' veiculo.pk %}"
-      onsubmit="return confirm('Arquivar este carro? Ele sai do estoque, mas nada é apagado.');"
-    >
-      {% csrf_token %}
-      <button type="submit" class="botao botao-secundario">Arquivar</button>
-    </form>
   </div>
 
   <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
@@ -97,17 +89,70 @@
       class="mb-3"
     >
       {% csrf_token %}
+      <label for="fotos-detalhe" class="mb-1 block font-medium">Fotos do carro</label>
       <input
+        id="fotos-detalhe"
         type="file"
         name="fotos"
         accept="image/*"
         capture="environment"
         multiple
-        class="mb-2 block w-full text-sm"
+        class="campo-arquivo mb-2"
       />
       <button type="submit" class="botao botao-secundario">Adicionar foto</button>
     </form>
     {% include "veiculos/partials/galeria.html" with veiculo=veiculo %}
+  </section>
+
+  {# Documentos do carro (foto do CRLV, consulta, procuração, etc.). #}
+  <section class="mb-6" aria-label="Documentos do carro">
+    <h2 class="mb-2 text-lg">Documentos do carro</h2>
+
+    {% with docs=veiculo.documentos.all %}
+      {% if docs %}
+        <ul class="mb-3 divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
+          {% for documento in docs %}
+            <li class="flex items-center justify-between gap-3 px-4 py-3">
+              <div class="min-w-0">
+                <div class="truncate font-medium">{{ documento.get_tipo_display }}</div>
+                {% if documento.descricao %}
+                  <div class="truncate text-sm text-tinta-suave">{{ documento.descricao }}</div>
+                {% endif %}
+              </div>
+              <a href="{{ documento.arquivo.url }}" target="_blank" class="shrink-0 text-petroleo-700">Abrir</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="mb-3 rounded-xl border border-borda bg-superficie px-4 py-4 text-center text-tinta-suave shadow-sm">
+          Nenhum documento guardado ainda.
+        </p>
+      {% endif %}
+    {% endwith %}
+
+    <form
+      method="post"
+      action="{% url 'veiculos:adicionar_documento' veiculo.pk %}"
+      enctype="multipart/form-data"
+      class="space-y-3 rounded-xl border border-borda bg-superficie p-4 shadow-sm"
+    >
+      {% csrf_token %}
+      <p class="font-medium">Guardar documento</p>
+      <div>
+        <label for="doc-tipo" class="mb-1 block text-sm">Tipo</label>
+        <select id="doc-tipo" name="tipo" class="campo">
+          <option value="doc_veiculo">Documento do veículo (CRV/CRLV)</option>
+          <option value="consulta">Consulta de situação</option>
+          <option value="procuracao">Procuração/autorização</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div>
+        <label for="doc-arquivo" class="mb-1 block text-sm">Foto ou PDF</label>
+        <input id="doc-arquivo" type="file" name="arquivo" accept="image/*,application/pdf" capture="environment" class="campo-arquivo" />
+      </div>
+      <button type="submit" class="botao botao-secundario">Guardar documento</button>
+    </form>
   </section>
   </div>
 
@@ -151,7 +196,7 @@
   {% if veiculo.alienado %}
     <section class="mb-6" aria-label="Financiamento">
       <h2 class="mb-2 text-lg">Financiamento</h2>
-      <div class="rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+      <div class="aviso aviso-atencao">
         <p>Carro com financiamento ativo em <strong>{{ veiculo.credor_alienacao|default:"—" }}</strong>.</p>
         <p>Saldo devedor: <strong>{{ veiculo.saldo_devedor|reais }}</strong></p>
       </div>

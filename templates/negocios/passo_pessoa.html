@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block largura %}max-w-3xl{% endblock %}
 
-{% block titulo %}{{ titulo }} — Bahia Car{% endblock %}
+{% block titulo %}{{ titulo }} · Bahia Car{% endblock %}
 
 {% block conteudo %}
   {% include "negocios/partials/cabecalho_passo.html" %}
 
   {% if form.non_field_errors %}
-    <div class="mb-4 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+    <div class="mb-4 aviso aviso-atencao">
       {{ form.non_field_errors }}
     </div>
   {% endif %}

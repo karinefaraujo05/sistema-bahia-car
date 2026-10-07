@@ -39,8 +39,9 @@
               <input
                 type="search"
                 name="q"
+                id="busca-global"
                 class="campo pl-10"
-                placeholder="Buscar por placa, carro ou pessoa"
+                placeholder="Buscar por placa, carro ou pessoa  ( / )"
                 autocomplete="off"
                 hx-get="{% url 'buscar' %}"
                 hx-trigger="keyup changed delay:300ms"
@@ -49,23 +50,58 @@
               <div id="busca-dropdown" class="busca-dropdown"></div>
             </form>
 
-            <div class="ml-auto flex shrink-0 items-center gap-2.5">
-              <div class="flex h-9 w-9 items-center justify-center rounded-full bg-petroleo-600 text-sm font-semibold text-white">
-                {{ user.get_full_name|default:user.username|first|upper }}
-              </div>
-              <div class="hidden leading-tight sm:block">
-                <div class="text-sm font-medium">{{ user.get_full_name|default:user.username }}</div>
-                <div class="text-xs text-tinta-suave">{% if user.eh_administrador %}Administrador{% else %}Vendedor{% endif %}</div>
+            <div class="relative ml-auto shrink-0">
+              <button
+                type="button"
+                id="botao-usuario"
+                onclick="alternarMenuUsuario()"
+                aria-haspopup="true"
+                aria-expanded="false"
+                class="flex items-center gap-2.5 rounded-lg p-1 hover:bg-petroleo-50 sm:pr-2.5"
+              >
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-petroleo-600 text-sm font-semibold text-white">
+                  {{ user.get_full_name|default:user.username|first|upper }}
+                </span>
+                <span class="hidden text-left leading-tight sm:block">
+                  <span class="block text-sm font-medium">{{ user.get_full_name|default:user.username|capfirst }}</span>
+                  <span class="block text-xs text-tinta-suave">{% if user.eh_administrador %}Administrador{% else %}Vendedor{% endif %}</span>
+                </span>
+                <svg class="hidden h-4 w-4 text-tinta-suave sm:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+
+              <div id="menu-usuario" class="absolute right-0 top-full z-40 mt-2 hidden w-56 rounded-xl border border-borda bg-superficie p-1.5 shadow-md">
+                <div class="border-b border-borda px-3 py-2 sm:hidden">
+                  <div class="text-sm font-medium">{{ user.get_full_name|default:user.username|capfirst }}</div>
+                  <div class="text-xs text-tinta-suave">{% if user.eh_administrador %}Administrador{% else %}Vendedor{% endif %}</div>
+                </div>
+                <a href="{% url 'ajuda' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-tinta hover:bg-petroleo-50">
+                  <svg class="h-5 w-5 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                  Como usar
+                </a>
+                {% if user.eh_administrador %}
+                  <a href="{% url 'contratos:configuracao' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-tinta hover:bg-petroleo-50">
+                    <svg class="h-5 w-5 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Configuração
+                  </a>
+                  <div class="my-1 border-t border-borda"></div>
+                {% endif %}
+                <form method="post" action="{% url 'contas:sair' %}">
+                  {% csrf_token %}
+                  <button type="submit" class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left font-medium text-tinta hover:bg-petroleo-50">
+                    <svg class="h-5 w-5 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    Sair
+                  </button>
+                </form>
               </div>
             </div>
           </header>
         {% endif %}
 
-        <main class="mx-auto w-full {% block largura %}max-w-6xl{% endblock %} flex-1 px-4 py-6 sm:px-6 lg:px-8">
+        <main class="mx-auto w-full {% block largura %}max-w-6xl{% endblock %} flex-1 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
           {% if messages %}
             <div class="mb-5 space-y-2">
               {% for mensagem in messages %}
-                <div class="rounded-xl border border-petroleo-200 bg-petroleo-50 px-4 py-3 text-petroleo-900 shadow-sm">
+                <div class="aviso aviso-info">
                   {{ mensagem }}
                 </div>
               {% endfor %}
@@ -86,6 +122,39 @@
         document.getElementById("sidebar").classList.add("-translate-x-full");
         document.getElementById("overlay").classList.add("hidden");
       }
+
+      function alternarMenuUsuario() {
+        var menu = document.getElementById("menu-usuario");
+        var botao = document.getElementById("botao-usuario");
+        var fechado = menu.classList.toggle("hidden");
+        botao.setAttribute("aria-expanded", fechado ? "false" : "true");
+      }
+      // Fecha o menu do usuário ao clicar fora ou apertar Esc.
+      document.addEventListener("click", function (e) {
+        var botao = document.getElementById("botao-usuario");
+        var menu = document.getElementById("menu-usuario");
+        if (!botao || !menu) return;
+        if (!botao.contains(e.target) && !menu.contains(e.target)) {
+          menu.classList.add("hidden");
+          botao.setAttribute("aria-expanded", "false");
+        }
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key !== "Escape") return;
+        var menu = document.getElementById("menu-usuario");
+        var botao = document.getElementById("botao-usuario");
+        if (menu) menu.classList.add("hidden");
+        if (botao) botao.setAttribute("aria-expanded", "false");
+      });
+      // Atalho: "/" foca a busca (quando não se está digitando em outro campo).
+      document.addEventListener("keydown", function (e) {
+        if (e.key !== "/") return;
+        var alvo = e.target || {};
+        var tag = (alvo.tagName || "").toLowerCase();
+        if (tag === "input" || tag === "textarea" || tag === "select" || alvo.isContentEditable) return;
+        var busca = document.getElementById("busca-global");
+        if (busca) { e.preventDefault(); busca.focus(); }
+      });
     </script>
   </body>
 </html>

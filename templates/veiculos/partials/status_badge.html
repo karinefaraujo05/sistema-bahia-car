@@ -1,4 +1,4 @@
 <span
-  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium{% if veiculo.status == 'em_estoque' %} bg-verde-fundo text-verde{% elif veiculo.status == 'reservado' %} bg-ambar-fundo text-ambar{% else %} bg-cinza-fundo text-cinza{% endif %}"
+  class="inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-sm font-medium{% if veiculo.status == 'em_estoque' %} bg-verde-fundo text-verde{% elif veiculo.status == 'reservado' %} bg-ambar-fundo text-ambar{% else %} bg-cinza-fundo text-cinza{% endif %}"
   >{{ veiculo.get_status_display }}</span
 >

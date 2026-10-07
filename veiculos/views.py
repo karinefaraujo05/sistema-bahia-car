@@ -1,7 +1,10 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+
+from contratos.models import Documento, TipoDocumento
 
 from .forms import VeiculoForm
 from .models import FotoVeiculo, StatusVeiculo, Veiculo
@@ -85,10 +88,40 @@ def editar(request, pk):
 @login_required
 @require_POST
 def arquivar(request, pk):
+    # Só o responsável (superusuário) pode arquivar carros.
+    if not request.user.is_superuser:
+        messages.error(request, "Só o responsável pode arquivar um carro.")
+        return redirect("veiculos:detalhe", pk=pk)
     veiculo = get_object_or_404(Veiculo.objetos, pk=pk)
     arquivar_veiculo(veiculo, usuario=request.user)
     messages.success(request, "Carro arquivado. Ele sai do estoque, mas nada é apagado.")
     return redirect("veiculos:estoque")
+
+
+@login_required
+@require_POST
+def adicionar_documento(request, pk):
+    """Guarda uma foto/PDF do documento direto na ficha do carro."""
+    veiculo = get_object_or_404(Veiculo.objetos, pk=pk)
+    arquivo = request.FILES.get("arquivo")
+    if not arquivo:
+        messages.error(request, "Escolha uma foto ou um PDF para guardar.")
+        return redirect("veiculos:detalhe", pk=pk)
+    limite = settings.TAMANHO_MAXIMO_UPLOAD_MB * 1024 * 1024
+    if arquivo.size > limite:
+        messages.error(request, f"O arquivo passa de {settings.TAMANHO_MAXIMO_UPLOAD_MB} MB.")
+        return redirect("veiculos:detalhe", pk=pk)
+    tipo = request.POST.get("tipo") or TipoDocumento.DOC_VEICULO
+    Documento._default_manager.create(
+        veiculo=veiculo,
+        tipo=tipo,
+        arquivo=arquivo,
+        descricao=request.POST.get("descricao", ""),
+        criado_por=request.user,
+        atualizado_por=request.user,
+    )
+    messages.success(request, "Documento guardado na ficha do carro.")
+    return redirect("veiculos:detalhe", pk=pk)
 
 
 def _galeria(request, veiculo):

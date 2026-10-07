@@ -1,26 +1,77 @@
-{% load formato contratos_extras %}CONTRATO DE COMPRA E VENDA DE VEÍCULO AUTOMOTOR COM INTERVENIÊNCIA DE INTERMEDIÁRIA
-Contrato nº {{ negocio.numero_contrato }}
+{% load formato contratos_extras pessoas_extras %}CONTRATO DE COMPRA E VENDA DE VEÍCULO AUTOMOTOR COM INTERVENIÊNCIA DE INTERMEDIÁRIA
+Contrato nº {{ negocio.numero_contrato|default:"____" }}
 
-VENDEDOR(A): {% include "contratos/modelos/_pessoa.txt" with p=vendedor papel_pessoa="VENDEDOR(A)" %}
+VENDEDOR(A): {{ vendedor.nome }}, {{ vendedor.nacionalidade|default:"____" }}, {{ vendedor.estado_civil|default:"____" }}, {{ vendedor.profissao|default:"____" }}, portador(a) do RG nº {{ vendedor.rg|default:"____" }} {{ vendedor.rg_orgao_emissor }}, inscrito(a) no CPF sob o nº {{ vendedor.cpf_cnpj|cpf_cnpj }}, residente e domiciliado(a) em {{ vendedor.endereco|default:"____" }}, {{ vendedor.cidade|default:"____" }}/{{ vendedor.uf|default:"__" }}, CEP {{ vendedor.cep|cep }}, doravante denominado(a) VENDEDOR(A).
 
-COMPRADOR(A): {% include "contratos/modelos/_pessoa.txt" with p=comprador papel_pessoa="COMPRADOR(A)" %}
+COMPRADOR(A): {{ comprador.nome }}, {{ comprador.nacionalidade|default:"____" }}, {{ comprador.estado_civil|default:"____" }}, {{ comprador.profissao|default:"____" }}, portador(a) do RG nº {{ comprador.rg|default:"____" }} {{ comprador.rg_orgao_emissor }}, inscrito(a) no CPF sob o nº {{ comprador.cpf_cnpj|cpf_cnpj }}, residente e domiciliado(a) em {{ comprador.endereco|default:"____" }}, {{ comprador.cidade|default:"____" }}/{{ comprador.uf|default:"__" }}, CEP {{ comprador.cep|cep }}, doravante denominado(a) COMPRADOR(A).
 
-INTERVENIENTE INTERMEDIÁRIA: {% include "contratos/modelos/_loja.txt" with papel_loja="INTERVENIENTE INTERMEDIÁRIA" %}
+INTERVENIENTE INTERMEDIÁRIA: {{ loja.razao_social|upper }}, nome fantasia {{ loja.nome_fantasia|default:"Bahia Car" }}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{ loja.cnpj|cpf_cnpj }}, com sede na {{ loja.endereco }}, {{ loja.cidade }}/{{ loja.uf }}, CEP {{ loja.cep|cep }}, neste ato representada por seu titular {{ loja.representante_nome }}, inscrito no CPF sob o nº {{ loja.representante_cpf|cpf_cnpj }}, doravante denominada INTERMEDIÁRIA.
 
-CLÁUSULA 1ª — OBJETO. O(A) VENDEDOR(A) vende ao(à) COMPRADOR(A) o veículo abaixo, com a interveniência da INTERMEDIÁRIA:
-{% include "contratos/modelos/_veiculo.txt" with v=item.veiculo item=item %}
+As partes, de comum acordo, celebram o presente contrato, que se regerá pelas cláusulas seguintes e pela legislação civil aplicável.
 
-CLÁUSULA 2ª — PAPEL DA INTERMEDIÁRIA. A INTERVENIENTE atua na aproximação das partes e na organização documental do negócio, não sendo proprietária do veículo. (Nota para o advogado: avaliar os limites da responsabilidade da revenda na intermediação/consignação.)
+CLÁUSULA 1ª – DO OBJETO. O(A) VENDEDOR(A) vende ao(à) COMPRADOR(A), que aceita, com a interveniência da INTERMEDIÁRIA, o veículo abaixo descrito, livre e desembaraçado de ônus salvo o declarado:
+Marca/Modelo: {{ item.veiculo.marca }} {{ item.veiculo.modelo }}
+Ano de fabricação/modelo: {{ item.veiculo.ano_fabricacao }}/{{ item.veiculo.ano_modelo }}
+Cor: {{ item.veiculo.cor }}
+Combustível: {{ item.veiculo.get_combustivel_display|default:"____" }}
+Placa: {{ item.veiculo.placa_formatada }}
+Renavam: {{ item.veiculo.renavam }}
+Chassi: {{ item.veiculo.chassi }}
+Quilometragem na entrega: {{ item.km_entrega|default:"____" }} km
 
-CLÁUSULA 3ª — PREÇO E PAGAMENTO. O preço total é de {{ item.valor|reais }} ({{ item.valor|extenso }}), pago da forma: {{ negocio.detalhes_pagamento|default:"a combinar" }}.
+CLÁUSULA 2ª – DO PAPEL DA INTERMEDIÁRIA. A INTERMEDIÁRIA atua exclusivamente na aproximação das partes e na organização documental do negócio, não sendo proprietária do veículo nem parte na compra e venda, não respondendo por vícios, débitos ou obrigações próprias do(a) VENDEDOR(A) ou do(a) COMPRADOR(A), salvo dolo ou culpa que lhe sejam diretamente imputáveis.
 
-CLÁUSULA 4ª — REMUNERAÇÃO DA INTERMEDIÁRIA. A remuneração da INTERVENIENTE é de {{ negocio.comissao_valor|reais }}{% if negocio.comissao_pagador %}, paga por {{ negocio.comissao_pagador.nome }}{% endif %}.
+CLÁUSULA 3ª – DO PREÇO E DA FORMA DE PAGAMENTO. O preço certo e ajustado é de {{ item.valor|reais }} ({{ item.valor|extenso }}), que o(a) COMPRADOR(A) pagará ao(à) VENDEDOR(A) da seguinte forma: {{ negocio.get_forma_pagamento_display|default:"____" }}{% if negocio.detalhes_pagamento %}, {{ negocio.detalhes_pagamento }}{% endif %}.
 
-CLÁUSULA 5ª — DECLARAÇÕES. O(A) VENDEDOR(A) declara legítima posse do veículo e responde por vícios ocultos preexistentes não declarados. Avarias: {{ item.veiculo.avarias_declaradas|default:"nenhuma declarada" }}.
-{% if item.veiculo.proprietario_registral %}O veículo está registrado em nome de {{ item.veiculo.proprietario_registral }}{% if anuente %}, que assina este contrato como anuente{% endif %}.{% endif %}
+CLÁUSULA 4ª – DA REMUNERAÇÃO DA INTERMEDIÁRIA. Pela intermediação, a INTERMEDIÁRIA receberá comissão de {{ negocio.comissao_valor|reais }}{% if negocio.comissao_pagador %}, paga por {{ negocio.comissao_pagador.nome }}{% endif %}, devida com a concretização do negócio.
 
-CLÁUSULA 6ª — ENTREGA E DÉBITOS. A entrega ocorre em {{ negocio.data_hora_entrega|date:"d/m/Y H:i"|default:"data a combinar" }}. Débitos com fato gerador até a entrega são do(a) VENDEDOR(A); a partir dela, do(a) COMPRADOR(A). IPVA e licenciamento: {{ loja.regra_ipva }}.
+CLÁUSULA 5ª – DAS DECLARAÇÕES DO(A) VENDEDOR(A). O(A) VENDEDOR(A) declara, sob as penas da lei, ser legítimo(a) proprietário(a) e possuidor(a) do veículo, com plenos poderes para aliená-lo; que o veículo está livre de alienação fiduciária, arrendamento, penhora, reserva de domínio, bloqueio judicial (RENAJUD) ou restrição administrativa não informada; que não houve sinistro com perda total nem adulteração de hodômetro; e responde pela evicção e pelos vícios ocultos preexistentes não declarados (arts. 441 a 457 do Código Civil).
+Avarias declaradas: {{ item.veiculo.avarias_declaradas|default:"nenhuma" }}
+{% if item.veiculo.proprietario_registral %}O veículo encontra-se registrado em nome de {{ item.veiculo.proprietario_registral }}{% if anuente %}, que assina o presente na qualidade de ANUENTE, concordando com a transferência{% endif %}.{% endif %}
 
-CLÁUSULA 7ª — DESCUMPRIMENTO. A parte que descumprir qualquer obrigação pagará à outra multa de {{ loja.multa_percentual }}% sobre o valor total, sem prejuízo de perdas e danos.
+CLÁUSULA 6ª – DA ENTREGA, DOS RISCOS E DOS DÉBITOS. A entrega do veículo e das chaves ocorrerá em {{ negocio.data_hora_entrega|date:"d/m/Y"|default:"____" }}, mediante vistoria conjunta e assinatura do termo de entrega.
 
-{% include "contratos/modelos/_rodape.txt" %}
+§ 1º Os riscos sobre o veículo transferem-se ao(à) COMPRADOR(A) com a tradição (art. 492 do Código Civil).
+
+§ 2º Multas, tributos, taxas, IPVA, licenciamento e quaisquer encargos com fato gerador até a data da entrega são de responsabilidade do(a) VENDEDOR(A); a partir dela, do(a) COMPRADOR(A).
+
+CLÁUSULA 7ª – DA DOCUMENTAÇÃO E DA COMUNICAÇÃO DE VENDA. O(A) VENDEDOR(A) entregará o CRLV-e e assinará a Autorização para Transferência de Propriedade de Veículo em meio eletrônico (ATPV-e) em favor do(a) COMPRADOR(A) em até 5 (cinco) dias úteis contados da entrega, registrando a comunicação de venda ao DETRAN/BA no mesmo prazo (art. 134 do Código de Trânsito Brasileiro). O(A) COMPRADOR(A) providenciará a transferência no prazo legal de 30 (trinta) dias. Chave reserva: {{ item.veiculo.tem_chave_reserva|sim_nao }}.
+
+CLÁUSULA 8ª – DO DESCUMPRIMENTO. A parte que descumprir qualquer obrigação deste contrato pagará à outra multa compensatória de {{ loja.multa_percentual|default:10|floatformat:0 }}% ({{ loja.multa_percentual|default:10|numero_extenso }} por cento) sobre o valor total da Cláusula 3ª, acrescida de juros de mora de 1% (um por cento) ao mês e correção monetária pelo IPCA desde a data do inadimplemento, sem prejuízo das perdas e danos.
+
+Parágrafo único. A multa não excederá o valor da obrigação principal (art. 412 do Código Civil).
+
+CLÁUSULA 9ª – DA PROTEÇÃO DE DADOS. Os dados pessoais das partes serão tratados exclusivamente para a execução deste contrato e o cumprimento de obrigações legais e regulatórias, nos termos da Lei nº 13.709/2018 (LGPD), e serão conservados pelo prazo legal.
+
+CLÁUSULA 10 – DAS DISPOSIÇÕES GERAIS. Este contrato obriga as partes e seus sucessores a qualquer título. A tolerância quanto ao descumprimento de qualquer cláusula não implica renúncia ou novação. Qualquer alteração só terá validade se feita por escrito. Este instrumento, assinado pelas partes e por duas testemunhas, constitui título executivo extrajudicial (art. 784, III, do Código de Processo Civil).
+
+CLÁUSULA 11 – DO FORO. Fica eleito o foro da comarca de {{ loja.cidade }}/{{ loja.uf }}, com renúncia a qualquer outro, por mais privilegiado que seja, para dirimir quaisquer questões decorrentes deste contrato.
+
+E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença das duas testemunhas abaixo, que também o subscrevem.
+
+{{ loja.cidade }}/{{ loja.uf }}, {{ negocio.data|date:"j \d\e F \d\e Y" }}.
+
+
+________________________________________
+{{ vendedor.nome }}
+VENDEDOR(A) · CPF {{ vendedor.cpf_cnpj|cpf_cnpj }}
+
+
+________________________________________
+{{ comprador.nome }}
+COMPRADOR(A) · CPF {{ comprador.cpf_cnpj|cpf_cnpj }}
+
+
+________________________________________
+{{ loja.razao_social|upper }} ({{ loja.nome_fantasia|default:"Bahia Car" }})
+INTERMEDIÁRIA · {{ loja.representante_nome }}, CPF {{ loja.representante_cpf|cpf_cnpj }}
+
+{% if item.veiculo.proprietario_registral and anuente %}
+________________________________________
+{{ anuente.nome }}
+ANUENTE · CPF {{ anuente.cpf_cnpj|cpf_cnpj }}
+{% endif %}
+
+TESTEMUNHAS
+1. ______________________________  Nome: ____  CPF: ____
+2. ______________________________  Nome: ____  CPF: ____

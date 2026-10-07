@@ -309,4 +309,72 @@
     width: 1.5rem;
     height: 1.5rem;
   }
+
+  /*
+    Aviso: faixa de status (atenção, ok, informação). Um componente só,
+    para todas as mensagens ficarem com o mesmo raio e respiro em todo o sistema.
+  */
+  .aviso {
+    border-radius: 0.875rem;
+    border: 1px solid var(--color-borda);
+    padding: 0.75rem 1rem;
+    color: var(--color-tinta);
+  }
+  .aviso-info {
+    border-color: var(--color-petroleo-200);
+    background-color: var(--color-petroleo-50);
+    color: var(--color-petroleo-900);
+  }
+  .aviso-atencao {
+    border-color: color-mix(in srgb, var(--color-ambar) 28%, var(--color-superficie));
+    background-color: var(--color-ambar-fundo);
+  }
+  .aviso-ok {
+    border-color: color-mix(in srgb, var(--color-verde) 30%, var(--color-superficie));
+    background-color: var(--color-verde-fundo);
+    color: var(--color-verde);
+  }
+
+  /* Link "voltar" com seta desenhada (mesmo traço dos outros ícones). */
+  .link-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 44px;
+    color: var(--color-tinta-suave);
+    font-weight: 500;
+    transition: color 0.15s ease;
+  }
+  .link-voltar:hover {
+    color: var(--color-tinta);
+  }
+  .link-voltar svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+  }
+
+  /* Campo de arquivo (upload de foto/documento) com visual consistente. */
+  .campo-arquivo {
+    width: 100%;
+    font-size: 0.9375rem;
+    color: var(--color-tinta-suave);
+  }
+  .campo-arquivo::file-selector-button {
+    margin-right: 0.75rem;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-borda);
+    border-radius: 0.625rem;
+    background-color: var(--color-superficie);
+    color: var(--color-tinta);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+  }
+  .campo-arquivo::file-selector-button:hover {
+    background-color: var(--color-petroleo-50);
+    border-color: var(--color-petroleo-200);
+  }
 }

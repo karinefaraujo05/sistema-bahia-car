@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-06T00:00:00Z",
+  "title": "Design System: Sistema Bahia Car",
+  "extensions": {
+    "colorMeta": {
+      "petroleo-600": { "role": "primary", "displayName": "Deep Petrol", "canonical": "#1a6670", "tonalRamp": ["#12343c", "#15424b", "#16525c", "#1a6670", "#277a83", "#43969f", "#73b9bf", "#d2eaec"] },
+      "petroleo-50": { "role": "primary", "displayName": "Petrol Mist", "canonical": "#ecf6f7", "tonalRamp": ["#12343c", "#16525c", "#277a83", "#43969f", "#73b9bf", "#a7d6da", "#d2eaec", "#ecf6f7"] },
+      "sidebar": { "role": "primary", "displayName": "Petrol Sidebar", "canonical": "#10303a", "tonalRamp": ["#0a2129", "#10303a", "#15424b", "#16525c", "#1a6670", "#277a83", "#43969f", "#73b9bf"] },
+      "tinta": { "role": "neutral", "displayName": "Ink", "canonical": "#101828", "tonalRamp": ["#101828", "#1f2a3d", "#334155", "#5b6675", "#94a0ae", "#c3ccd6", "#e6eaee", "#f4f6f8"] },
+      "tinta-suave": { "role": "neutral", "displayName": "Soft Ink", "canonical": "#5b6675", "tonalRamp": ["#101828", "#334155", "#5b6675", "#7a8694", "#94a0ae", "#b6bfc9", "#d7dde3", "#eef1f4"] },
+      "fundo": { "role": "neutral", "displayName": "Cool Paper", "canonical": "#f4f6f8", "tonalRamp": ["#101828", "#334155", "#64748b", "#94a0ae", "#c3ccd6", "#e6eaee", "#f4f6f8", "#ffffff"] },
+      "superficie": { "role": "neutral", "displayName": "Surface White", "canonical": "#ffffff", "tonalRamp": ["#334155", "#64748b", "#94a0ae", "#c3ccd6", "#e6eaee", "#eef1f4", "#f4f6f8", "#ffffff"] },
+      "borda": { "role": "neutral", "displayName": "Hairline", "canonical": "#e6eaee", "tonalRamp": ["#334155", "#64748b", "#94a0ae", "#b6bfc9", "#d2d8de", "#e6eaee", "#f0f2f5", "#ffffff"] },
+      "verde": { "role": "tertiary", "displayName": "Quiet Green", "canonical": "#2f7d46", "tonalRamp": ["#13331d", "#1c4a2a", "#265f38", "#2f7d46", "#4a9a62", "#7bbd8e", "#b6ddc0", "#e7f3ea"] },
+      "ambar": { "role": "tertiary", "displayName": "Warm Amber", "canonical": "#9a5b00", "tonalRamp": ["#3a2200", "#5c3600", "#7a4800", "#9a5b00", "#bd7a1e", "#d9a257", "#ecca97", "#f7eeda"] },
+      "cinza": { "role": "tertiary", "displayName": "Neutral Grey", "canonical": "#64748b", "tonalRamp": ["#1f2937", "#374151", "#4b5563", "#64748b", "#8c98a8", "#b4bcc8", "#d7dce3", "#eef1f4"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page titles (h1), e.g. Início, Estoque." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles inside panels (Vendas, Últimos negócios)." },
+      "title": { "displayName": "Title", "purpose": "Card headings and list-row primary text." },
+      "body": { "displayName": "Body", "purpose": "Baseline text; 17px minimum on mobile is a hard floor. Controls inherit this size." },
+      "label": { "displayName": "Label", "purpose": "Metadata, captions, nav and badge text, chart axis labels." }
+    },
+    "shadows": [
+      { "name": "rest", "value": "0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08)", "purpose": "Default elevation for cards, panels, fields, buttons, indicators — a quiet lift off the paper." },
+      { "name": "raised", "value": "0 2px 4px rgba(16,24,40,0.06), 0 8px 20px rgba(16,24,40,0.08)", "purpose": "Hover/active state for interactive surfaces and the open search dropdown." },
+      { "name": "focus-ring", "value": "0 0 0 3px color-mix(in srgb, #277a83 18%, transparent)", "purpose": "Petrol glow around a focused field." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "ease", "purpose": "Default easing for state transitions." },
+      { "name": "duration-fast", "value": "0.15s", "purpose": "Buttons, fields, nav — color/shadow/border/transform transitions." },
+      { "name": "duration-lift", "value": "0.18s", "purpose": "Card and action-card hover lift." },
+      { "name": "reduced-motion", "value": "transition/animation clamped to 0.01ms under prefers-reduced-motion", "purpose": "Honors the user's reduced-motion preference globally." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main commit action — petrol fill, always with a text label, lifts on hover.",
+      "html": "<button class=\"ds-btn-primary\">Salvar</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 48px; padding: 0.75rem 1.375rem; border-radius: 0.75rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 1.0625rem; font-weight: 600; color: #ffffff; background-color: #1a6670; border: none; box-shadow: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08); cursor: pointer; transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease; } .ds-btn-primary:hover { background-color: #16525c; box-shadow: 0 2px 4px rgba(16,24,40,0.06), 0 8px 20px rgba(16,24,40,0.08); transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid #277a83; outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Secondary action — white with a hairline border, fills petrol-mist on hover.",
+      "html": "<button class=\"ds-btn-secondary\">Voltar</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 48px; padding: 0.75rem 1.375rem; border-radius: 0.75rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 1.0625rem; font-weight: 600; color: #101828; background-color: #ffffff; border: 1px solid #e6eaee; box-shadow: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08); cursor: pointer; transition: background-color 0.15s ease, border-color 0.15s ease; } .ds-btn-secondary:hover { background-color: #ecf6f7; border-color: #a7d6da; } .ds-btn-secondary:focus-visible { outline: 2px solid #277a83; outline-offset: 2px; }"
+    },
+    {
+      "name": "Search Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "The global search field — white, hairline border, petrol glow on focus; the heart of the product.",
+      "html": "<div class=\"ds-field-wrap\"><span class=\"ds-field-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg></span><input class=\"ds-input-search\" type=\"search\" placeholder=\"Buscar por placa, carro ou pessoa\" /></div>",
+      "css": ".ds-field-wrap { position: relative; width: 100%; max-width: 36rem; } .ds-field-icon { position: absolute; inset: 0 auto 0 0.75rem; display: flex; align-items: center; color: #5b6675; pointer-events: none; } .ds-field-icon svg { width: 1.25rem; height: 1.25rem; } .ds-input-search { width: 100%; min-height: 48px; padding: 0.625rem 0.875rem 0.625rem 2.5rem; border-radius: 0.625rem; background-color: #ffffff; border: 1px solid #e6eaee; color: #101828; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 1.0625rem; caret-color: #1a6670; transition: border-color 0.15s ease, box-shadow 0.15s ease; } .ds-input-search::placeholder { color: #5b6675; } .ds-input-search:focus { outline: none; border-color: #277a83; box-shadow: 0 0 0 3px color-mix(in srgb, #277a83 18%, transparent); }"
+    },
+    {
+      "name": "Vehicle Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The signature content object — cover photo, title + status badge, metadata, petrol price, days-in-stock.",
+      "html": "<a class=\"ds-card\" href=\"#\"><div class=\"ds-card-photo\"><img src=\"https://picsum.photos/seed/bahiacar/480/270\" alt=\"Honda Civic\" /></div><div class=\"ds-card-body\"><div class=\"ds-card-head\"><h3 class=\"ds-card-title\">Honda Civic</h3><span class=\"ds-badge ds-badge-success\">Em estoque</span></div><p class=\"ds-card-meta\">2019/2020 · Prata · ABC-1D23</p><div class=\"ds-card-price-row\"><span class=\"ds-card-price\">R$ 92.000,00</span></div><p class=\"ds-card-caption\">Há 12 dias na loja</p></div></a>",
+      "css": ".ds-card { display: block; overflow: hidden; border-radius: 1rem; background-color: #ffffff; border: 1px solid #e6eaee; box-shadow: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08); color: #101828; text-decoration: none; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; transition: box-shadow 0.18s ease, transform 0.18s ease; } .ds-card:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(16,24,40,0.06), 0 8px 20px rgba(16,24,40,0.08); } .ds-card-photo { aspect-ratio: 16 / 9; background-color: #eef1f4; } .ds-card-photo img { width: 100%; height: 100%; object-fit: cover; } .ds-card-body { padding: 1rem; } .ds-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; } .ds-card-title { margin: 0; font-size: 1rem; font-weight: 600; } .ds-card-meta { margin: 0.25rem 0 0; font-size: 0.875rem; color: #5b6675; } .ds-card-price-row { margin-top: 0.75rem; } .ds-card-price { font-size: 1.125rem; font-weight: 700; color: #16525c; } .ds-card-caption { margin-top: 0.25rem; font-size: 0.75rem; color: #5b6675; } .ds-badge { display: inline-flex; align-items: center; border-radius: 9999px; padding: 0.125rem 0.625rem; font-size: 0.875rem; font-weight: 500; } .ds-badge-success { background-color: #e7f3ea; color: #2f7d46; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge-success",
+      "description": "Pill badge speaking status quietly — tint field, solid status text. Green / amber / grey variants.",
+      "html": "<span class=\"ds-badge ds-badge-success\">Em estoque</span> <span class=\"ds-badge ds-badge-warning\">Reservado</span> <span class=\"ds-badge ds-badge-neutral\">Consignado</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; border-radius: 9999px; padding: 0.125rem 0.625rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; } .ds-badge-success { background-color: #e7f3ea; color: #2f7d46; } .ds-badge-warning { background-color: #f7eeda; color: #9a5b00; } .ds-badge-neutral { background-color: #eef1f4; color: #64748b; }"
+    },
+    {
+      "name": "Aviso (Status Banner)",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "One inline status-banner component for all messages — info (petrol), atenção (amber), ok (green). Same radius and padding everywhere.",
+      "html": "<div class=\"ds-aviso ds-aviso-info\">Venda salva.</div><div class=\"ds-aviso ds-aviso-atencao\" style=\"margin-top:8px\"><strong>Atenção:</strong> o modelo de contrato é provisório.</div><div class=\"ds-aviso ds-aviso-ok\" style=\"margin-top:8px\">Dados completos para gerar contratos.</div>",
+      "css": ".ds-aviso { border-radius: 0.875rem; border: 1px solid #e6eaee; padding: 0.75rem 1rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 1.0625rem; color: #101828; } .ds-aviso-info { border-color: #a7d6da; background-color: #ecf6f7; color: #12343c; } .ds-aviso-atencao { border-color: color-mix(in srgb, #9a5b00 28%, #ffffff); background-color: #f7eeda; } .ds-aviso-ok { border-color: color-mix(in srgb, #2f7d46 30%, #ffffff); background-color: #e7f3ea; color: #2f7d46; }"
+    },
+    {
+      "name": "Action Card",
+      "kind": "custom",
+      "refersTo": "action-card",
+      "description": "Large dashboard shortcut — tinted icon chip + label, lifts 2px on hover.",
+      "html": "<a class=\"ds-action\" href=\"#\"><span class=\"ds-action-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 5v14\"/><path d=\"m19 12-7 7-7-7\"/></svg></span><span>Cadastrar carro que entrou</span></a>",
+      "css": ".ds-action { display: flex; align-items: center; gap: 1rem; min-height: 72px; padding: 1.125rem 1.375rem; background-color: #ffffff; border: 1px solid #e6eaee; border-radius: 0.875rem; box-shadow: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08); font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 1.0625rem; font-weight: 600; color: #101828; text-decoration: none; cursor: pointer; transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease; } .ds-action:hover { border-color: #a7d6da; box-shadow: 0 2px 4px rgba(16,24,40,0.06), 0 8px 20px rgba(16,24,40,0.08); transform: translateY(-2px); } .ds-action-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 0.75rem; background-color: #ecf6f7; color: #16525c; } .ds-action-icon svg { width: 1.5rem; height: 1.5rem; }"
+    },
+    {
+      "name": "Sidebar Item",
+      "kind": "nav",
+      "refersTo": "sidebar-item",
+      "description": "Nav row on the dark petrol rail — soft blue-grey at rest, white wash when active.",
+      "html": "<nav class=\"ds-rail\"><a class=\"ds-nav-item ds-nav-item-active\" href=\"#\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/><path d=\"M9 22V12h6v10\"/></svg><span>Início</span></a><a class=\"ds-nav-item\" href=\"#\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/></svg><span>Pessoas</span></a></nav>",
+      "css": ".ds-rail { display: flex; flex-direction: column; gap: 0.25rem; width: 16rem; padding: 0.75rem; background-color: #10303a; font-family: Inter, ui-sans-serif, system-ui, sans-serif; } .ds-nav-item { display: flex; align-items: center; gap: 0.75rem; min-height: 44px; padding: 0.625rem 0.875rem; border-radius: 0.625rem; font-size: 1.0625rem; font-weight: 500; color: #c3d1d4; text-decoration: none; transition: background-color 0.15s ease, color 0.15s ease; } .ds-nav-item svg { width: 1.25rem; height: 1.25rem; flex-shrink: 0; } .ds-nav-item:hover { background-color: color-mix(in srgb, #fff 8%, transparent); color: #fff; } .ds-nav-item-active { background-color: color-mix(in srgb, #fff 12%, transparent); color: #fff; font-weight: 600; }"
+    },
+    {
+      "name": "Indicator Stat",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Dashboard metric — tinted icon chip, bold figure, soft-ink caption. Static (no hover).",
+      "html": "<div class=\"ds-indicator\"><span class=\"ds-indicator-icon\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"7\" cy=\"17\" r=\"2\"/><circle cx=\"17\" cy=\"17\" r=\"2\"/><path d=\"M9 17h6\"/></svg></span><div><div class=\"ds-indicator-value\">14</div><div class=\"ds-indicator-caption\">carros na loja</div></div></div>",
+      "css": ".ds-indicator { display: flex; align-items: center; gap: 1rem; background-color: #ffffff; border: 1px solid #e6eaee; border-radius: 0.875rem; box-shadow: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08); padding: 1.125rem 1.25rem; font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-variant-numeric: tabular-nums; } .ds-indicator-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border-radius: 0.75rem; background-color: #ecf6f7; color: #16525c; } .ds-indicator-icon svg { width: 1.5rem; height: 1.5rem; } .ds-indicator-value { font-size: 1.5rem; font-weight: 700; color: #101828; } .ds-indicator-caption { font-size: 0.875rem; color: #5b6675; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Balcão de Confiança (The Trust Counter)",
+    "overview": "This is the unhurried dealership counter, rendered as software: the place where a non-technical shop owner handles real paperwork plainly and trusts that nothing he enters will ever get lost. The whole system is written to feel calm, honest, and sure. Cool paper-grey backdrops carry white surfaces that lift just enough to read as 'a card you can pick up.' A single deep petrol accent does all the pointing — it is the one voice in the room, never a chorus. There is no flash, no persuasion, no decoration that isn't doing a job; the brand lives in restraint and in the precision of small details (tabular figures, a hairline border, a shadow that deepens only when you reach for something). Everything is sized for certainty over density. Body text starts at 17px, primary actions are at least 48px tall and always carry words, and color is used sparingly enough that when petrol does appear it means 'this is the thing.' The palette is sober and faintly warm; status is spoken in quiet green / amber / grey, never in alarm. The result reads as a well-kept ledger at a trusted counter, not a dashboard and emphatically not something generated by a machine.",
+    "keyCharacteristics": [
+      "Cool-paper canvas, white surfaces, one deep petrol accent used sparingly.",
+      "Calm and literal: plain Brazilian-Portuguese labels, big sure buttons, generous text.",
+      "Soft ambient shadow at rest; surfaces lift 1–2px only on hover.",
+      "Status spoken quietly in green / amber / grey, never loud.",
+      "Tabular numerals everywhere money and counts appear.",
+      "A dark petrol sidebar frames a light, airy workspace."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Deep petrol is the only accent in the system. It should touch well under ~10% of any screen — its rarity is what makes it read as 'the thing to do.' Never introduce a second accent hue; status colors are not accents.", "section": "colors" },
+      { "name": "The No-Alarm Rule", "body": "Status is informational, not emotional. Use the *-fundo tint as the field and the solid status color only for the text/icon on it. Never fill a large surface with a saturated status color.", "section": "colors" },
+      { "name": "The Ledger Numeral Rule", "body": "Tabular numerals stay on globally. Any money, plate, count, or date must align vertically across rows. Never switch a figure to proportional numerals.", "section": "typography" },
+      { "name": "The Plain-Word Rule", "body": "Type carries plain Brazilian Portuguese as a person would speak it ('Salvar', 'Carro vendido', 'Foto do contrato'). Never system/DB jargon. Binding brand commitment.", "section": "typography" },
+      { "name": "The Reach Rule", "body": "Elevation change is a response to intent. A surface deepens its shadow and lifts a pixel or two only on hover/focus; nothing floats dramatically at rest, and nothing animates elevation without a user gesture.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep Deep Petrol as the only accent, under ~10% of any screen (The One Voice Rule). Use Petrol Mist (#ecf6f7) for soft hover beds and active-nav backgrounds.",
+      "Do keep tabular numerals on for every figure — prices (R$ 32.000,00), plates, counts, dates (dd/mm/aaaa) must align across rows.",
+      "Do make primary actions ≥48px tall and always carry a text label; icons only ever support text.",
+      "Do define each surface with a hairline border and a soft shadow-sm, and lift it 1–2px to shadow-md only on hover (The Reach Rule).",
+      "Do write every label and message in plain Brazilian Portuguese as a person would speak, and make errors say what to do.",
+      "Do speak status quietly — status tint as field, solid status color for text/icon only.",
+      "Do hold every layout at 375px; desktop is primary but mobile is a real surface."
+    ],
+    "donts": [
+      "Don't use purple/blue gradients, emojis in the UI, sparkle/star icons, glassmorphism, or exaggerated shadows — binding brand rejections that make it look AI-made.",
+      "Don't introduce a second accent color, or fill a large surface with a saturated status color (The No-Alarm Rule).",
+      "Don't over-round: no fully-pill buttons or inputs. Pills are only for badges, filter tabs, and avatars.",
+      "Don't drop body text below 17px on mobile, or ship an icon-only control without a text label.",
+      "Don't use marketing copy ('Gerencie seu estoque de forma inteligente!') or technical jargon anywhere in the UI.",
+      "Don't add drama to elevation — nothing floats dramatically at rest or animates its shadow without a user gesture."
+    ]
+  }
+}

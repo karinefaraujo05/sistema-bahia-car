@@ -1,23 +1,81 @@
-{% load formato contratos_extras %}CONTRATO DE COMPRA E VENDA DE VEÍCULO AUTOMOTOR
-Contrato nº {{ negocio.numero_contrato }}
+{% load formato contratos_extras pessoas_extras %}CONTRATO DE COMPRA E VENDA DE VEÍCULO AUTOMOTOR
+Contrato nº {{ negocio.numero_contrato|default:"____" }}
 
-VENDEDOR(A): {% include "contratos/modelos/_pessoa.txt" with p=vendedor papel_pessoa="VENDEDOR(A)" %}
+VENDEDOR(A): {{ vendedor.nome }}, {{ vendedor.nacionalidade|default:"____" }}, {{ vendedor.estado_civil|default:"____" }}, {{ vendedor.profissao|default:"____" }}, portador(a) do RG nº {{ vendedor.rg|default:"____" }} {{ vendedor.rg_orgao_emissor }}, inscrito(a) no CPF sob o nº {{ vendedor.cpf_cnpj|cpf_cnpj }}, residente e domiciliado(a) em {{ vendedor.endereco|default:"____" }}, {{ vendedor.cidade|default:"____" }}/{{ vendedor.uf|default:"__" }}, CEP {{ vendedor.cep|cep }}, doravante denominado(a) VENDEDOR(A).
 
-COMPRADORA: {% include "contratos/modelos/_loja.txt" with papel_loja="COMPRADORA" %}
+COMPRADORA: {{ loja.razao_social|upper }}, nome fantasia {{ loja.nome_fantasia|default:"Bahia Car" }}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{ loja.cnpj|cpf_cnpj }}, com sede na {{ loja.endereco }}, {{ loja.cidade }}/{{ loja.uf }}, CEP {{ loja.cep|cep }}, neste ato representada por seu titular {{ loja.representante_nome }}, inscrito no CPF sob o nº {{ loja.representante_cpf|cpf_cnpj }}, doravante denominada COMPRADORA.
 
-CLÁUSULA 1ª — OBJETO. O(A) VENDEDOR(A) vende à COMPRADORA, livre de ônus salvo o aqui declarado, o veículo:
-{% include "contratos/modelos/_veiculo.txt" with v=item.veiculo item=item %}
+As partes, de comum acordo, celebram o presente contrato, que se regerá pelas cláusulas seguintes e pela legislação civil aplicável.
 
-CLÁUSULA 2ª — PREÇO E PAGAMENTO. O preço total é de {{ item.valor|reais }} ({{ item.valor|extenso }}), pago da seguinte forma: {{ negocio.detalhes_pagamento|default:"a combinar" }}.
-{% if item.veiculo.alienado %}O veículo possui financiamento ativo junto a {{ item.veiculo.credor_alienacao }}, com saldo devedor declarado de {{ item.veiculo.saldo_devedor|reais }}. As partes declaram ciência de que a transferência depende da quitação ou da anuência do credor.{% endif %}
+CLÁUSULA 1ª – DO OBJETO. O(A) VENDEDOR(A) vende à COMPRADORA, que aceita, o veículo abaixo descrito, livre e desembaraçado de quaisquer ônus, gravames, restrições judiciais ou administrativas, salvo o expressamente declarado na Cláusula 3ª:
+Marca/Modelo: {{ item.veiculo.marca }} {{ item.veiculo.modelo }}
+Ano de fabricação/modelo: {{ item.veiculo.ano_fabricacao }}/{{ item.veiculo.ano_modelo }}
+Cor: {{ item.veiculo.cor }}
+Combustível: {{ item.veiculo.get_combustivel_display|default:"____" }}
+Placa: {{ item.veiculo.placa_formatada }}
+Renavam: {{ item.veiculo.renavam }}
+Chassi: {{ item.veiculo.chassi }}
+Quilometragem na entrega: {{ item.km_entrega|default:"____" }} km
 
-CLÁUSULA 3ª — DECLARAÇÕES DO(A) VENDEDOR(A). Declara ser legítimo possuidor do veículo, que não pesam sobre ele restrições além das aqui descritas, e responde pela evicção e por vícios ocultos preexistentes não declarados, nos termos da lei civil.
-Avarias declaradas: {{ item.veiculo.avarias_declaradas|default:"nenhuma declarada" }}.
+CLÁUSULA 2ª – DO PREÇO E DA FORMA DE PAGAMENTO. O preço certo e ajustado é de {{ item.valor|reais }} ({{ item.valor|extenso }}), que a COMPRADORA pagará da seguinte forma: {{ negocio.get_forma_pagamento_display|default:"____" }}{% if negocio.detalhes_pagamento %}, {{ negocio.detalhes_pagamento }}{% endif %}.
 
-CLÁUSULA 4ª — ENTREGA E DÉBITOS. A entrega ocorre em {{ negocio.data_hora_entrega|date:"d/m/Y H:i"|default:"data a combinar" }}, no endereço {{ negocio.local_entrega|default:loja.endereco }}. Multas, tributos e encargos com fato gerador até a entrega são de responsabilidade do(a) VENDEDOR(A); a partir dela, da COMPRADORA. IPVA e licenciamento: {{ loja.regra_ipva }}.
+§ 1º O comprovante de transferência bancária ou PIX, ou o recibo assinado pelo(a) VENDEDOR(A), valerá como prova de pagamento e quitação da parcela correspondente.
 
-CLÁUSULA 5ª — DOCUMENTAÇÃO. O(A) VENDEDOR(A) assinará a ATPV-e em até {{ loja.prazo_assinatura_dias }} dias úteis e entregará os documentos do veículo. Chave reserva: {{ item.veiculo.tem_chave_reserva|sim_nao }}.
+§ 2º Havendo saldo a pagar, a COMPRADORA poderá reter e compensar desse saldo os valores de débitos, multas ou encargos de responsabilidade do(a) VENDEDOR(A) que vierem a ser apurados após a entrega, mediante comunicação escrita.
 
-CLÁUSULA 6ª — DESCUMPRIMENTO. A parte que descumprir qualquer obrigação pagará à outra multa de {{ loja.multa_percentual }}% sobre o valor total, sem prejuízo de perdas e danos.
+CLÁUSULA 3ª – DAS DECLARAÇÕES DO(A) VENDEDOR(A). O(A) VENDEDOR(A) declara, sob as penas da lei, que:
+1. é legítimo(a) proprietário(a) e possuidor(a) do veículo, com plenos poderes para aliená-lo;
+2. o veículo não está alienado fiduciariamente, arrendado, penhorado, nem sujeito a reserva de domínio, bloqueio judicial (RENAJUD) ou restrição administrativa;
+3. o veículo não foi objeto de sinistro com perda total, leilão, remarcação de chassi ou adulteração de hodômetro, e a quilometragem informada na Cláusula 1ª é a real;
+4. não existem multas, IPVA, licenciamento, seguro obrigatório ou outros débitos pendentes, salvo os relacionados abaixo;
+5. responde pela evicção e pelos vícios ocultos preexistentes não declarados, nos termos dos arts. 441 a 457 do Código Civil.
+Avarias declaradas: {{ item.veiculo.avarias_declaradas|default:"nenhuma" }}
+Débitos declarados: {% if item.veiculo.alienado %}financiamento junto a {{ item.veiculo.credor_alienacao|default:"____" }}, com saldo devedor de {{ item.veiculo.saldo_devedor|reais }}{% else %}nenhum{% endif %}
 
-{% include "contratos/modelos/_rodape.txt" %}
+CLÁUSULA 4ª – DA ENTREGA, DOS RISCOS E DOS DÉBITOS. A entrega do veículo e das chaves ocorrerá em {{ negocio.data_hora_entrega|date:"d/m/Y"|default:"____" }}, na sede da COMPRADORA ({{ loja.endereco }}, {{ loja.cidade }}/{{ loja.uf }}), mediante vistoria conjunta e assinatura do termo de entrega.
+
+§ 1º A COMPRADORA declara ter vistoriado o veículo e recebê-lo no estado em que se encontra, ressalvados os vícios ocultos e as declarações da Cláusula 3ª.
+
+§ 2º Os riscos sobre o veículo transferem-se à COMPRADORA com a tradição (art. 492 do Código Civil).
+
+§ 3º Multas, tributos, taxas, IPVA, licenciamento e quaisquer encargos com fato gerador até a data da entrega são de responsabilidade exclusiva do(a) VENDEDOR(A); a partir dela, da COMPRADORA.
+
+§ 4º Débitos de responsabilidade do(a) VENDEDOR(A) apurados após a entrega serão por ele(a) reembolsados à COMPRADORA em até 10 (dez) dias contados da notificação, sem prejuízo da compensação prevista no § 2º da Cláusula 2ª.
+
+CLÁUSULA 5ª – DA DOCUMENTAÇÃO E DA COMUNICAÇÃO DE VENDA. O(A) VENDEDOR(A) obriga-se a:
+1. assinar a Autorização para Transferência de Propriedade de Veículo em meio eletrônico (ATPV-e) em até 5 (cinco) dias úteis contados da entrega;
+2. registrar a comunicação de venda perante o DETRAN/BA no mesmo prazo, nos termos do art. 134 do Código de Trânsito Brasileiro, e enviar o comprovante à COMPRADORA;
+3. entregar o CRLV-e, o manual e demais documentos do veículo. Chave reserva: {{ item.veiculo.tem_chave_reserva|sim_nao }}.
+
+§ 1º Até a efetivação da comunicação de venda, o(a) VENDEDOR(A) responde solidariamente pelas infrações cometidas com o veículo, na forma da lei, obrigando-se a reembolsar a COMPRADORA de qualquer valor que esta venha a pagar a esse título.
+
+§ 2º A COMPRADORA, por sua vez, obriga-se a não circular com o veículo antes da entrega e a providenciar os atos de sua competência perante o órgão de trânsito.
+
+CLÁUSULA 6ª – DO DESCUMPRIMENTO. A parte que descumprir qualquer obrigação deste contrato pagará à outra multa compensatória de {{ loja.multa_percentual|default:10|floatformat:0 }}% ({{ loja.multa_percentual|default:10|numero_extenso }} por cento) sobre o valor total da Cláusula 2ª, acrescida de juros de mora de 1% (um por cento) ao mês e correção monetária pelo IPCA desde a data do inadimplemento, sem prejuízo das perdas e danos e da execução específica da obrigação.
+
+Parágrafo único. A multa não excederá o valor da obrigação principal (art. 412 do Código Civil).
+
+CLÁUSULA 7ª – DA PROTEÇÃO DE DADOS. Os dados pessoais das partes serão tratados exclusivamente para a execução deste contrato e o cumprimento de obrigações legais e regulatórias, nos termos da Lei nº 13.709/2018 (LGPD), e serão conservados pelo prazo legal.
+
+CLÁUSULA 8ª – DAS DISPOSIÇÕES GERAIS. Este contrato obriga as partes e seus sucessores a qualquer título. A tolerância quanto ao descumprimento de qualquer cláusula não implica renúncia ou novação. Qualquer alteração só terá validade se feita por escrito e assinada por ambas as partes. Este instrumento, assinado pelas partes e por duas testemunhas, constitui título executivo extrajudicial (art. 784, III, do Código de Processo Civil).
+
+CLÁUSULA 9ª – DO FORO. Fica eleito o foro da comarca de {{ loja.cidade }}/{{ loja.uf }}, com renúncia a qualquer outro, por mais privilegiado que seja, para dirimir quaisquer questões decorrentes deste contrato.
+
+E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença das duas testemunhas abaixo, que também o subscrevem.
+
+{{ loja.cidade }}/{{ loja.uf }}, {{ negocio.data|date:"j \d\e F \d\e Y" }}.
+
+
+________________________________________
+{{ vendedor.nome }}
+VENDEDOR(A) · CPF {{ vendedor.cpf_cnpj|cpf_cnpj }}
+
+
+________________________________________
+{{ loja.razao_social|upper }} ({{ loja.nome_fantasia|default:"Bahia Car" }})
+COMPRADORA · {{ loja.representante_nome }}, CPF {{ loja.representante_cpf|cpf_cnpj }}
+
+
+TESTEMUNHAS
+1. ______________________________  Nome: ____  CPF: ____
+2. ______________________________  Nome: ____  CPF: ____

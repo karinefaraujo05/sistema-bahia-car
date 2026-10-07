@@ -1,26 +1,64 @@
-{% load formato contratos_extras %}CONTRATO DE PERMUTA DE VEÍCULOS COM COMPLEMENTAÇÃO DE PREÇO
-Contrato nº {{ negocio.numero_contrato }}
+{% load formato contratos_extras pessoas_extras %}CONTRATO DE PERMUTA DE VEÍCULOS COM COMPLEMENTAÇÃO DE PREÇO
+Contrato nº {{ negocio.numero_contrato|default:"____" }}
 
-LOJA: {% include "contratos/modelos/_loja.txt" with papel_loja="LOJA" %}
+LOJA: {{ loja.razao_social|upper }}, nome fantasia {{ loja.nome_fantasia|default:"Bahia Car" }}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{ loja.cnpj|cpf_cnpj }}, com sede na {{ loja.endereco }}, {{ loja.cidade }}/{{ loja.uf }}, CEP {{ loja.cep|cep }}, neste ato representada por seu titular {{ loja.representante_nome }}, inscrito no CPF sob o nº {{ loja.representante_cpf|cpf_cnpj }}, doravante denominada LOJA.
 
-CLIENTE: {% include "contratos/modelos/_pessoa.txt" with p=permutante papel_pessoa="CLIENTE" %}
+CLIENTE: {{ permutante.nome }}, {{ permutante.nacionalidade|default:"____" }}, {{ permutante.estado_civil|default:"____" }}, {{ permutante.profissao|default:"____" }}, portador(a) do RG nº {{ permutante.rg|default:"____" }} {{ permutante.rg_orgao_emissor }}, inscrito(a) no CPF sob o nº {{ permutante.cpf_cnpj|cpf_cnpj }}, residente e domiciliado(a) em {{ permutante.endereco|default:"____" }}, {{ permutante.cidade|default:"____" }}/{{ permutante.uf|default:"__" }}, CEP {{ permutante.cep|cep }}, doravante denominado(a) CLIENTE.
 
-CLÁUSULA 1ª — OBJETO. As partes permutam entre si os veículos abaixo.
+As partes, de comum acordo, celebram o presente contrato de permuta, que se regerá pelas cláusulas seguintes e pela legislação civil aplicável (art. 533 do Código Civil).
 
-Veículo entregue pela LOJA ao CLIENTE:
-{% include "contratos/modelos/_veiculo.txt" with v=saida.veiculo item=saida %}
+CLÁUSULA 1ª – DO OBJETO. As partes permutam entre si, livres de ônus salvo o declarado, os veículos abaixo descritos:
+Veículo entregue pela LOJA ao(à) CLIENTE:
+Marca/Modelo: {{ saida.veiculo.marca }} {{ saida.veiculo.modelo }}
+Ano de fabricação/modelo: {{ saida.veiculo.ano_fabricacao }}/{{ saida.veiculo.ano_modelo }}
+Cor: {{ saida.veiculo.cor }} · Combustível: {{ saida.veiculo.get_combustivel_display|default:"____" }}
+Placa: {{ saida.veiculo.placa_formatada }} · Renavam: {{ saida.veiculo.renavam }} · Chassi: {{ saida.veiculo.chassi }}
+Quilometragem na entrega: {{ saida.km_entrega|default:"____" }} km · Valor atribuído: {{ saida.valor|reais }}
 {% for e in entradas %}
-Veículo entregue pelo CLIENTE à LOJA:
-{% include "contratos/modelos/_veiculo.txt" with v=e.veiculo item=e %}
+Veículo entregue pelo(a) CLIENTE à LOJA:
+Marca/Modelo: {{ e.veiculo.marca }} {{ e.veiculo.modelo }}
+Ano de fabricação/modelo: {{ e.veiculo.ano_fabricacao }}/{{ e.veiculo.ano_modelo }}
+Cor: {{ e.veiculo.cor }} · Combustível: {{ e.veiculo.get_combustivel_display|default:"____" }}
+Placa: {{ e.veiculo.placa_formatada }} · Renavam: {{ e.veiculo.renavam }} · Chassi: {{ e.veiculo.chassi }}
+Quilometragem na entrega: {{ e.km_entrega|default:"____" }} km · Valor atribuído: {{ e.valor|reais }}
 {% endfor %}
-CLÁUSULA 2ª — VALORES E DIFERENÇA. O veículo da LOJA é avaliado em {{ saida.valor|reais }}. {% if diferenca > 0 %}O CLIENTE pagará à LOJA a diferença de {{ diferenca|reais }} ({{ diferenca|extenso }}), da forma: {{ negocio.detalhes_pagamento|default:"a combinar" }}.{% elif diferenca < 0 %}A LOJA pagará ao CLIENTE a diferença de {{ diferenca|reais }}.{% else %}Os valores são equivalentes, sem complementação de preço.{% endif %}
+CLÁUSULA 2ª – DOS VALORES E DA DIFERENÇA. O veículo entregue pela LOJA é avaliado em {{ saida.valor|reais }} ({{ saida.valor|extenso }}). {% if diferenca > 0 %}O(A) CLIENTE pagará à LOJA a diferença de {{ diferenca|reais }} ({{ diferenca|extenso }}), da seguinte forma: {{ negocio.get_forma_pagamento_display|default:"____" }}{% if negocio.detalhes_pagamento %}, {{ negocio.detalhes_pagamento }}{% endif %}.{% elif diferenca < 0 %}A LOJA pagará ao(à) CLIENTE a diferença de {{ diferenca|reais }} ({{ diferenca|extenso }}), da seguinte forma: {{ negocio.get_forma_pagamento_display|default:"____" }}{% if negocio.detalhes_pagamento %}, {{ negocio.detalhes_pagamento }}{% endif %}.{% else %}Os valores são equivalentes, não havendo complementação de preço.{% endif %}
 
-CLÁUSULA 3ª — DECLARAÇÕES. Cada parte, quanto ao veículo que entrega, declara legítima posse, ausência de restrições não informadas e responde por vícios ocultos preexistentes não declarados, nos termos da lei civil.
+CLÁUSULA 3ª – DAS DECLARAÇÕES DAS PARTES. Cada parte, quanto ao veículo que entrega, declara, sob as penas da lei, ser legítima proprietária e possuidora, com plenos poderes para transferi-lo; que o veículo está livre de alienação fiduciária, arrendamento, penhora, reserva de domínio, bloqueio judicial (RENAJUD) ou restrição administrativa não informada; que não houve sinistro com perda total nem adulteração de hodômetro, sendo real a quilometragem informada; e responde pela evicção e pelos vícios ocultos preexistentes não declarados (arts. 441 a 457 do Código Civil).
 
-CLÁUSULA 4ª — ENTREGA E DÉBITOS. A entrega ocorre em {{ negocio.data_hora_entrega|date:"d/m/Y H:i"|default:"data a combinar" }}. Multas, tributos e encargos com fato gerador até a entrega são de quem entrega cada veículo; a partir dela, de quem recebe. IPVA e licenciamento: {{ loja.regra_ipva }}.
+CLÁUSULA 4ª – DA ENTREGA, DOS RISCOS E DOS DÉBITOS. A entrega dos veículos e das chaves ocorrerá em {{ negocio.data_hora_entrega|date:"d/m/Y"|default:"____" }}, mediante vistoria conjunta e assinatura dos termos de entrega.
 
-CLÁUSULA 5ª — DOCUMENTAÇÃO. Cada parte assinará a ATPV-e do veículo que entrega em até {{ loja.prazo_assinatura_dias }} dias úteis.
+§ 1º Os riscos sobre cada veículo transferem-se à parte que o recebe com a tradição (art. 492 do Código Civil).
 
-CLÁUSULA 6ª — DESCUMPRIMENTO. A parte que descumprir qualquer obrigação pagará à outra multa de {{ loja.multa_percentual }}% sobre o valor total, sem prejuízo de perdas e danos.
+§ 2º Multas, tributos, taxas, IPVA, licenciamento e quaisquer encargos com fato gerador até a data da entrega são de responsabilidade de quem entrega cada veículo; a partir dela, de quem o recebe.
 
-{% include "contratos/modelos/_rodape.txt" %}
+CLÁUSULA 5ª – DA DOCUMENTAÇÃO. Cada parte entregará o CRLV-e e assinará a Autorização para Transferência de Propriedade de Veículo em meio eletrônico (ATPV-e) do veículo que entrega, em até 5 (cinco) dias úteis contados da entrega, providenciando ainda a respectiva comunicação de venda ao DETRAN/BA (art. 134 do Código de Trânsito Brasileiro).
+
+CLÁUSULA 6ª – DO DESCUMPRIMENTO. A parte que descumprir qualquer obrigação deste contrato pagará à outra multa compensatória de {{ loja.multa_percentual|default:10|floatformat:0 }}% ({{ loja.multa_percentual|default:10|numero_extenso }} por cento) sobre o valor do veículo entregue pela LOJA, acrescida de juros de mora de 1% (um por cento) ao mês e correção monetária pelo IPCA desde a data do inadimplemento, sem prejuízo das perdas e danos.
+
+Parágrafo único. A multa não excederá o valor da obrigação principal (art. 412 do Código Civil).
+
+CLÁUSULA 7ª – DA PROTEÇÃO DE DADOS. Os dados pessoais das partes serão tratados exclusivamente para a execução deste contrato e o cumprimento de obrigações legais e regulatórias, nos termos da Lei nº 13.709/2018 (LGPD), e serão conservados pelo prazo legal.
+
+CLÁUSULA 8ª – DAS DISPOSIÇÕES GERAIS. Este contrato obriga as partes e seus sucessores a qualquer título. A tolerância quanto ao descumprimento de qualquer cláusula não implica renúncia ou novação. Qualquer alteração só terá validade se feita por escrito e assinada por ambas as partes. Este instrumento, assinado pelas partes e por duas testemunhas, constitui título executivo extrajudicial (art. 784, III, do Código de Processo Civil).
+
+CLÁUSULA 9ª – DO FORO. Fica eleito o foro da comarca de {{ loja.cidade }}/{{ loja.uf }}, com renúncia a qualquer outro, por mais privilegiado que seja, para dirimir quaisquer questões decorrentes deste contrato.
+
+E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença das duas testemunhas abaixo, que também o subscrevem.
+
+{{ loja.cidade }}/{{ loja.uf }}, {{ negocio.data|date:"j \d\e F \d\e Y" }}.
+
+
+________________________________________
+{{ loja.razao_social|upper }} ({{ loja.nome_fantasia|default:"Bahia Car" }})
+LOJA · {{ loja.representante_nome }}, CPF {{ loja.representante_cpf|cpf_cnpj }}
+
+
+________________________________________
+{{ permutante.nome }}
+CLIENTE · CPF {{ permutante.cpf_cnpj|cpf_cnpj }}
+
+
+TESTEMUNHAS
+1. ______________________________  Nome: ____  CPF: ____
+2. ______________________________  Nome: ____  CPF: ____
