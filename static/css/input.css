@@ -320,6 +320,50 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-vermelho) 18%, transparent);
   }
 
+  /* Cartões da Central de ajuda (cada um abre um passo a passo). */
+  .cartao-guia {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    width: 100%;
+    padding: 1rem 1.125rem;
+    text-align: left;
+    border: 1px solid var(--color-borda);
+    border-radius: 1rem;
+    background-color: var(--color-superficie);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+  }
+  .cartao-guia:hover {
+    border-color: var(--color-acento-300);
+    box-shadow: 0 6px 18px -8px rgb(0 0 0 / 0.18);
+  }
+  .cartao-guia:active {
+    transform: translateY(1px);
+  }
+  .cartao-guia-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .cartao-guia-titulo {
+    font-weight: 600;
+    color: var(--color-tinta);
+  }
+  .cartao-guia-sub {
+    font-size: 0.875rem;
+    color: var(--color-tinta-suave);
+  }
+  .cartao-guia-seta {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    color: var(--color-tinta-suave);
+  }
+
   /* Botão do WhatsApp (verde), usado no Modo pátio. */
   .botao-whats {
     display: inline-flex;

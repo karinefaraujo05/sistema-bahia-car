@@ -1,161 +1,332 @@
 {% extends "base.html" %}
-{% block largura %}max-w-3xl{% endblock %}
+{% block largura %}max-w-4xl{% endblock %}
 
 {% block titulo %}Como usar · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-6">
-    <h1 class="text-2xl">Como usar o Bahia Car</h1>
-    <p class="mt-1 text-tinta-suave">Um passo a passo simples do dia a dia da loja.</p>
+    <h1 class="text-2xl">O que você quer fazer hoje?</h1>
+    <p class="mt-1 text-tinta-suave">Escolha embaixo e eu te levo passo a passo, uma coisa de cada vez.</p>
   </div>
 
-  {# Busca #}
-  <section class="painel mb-4 p-5">
-    <div class="mb-2 flex items-center gap-3">
-      <span class="indicador-icone bg-acento-50 text-acento-700">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      </span>
-      <h2 class="text-lg">Encontrar qualquer coisa</h2>
-    </div>
-    <p>
-      Use a <strong>barra de busca</strong> lá em cima. Digite a <strong>placa</strong>, o
-      <strong>nome</strong> da pessoa, o <strong>CPF</strong> ou o <strong>modelo</strong> do carro.
-      Os resultados aparecem enquanto você digita. Toque num resultado pra abrir.
-    </p>
-  </section>
-
-  {# Cadastrar carro #}
-  <section class="painel mb-4 p-5">
-    <div class="mb-3 flex items-center gap-3">
-      <span class="indicador-icone bg-acento-50 text-acento-700">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
-      </span>
-      <h2 class="text-lg">Cadastrar um carro no estoque</h2>
-    </div>
-    <ol class="list-decimal space-y-1 pl-5">
-      <li>Vá em <strong>Estoque</strong> e toque em <strong>Adicionar carro</strong>.</li>
-      <li>Preencha os dados (placa, marca, modelo, ano, cor…).</li>
-      <li>Adicione <strong>fotos</strong> pela câmera.</li>
-      <li>Toque em <strong>Salvar</strong>.</li>
-    </ol>
-    <p class="mt-2 text-sm text-tinta-suave">
-      Dica: na ficha do carro, guarde a <strong>foto do documento</strong> em "Documentos do carro".
-    </p>
-  </section>
-
-  {# Compra / venda / troca #}
-  <section class="painel mb-4 p-5">
-    <div class="mb-3 flex items-center gap-3">
+  {# Cartões de cenário — tocar abre o passo a passo #}
+  <div class="grid gap-4 sm:grid-cols-2">
+    <button type="button" class="cartao-guia" data-cenario="venda">
       <span class="indicador-icone bg-verde-fundo text-verde">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       </span>
-      <h2 class="text-lg">Registrar uma compra, venda ou troca</h2>
-    </div>
-    <p class="mb-2">
-      Na tela inicial, toque no atalho certo: <strong>Comprei um carro</strong>,
-      <strong>Vendi um carro</strong> ou <strong>Fiz uma troca</strong>. O sistema vai te guiando
-      em passos curtos:
-    </p>
-    <ol class="list-decimal space-y-1 pl-5">
-      <li><strong>De quem é o carro</strong> (da loja ou de outra pessoa).</li>
-      <li><strong>Quem</strong> é o cliente: busque ou cadastre na hora.</li>
-      <li><strong>Qual carro</strong>: escolha do estoque ou cadastre ali mesmo.</li>
-      <li><strong>Financiamento</strong>, se o carro ainda tem parcela de banco.</li>
-      <li><strong>Valores, pagamento e entrega</strong> (o local já vem preenchido).</li>
-      <li><strong>Contrato</strong> e, por fim, a <strong>revisão</strong> pra confirmar.</li>
-    </ol>
-    <p class="mt-2 text-sm text-tinta-suave">
-      Pode <strong>salvar como rascunho</strong> em qualquer passo e continuar depois.
-    </p>
-  </section>
+      <span class="cartao-guia-texto">
+        <span class="cartao-guia-titulo">Vender um carro da loja</span>
+        <span class="cartao-guia-sub">Um carro que é seu, do estoque.</span>
+      </span>
+      <svg class="cartao-guia-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
 
-  {# Consignação #}
-  <section class="painel mb-4 p-5">
-    <div class="mb-3 flex items-center gap-3">
+    <button type="button" class="cartao-guia" data-cenario="consignado">
       <span class="indicador-icone bg-ambar-fundo text-ambar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
       </span>
-      <h2 class="text-lg">Pegar um carro pra vender (de outra pessoa)</h2>
-    </div>
-    <ol class="list-decimal space-y-1 pl-5">
-      <li>Na tela inicial, toque em <strong>Peguei um carro pra vender</strong>.</li>
-      <li>Cadastre o <strong>dono</strong> e o <strong>carro</strong>.</li>
-      <li>Defina o <strong>valor mínimo</strong> pro dono e a <strong>comissão</strong>.</li>
-    </ol>
-    <p class="mt-2 text-sm text-tinta-suave">
-      O carro entra no estoque marcado como "consignado". Quando vender, o sistema lembra do
-      <strong>repasse ao dono</strong>.
-    </p>
-  </section>
+      <span class="cartao-guia-texto">
+        <span class="cartao-guia-titulo">Vender um carro de um cliente</span>
+        <span class="cartao-guia-sub">Alguém deixou o carro na loja pra você vender.</span>
+      </span>
+      <svg class="cartao-guia-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
 
-  {# Contrato #}
-  <section class="painel mb-4 p-5">
-    <div class="mb-3 flex items-center gap-3">
+    <button type="button" class="cartao-guia" data-cenario="compra">
+      <span class="indicador-icone bg-acento-50 text-acento-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      </span>
+      <span class="cartao-guia-texto">
+        <span class="cartao-guia-titulo">Comprar um carro pra loja</span>
+        <span class="cartao-guia-sub">Entrou um carro novo no estoque.</span>
+      </span>
+      <svg class="cartao-guia-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+
+    <button type="button" class="cartao-guia" data-cenario="troca">
+      <span class="indicador-icone bg-acento-50 text-acento-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+      </span>
+      <span class="cartao-guia-texto">
+        <span class="cartao-guia-titulo">Fazer uma troca</span>
+        <span class="cartao-guia-sub">O cliente dá o carro dele e leva um seu.</span>
+      </span>
+      <svg class="cartao-guia-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+
+    <button type="button" class="cartao-guia" data-cenario="carro">
+      <span class="indicador-icone bg-acento-50 text-acento-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+      </span>
+      <span class="cartao-guia-texto">
+        <span class="cartao-guia-titulo">Cadastrar um carro</span>
+        <span class="cartao-guia-sub">Botar um carro no estoque.</span>
+      </span>
+      <svg class="cartao-guia-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+
+    <button type="button" class="cartao-guia" data-cenario="cliente">
+      <span class="indicador-icone bg-acento-50 text-acento-700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+      </span>
+      <span class="cartao-guia-texto">
+        <span class="cartao-guia-titulo">Cadastrar um cliente</span>
+        <span class="cartao-guia-sub">Guardar os dados de uma pessoa.</span>
+      </span>
+      <svg class="cartao-guia-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+
+    <button type="button" class="cartao-guia" data-cenario="contrato">
       <span class="indicador-icone bg-acento-50 text-acento-700">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
       </span>
-      <h2 class="text-lg">Gerar e baixar o contrato</h2>
-    </div>
-    <ol class="list-decimal space-y-1 pl-5">
-      <li>Abra o <strong>negócio</strong> (em Vendas ou pela busca).</li>
-      <li>Toque em <strong>Gerar contrato</strong>.</li>
-      <li>Em <strong>Abrir / editar</strong>, escolha quantas <strong>testemunhas</strong> e escreva <strong>observações</strong>, se quiser.</li>
-      <li>Toque em <strong>Baixar PDF</strong> (ou Word). Vem com nome fácil e em uma folha.</li>
-      <li>Depois de assinado, <strong>tire uma foto</strong> do contrato e guarde no negócio.</li>
-    </ol>
-  </section>
+      <span class="cartao-guia-texto">
+        <span class="cartao-guia-titulo">Gerar o contrato</span>
+        <span class="cartao-guia-sub">Imprimir o contrato de um negócio.</span>
+      </span>
+      <svg class="cartao-guia-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
 
-  {# Pessoas #}
-  <section class="painel mb-4 p-5">
-    <div class="mb-3 flex items-center gap-3">
+    <button type="button" class="cartao-guia" data-cenario="buscar">
       <span class="indicador-icone bg-acento-50 text-acento-700">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
       </span>
-      <h2 class="text-lg">Cadastrar uma pessoa</h2>
-    </div>
-    <ol class="list-decimal space-y-1 pl-5">
-      <li>Vá em <strong>Pessoas → Cadastrar pessoa</strong> (ou "cadastro rápido" se tiver pressa).</li>
-      <li>Digite o <strong>CEP</strong> e o endereço aparece sozinho; você só põe o número.</li>
-      <li>Preencha o resto e toque em <strong>Salvar</strong>.</li>
-    </ol>
-  </section>
-
-  {# Vendas #}
-  <section class="painel mb-4 p-5">
-    <div class="mb-3 flex items-center gap-3">
-      <span class="indicador-icone bg-verde-fundo text-verde">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      <span class="cartao-guia-texto">
+        <span class="cartao-guia-titulo">Achar um carro ou pessoa</span>
+        <span class="cartao-guia-sub">Encontrar qualquer coisa rápido.</span>
       </span>
-      <h2 class="text-lg">Ver as vendas do mês</h2>
-    </div>
-    <p>
-      Em <strong>Vendas</strong> você vê os negócios do mês, o <strong>total vendido</strong> e o
-      <strong>lucro</strong>. Use as setas pra trocar de mês e os filtros por tipo. Dá pra
-      <strong>exportar pra Excel</strong>.
-    </p>
-  </section>
-
-  {# Cancelar #}
-  <section class="painel mb-6 p-5">
-    <div class="mb-3 flex items-center gap-3">
-      <span class="indicador-icone bg-cinza-fundo text-cinza">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-      </span>
-      <h2 class="text-lg">Cancelar um negócio</h2>
-    </div>
-    <p>
-      Abra o negócio e toque em <strong>Cancelar</strong>. O carro <strong>volta pro estoque</strong>
-      automaticamente, e <strong>nada é apagado</strong>: fica tudo no histórico.
-    </p>
-  </section>
+      <svg class="cartao-guia-seta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  </div>
 
   {# Bom saber #}
-  <div class="aviso aviso-info">
-    <p class="mb-1 font-medium">Bom saber</p>
+  <div class="aviso aviso-info mt-6">
+    <p class="mb-1 font-medium">Pode ficar tranquilo</p>
     <ul class="list-disc space-y-1 pl-5 text-sm">
-      <li><strong>Nada é apagado.</strong> "Arquivar" só tira da lista; o histórico continua lá.</li>
+      <li><strong>Nada é apagado.</strong> "Arquivar" só tira da lista; o histórico fica guardado.</li>
+      <li>Dá pra <strong>salvar como rascunho</strong> no meio de um negócio e terminar depois.</li>
       <li>A <strong>Configuração da loja</strong> (nome, CNPJ…) fica no menu do seu nome, no canto de cima.</li>
-      <li>Você fica <strong>logado</strong>, não precisa entrar toda vez.</li>
     </ul>
   </div>
+
+  {# ---- Passo a passo (abre ao tocar num cartão) ---- #}
+  <div id="guia-overlay" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4">
+    <div id="guia-painel" class="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl bg-superficie shadow-xl sm:rounded-2xl" role="dialog" aria-modal="true" aria-labelledby="guia-titulo">
+      <div class="flex items-center justify-between border-b border-borda px-5 py-4">
+        <h2 id="guia-titulo" class="text-lg"></h2>
+        <button type="button" id="guia-fechar" class="rounded-lg p-1.5 text-tinta-suave hover:bg-fundo" aria-label="Fechar">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="px-5 pt-4">
+        <div class="mb-1 flex items-center justify-between text-sm text-tinta-suave">
+          <span id="guia-contador"></span>
+        </div>
+        <div class="h-1.5 w-full overflow-hidden rounded-full bg-fundo">
+          <div id="guia-barra" class="h-full rounded-full bg-acento-500 transition-all"></div>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto px-5 py-6">
+        <div class="flex gap-4">
+          <span id="guia-numero" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-acento-600 text-lg font-bold text-white"></span>
+          <div>
+            <p id="guia-passo" class="text-base leading-relaxed text-tinta"></p>
+            <p id="guia-dica" class="mt-3 hidden rounded-lg bg-acento-50 px-3 py-2 text-sm text-acento-700"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 border-t border-borda px-5 py-4">
+        <button type="button" id="guia-voltar" class="botao botao-secundario">Voltar</button>
+        <button type="button" id="guia-proximo" class="botao botao-primario ml-auto">Próximo</button>
+        <a id="guia-fazer" href="#" class="botao botao-primario ml-auto hidden">Fazer agora</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var CENARIOS = {
+        venda: {
+          titulo: "Vender um carro da loja",
+          passos: [
+            { t: "Na tela inicial, toque no atalho <b>Vendi um carro</b>. (Ou clique em <b>Fazer agora</b> aqui embaixo que eu já abro pra você.)" },
+            { t: "O sistema pergunta <b>de quem é o carro</b>. Escolha <b>Da loja</b>." },
+            { t: "Agora diga <b>quem está comprando</b>. Busque pelo nome ou CPF; se for cliente novo, dá pra cadastrar na hora." },
+            { t: "Escolha <b>qual carro</b> saiu do estoque." },
+            { t: "Preencha <b>os valores e a forma de pagamento</b> (à vista, financiado…). O local de entrega já vem preenchido.", dica: "Pode salvar como rascunho e continuar depois, se o cliente ainda não fechou." },
+            { t: "Gere o <b>contrato</b> e confira tudo na <b>revisão</b>. Confirmou? Venda registrada! 🎉" }
+          ],
+          cta: { label: "Começar uma venda agora", href: "{% url 'negocios:iniciar' 'venda' %}" }
+        },
+        consignado: {
+          titulo: "Vender um carro de um cliente",
+          passos: [
+            { t: "Esse caso tem duas partes. <b>Primeiro</b> você registra que o cliente <b>deixou o carro</b> na loja. Toque em <b>Peguei um carro pra vender</b>." },
+            { t: "Cadastre o <b>dono do carro</b> e o <b>carro</b> que ele deixou." },
+            { t: "Combine o <b>valor mínimo</b> que o dono quer receber e a sua <b>comissão</b>." },
+            { t: "Pronto: o carro entra no estoque marcado como <b>consignado</b>. Agora é só aparecer um comprador.", dica: "Ele aparece normalmente na busca e no Modo pátio, com o selo Consignado." },
+            { t: "<b>Quando vender:</b> abra a consignação (em Vendas ou pela busca) e toque em <b>Vender este carro</b>. O comprador e os valores você preenche como numa venda comum." },
+            { t: "No fim, o sistema já calcula sozinho o <b>repasse pro dono</b> e a sua <b>comissão</b>. É só pagar o dono. 🎉" }
+          ],
+          cta: { label: "Registrar um carro consignado agora", href: "{% url 'negocios:consignar' %}" }
+        },
+        compra: {
+          titulo: "Comprar um carro pra loja",
+          passos: [
+            { t: "Na tela inicial, toque em <b>Comprei um carro</b>." },
+            { t: "Diga <b>de quem você comprou</b>: busque a pessoa ou cadastre na hora." },
+            { t: "Cadastre o <b>carro que entrou</b> (placa, marca, modelo, ano…)." },
+            { t: "Preencha <b>quanto você pagou</b> e a forma de pagamento." },
+            { t: "Confirme. O carro já entra no seu <b>estoque</b>, pronto pra vender. 🎉" }
+          ],
+          cta: { label: "Registrar uma compra agora", href: "{% url 'negocios:iniciar' 'compra' %}" }
+        },
+        troca: {
+          titulo: "Fazer uma troca",
+          passos: [
+            { t: "Na tela inicial, toque em <b>Fiz uma troca</b>." },
+            { t: "Escolha <b>qual carro da loja</b> o cliente levou." },
+            { t: "Cadastre ou escolha o <b>carro que o cliente deu</b> na troca." },
+            { t: "Ajuste os <b>valores</b>: quem paga a diferença e quanto.", dica: "O carro que o cliente deu entra no seu estoque automaticamente." },
+            { t: "Gere o <b>contrato</b> e confira na <b>revisão</b>. Pronto! 🎉" }
+          ],
+          cta: { label: "Começar uma troca agora", href: "{% url 'negocios:iniciar' 'troca' %}" }
+        },
+        carro: {
+          titulo: "Cadastrar um carro",
+          passos: [
+            { t: "Vá em <b>Estoque</b> e toque em <b>Adicionar carro</b>." },
+            { t: "Preencha os dados: <b>placa, marca, modelo, ano, cor</b>…", dica: "Ao digitar a marca e o modelo, dá pra puxar o <b>preço da tabela FIPE</b> ali mesmo." },
+            { t: "Adicione <b>fotos</b> pela câmera do celular." },
+            { t: "Toque em <b>Salvar</b>. Dica: guarde também a <b>foto do documento</b> na ficha do carro. 🎉" }
+          ],
+          cta: { label: "Cadastrar um carro agora", href: "{% url 'veiculos:novo' %}" }
+        },
+        cliente: {
+          titulo: "Cadastrar um cliente",
+          passos: [
+            { t: "Vá em <b>Pessoas</b> e toque em <b>Cadastrar pessoa</b>." },
+            { t: "Digite o <b>CEP</b>: o endereço aparece sozinho, você só coloca o número." },
+            { t: "Preencha nome, CPF e telefone e toque em <b>Salvar</b>.", dica: "Os campos vão se formatando sozinhos enquanto você digita (CPF, telefone, CEP)." }
+          ],
+          cta: { label: "Cadastrar uma pessoa agora", href: "{% url 'pessoas:novo' %}" }
+        },
+        contrato: {
+          titulo: "Gerar o contrato",
+          passos: [
+            { t: "Abra o <b>negócio</b> (em Vendas ou pela busca lá em cima)." },
+            { t: "Toque em <b>Gerar contrato</b>." },
+            { t: "Escolha quantas <b>testemunhas</b> e escreva <b>observações</b>, se quiser." },
+            { t: "Toque em <b>Baixar PDF</b> (ou Word). Vem bonito e em uma folha só." },
+            { t: "Depois de assinado, <b>tire uma foto</b> do contrato e guarde no negócio. 🎉" }
+          ],
+          cta: { label: "Ver minhas vendas", href: "{% url 'negocios:vendas' %}" }
+        },
+        buscar: {
+          titulo: "Achar um carro ou pessoa",
+          passos: [
+            { t: "Use a <b>barra de busca</b> lá no topo da tela." },
+            { t: "Digite a <b>placa</b>, o <b>nome</b> da pessoa, o <b>CPF</b> ou o <b>modelo</b> do carro." },
+            { t: "Os resultados aparecem enquanto você digita. Toque num deles pra abrir. 🎉" }
+          ],
+          cta: null
+        }
+      };
+
+      var overlay = document.getElementById("guia-overlay");
+      var elTitulo = document.getElementById("guia-titulo");
+      var elContador = document.getElementById("guia-contador");
+      var elBarra = document.getElementById("guia-barra");
+      var elNumero = document.getElementById("guia-numero");
+      var elPasso = document.getElementById("guia-passo");
+      var elDica = document.getElementById("guia-dica");
+      var btnVoltar = document.getElementById("guia-voltar");
+      var btnProximo = document.getElementById("guia-proximo");
+      var linkFazer = document.getElementById("guia-fazer");
+
+      var atual = null;
+      var idx = 0;
+
+      function render() {
+        var c = CENARIOS[atual];
+        var total = c.passos.length;
+        var passo = c.passos[idx];
+        elTitulo.textContent = c.titulo;
+        elContador.textContent = "Passo " + (idx + 1) + " de " + total;
+        elBarra.style.width = Math.round(((idx + 1) / total) * 100) + "%";
+        elNumero.textContent = idx + 1;
+        elPasso.innerHTML = passo.t;
+        if (passo.dica) {
+          elDica.innerHTML = "💡 " + passo.dica;
+          elDica.classList.remove("hidden");
+        } else {
+          elDica.classList.add("hidden");
+        }
+        btnVoltar.disabled = idx === 0;
+        btnVoltar.classList.toggle("opacity-40", idx === 0);
+
+        var ultimo = idx === total - 1;
+        if (ultimo && c.cta) {
+          btnProximo.classList.add("hidden");
+          linkFazer.classList.remove("hidden");
+          linkFazer.textContent = c.cta.label;
+          linkFazer.href = c.cta.href;
+        } else {
+          linkFazer.classList.add("hidden");
+          btnProximo.classList.remove("hidden");
+          btnProximo.textContent = ultimo ? "Entendi!" : "Próximo";
+        }
+      }
+
+      function abrir(id) {
+        atual = id;
+        idx = 0;
+        render();
+        overlay.classList.remove("hidden");
+        overlay.classList.add("flex");
+        document.body.style.overflow = "hidden";
+      }
+
+      function fechar() {
+        overlay.classList.add("hidden");
+        overlay.classList.remove("flex");
+        document.body.style.overflow = "";
+      }
+
+      document.querySelectorAll(".cartao-guia").forEach(function (card) {
+        card.addEventListener("click", function () {
+          abrir(card.getAttribute("data-cenario"));
+        });
+      });
+
+      btnProximo.addEventListener("click", function () {
+        var total = CENARIOS[atual].passos.length;
+        if (idx < total - 1) {
+          idx++;
+          render();
+        } else {
+          fechar(); // "Entendi!" no último passo de cenário sem link
+        }
+      });
+
+      btnVoltar.addEventListener("click", function () {
+        if (idx > 0) {
+          idx--;
+          render();
+        }
+      });
+
+      document.getElementById("guia-fechar").addEventListener("click", fechar);
+      overlay.addEventListener("click", function (e) {
+        if (e.target === overlay) fechar();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && !overlay.classList.contains("hidden")) fechar();
+      });
+    })();
+  </script>
 {% endblock %}
