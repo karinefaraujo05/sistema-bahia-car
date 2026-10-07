@@ -15,7 +15,6 @@ from veiculos.models import Situacao, StatusVeiculo, Veiculo
 from .agenda import lembretes
 from .busca import buscar as buscar_tudo
 
-
 MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 
 

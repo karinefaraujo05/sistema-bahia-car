@@ -24,7 +24,7 @@ def detalhe(request, pk):
 
 @login_required
 def novo(request):
-    # "next" (quando veio de um negócio): depois de salvar, volta pra lá já com a pessoa selecionada.
+    # "next" (quando veio de um negócio): ao salvar, volta pra lá já com a pessoa escolhida.
     proximo = request.GET.get("next", "")
     if request.method == "POST":
         form = PessoaForm(request.POST)

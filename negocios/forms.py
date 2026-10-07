@@ -24,7 +24,7 @@ class EscolherPessoaForm(forms.Form):
         label="Pessoa já cadastrada",
         empty_label="escolher…",
         error_messages={
-            "required": "Escolha a pessoa. Se ela ainda não existe, cadastre primeiro no botão abaixo.",
+            "required": "Escolha a pessoa. Se ainda não existe, cadastre no botão abaixo.",
         },
     )
 
