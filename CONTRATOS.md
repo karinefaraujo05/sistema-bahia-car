@@ -3,7 +3,7 @@
 > **MODELO PROVISÓRIO. NÃO USAR COM CLIENTES ANTES DA REVISÃO DE UM ADVOGADO.**
 > Este texto foi escrito como ponto de partida técnico. Ele não substitui orientação jurídica. Cada cláusula está marcada com `<!-- REVISAR COM ADVOGADO -->` nos templates HTML.
 
-## Como usar este arquivo (para o Claude Code)
+## Como usar este arquivo
 
 - Converta cada modelo em template HTML do Django em `contratos/templates/contratos/`, um arquivo por modelo, com os blocos comuns em `partials/`.
 - Os placeholders usam a sintaxe de template do Django: `{{ variavel }}` e `{% if %}`.
