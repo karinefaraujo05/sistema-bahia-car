@@ -1,0 +1,9 @@
+{% load contratos_extras pessoas_extras %}
+<div class="parte">
+  <div class="rot">{{ p.rotulo }}</div>
+  {% if p.eh_loja %}
+    <span class="nome">{{ p.nome }}</span> ({{ p.fantasia }}), pessoa jurídica de direito privado, CNPJ {{ loja.cnpj|cpf_cnpj }}, com sede na {{ loja.endereco }}, {{ loja.cidade }}/{{ loja.uf }}, CEP {{ loja.cep|cep }}, neste ato representada por seu titular {{ loja.representante_nome }}, CPF {{ loja.representante_cpf|cpf_cnpj }}.
+  {% else %}
+    <span class="nome">{{ p.pessoa.nome }}</span>{% if p.pessoa.nacionalidade %}, {{ p.pessoa.nacionalidade }}{% endif %}{% if p.pessoa.estado_civil %}, {{ p.pessoa.estado_civil }}{% endif %}{% if p.pessoa.profissao %}, {{ p.pessoa.profissao }}{% endif %}{% if p.pessoa.rg %}, RG {{ p.pessoa.rg }} {{ p.pessoa.rg_orgao_emissor }}{% endif %}, CPF {{ p.pessoa.cpf_cnpj|cpf_cnpj }}, residente e domiciliado(a) em {{ p.pessoa.endereco }}, {{ p.pessoa.cidade }}/{{ p.pessoa.uf }}, CEP {{ p.pessoa.cep|cep }}.
+  {% endif %}
+</div>

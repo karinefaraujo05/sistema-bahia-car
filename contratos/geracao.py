@@ -237,10 +237,17 @@ def nome_arquivo_contrato(contrato):
 def renderizar_pdf(contrato):
     from weasyprint import HTML  # importado aqui porque depende das libs de sistema
 
-    html = render_to_string(
-        "contratos/pdf_base.html",
-        {"contrato": contrato, "loja": ConfiguracaoLoja.carregar()},
-    )
+    # Venda, compra, troca e venda de terceiro usam o layout bonito (MARA),
+    # montado a partir dos dados. A consignação (sem negócio) segue no antigo.
+    if contrato.negocio_id:
+        from .mara import contexto_mara
+
+        html = render_to_string("contratos/mara/contrato.html", contexto_mara(contrato))
+    else:
+        html = render_to_string(
+            "contratos/pdf_base.html",
+            {"contrato": contrato, "loja": ConfiguracaoLoja.carregar()},
+        )
     return HTML(string=html).write_pdf()
 
 

@@ -1,0 +1,12 @@
+<div class="veic">
+  <div class="wide"><span>Marca / Modelo</span><b>{{ v.marca_modelo }}</b></div>
+  <div><span>Ano fab./modelo</span><b>{{ v.ano }}</b></div>
+  <div><span>Cor</span><b>{{ v.cor|default:"—" }}</b></div>
+  <div class="id"><span>Placa</span><b>{{ v.placa }}</b></div>
+  <div class="id"><span>Renavam</span><b>{{ v.renavam|default:"—" }}</b></div>
+  <div class="wide id"><span>Chassi</span><b>{{ v.chassi|default:"—" }}</b></div>
+  <div><span>Combustível</span><b>{{ v.combustivel|default:"—" }}</b></div>
+  <div><span>Quilometragem</span><b>{% if v.km %}{{ v.km }} km{% else %}—{% endif %}</b></div>
+  <div><span>Chave reserva</span><b>{{ v.chave }}</b></div>
+  <div><span>Avarias declaradas</span><b>{{ v.avarias }}</b></div>
+</div>

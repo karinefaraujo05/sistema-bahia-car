@@ -1,0 +1,161 @@
+<!doctype html>
+{% load formato contratos_extras pessoas_extras %}
+<html lang="pt-br">
+<head>
+<meta charset="utf-8" />
+<title>{{ titulo }} — Bahia Car</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "DejaVu Serif", Georgia, serif; color: #1a1a1a; font-size: 8.8pt; line-height: 1.32; }
+  .sans, h1, .rot, .meta, .veic span, .preco .valor, .preco .ext span, .cl b.t, .obs .rot, .brand, .ass b { font-family: "DejaVu Sans", Arial, sans-serif; }
+
+  .page { width: 210mm; min-height: 297mm; padding: 11mm 15mm 9mm; display: flex; flex-direction: column; }
+  .page > * { flex-shrink: 0; }
+
+  .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #10303a; padding-bottom: 6px; }
+  .brand { font-size: 16pt; font-weight: bold; letter-spacing: 1.5px; color: #10303a; line-height: 1; text-transform: uppercase; }
+  .meta { font-size: 7.5pt; color: #555; text-align: right; line-height: 1.35; }
+  .meta b { display: block; font-size: 10.5pt; color: #10303a; }
+
+  h1 { font-size: 12pt; font-weight: bold; text-align: center; margin: 9px 0 8px; letter-spacing: .4px; color: #10303a; }
+
+  .partes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 7px; }
+  .partes.solo { grid-template-columns: 1fr; }
+  .parte { border-left: 2.5px solid #10303a; padding: 1px 0 1px 8px; text-align: justify; }
+  .rot { font-size: 7.2pt; font-weight: bold; color: #10303a; letter-spacing: .4px; }
+  .parte .nome { font-weight: bold; }
+  .interv { border-left: 2.5px solid #9a5b00; margin-bottom: 7px; }
+  .interv .rot { color: #9a5b00; }
+
+  .veic { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #c9d2de; border-radius: 3px; margin: 4px 0 7px; overflow: hidden; }
+  .veic > div { padding: 3px 7px; border-right: 1px solid #e1e7ef; border-bottom: 1px solid #e1e7ef; }
+  .veic > div:nth-child(4n) { border-right: 0; }
+  .veic > div:nth-last-child(-n+4) { border-bottom: 0; }
+  .veic span { display: block; font-size: 6.8pt; color: #6b7684; }
+  .veic b { font-size: 9pt; }
+  .veic .id b { font-family: "DejaVu Sans Mono", "Courier New", monospace; font-size: 8.6pt; }
+  .veic .wide { grid-column: span 2; }
+  .veic-rot { font-size: 7.2pt; font-weight: bold; color: #10303a; margin: 5px 0 1px; font-family: "DejaVu Sans", Arial, sans-serif; }
+
+  .preco { display: grid; grid-template-columns: auto 1fr; gap: 0 14px; align-items: center; background: #eef4f4; border: 1px solid #c9d2de; border-radius: 3px; padding: 5px 11px; margin: 3px 0 6px; }
+  .preco .valor { font-size: 14pt; font-weight: bold; color: #10303a; white-space: nowrap; }
+  .preco .ext { font-size: 9pt; }
+  .preco .ext span { display: block; font-size: 6.8pt; color: #6b7684; }
+
+  .cl { margin: 0 0 5px; text-align: justify; }
+  .cl b.t { font-size: 8.2pt; color: #10303a; }
+  .cl .p { display: block; padding-left: 12px; }
+
+  .obs { border: 1px dashed #c9d2de; border-radius: 3px; padding: 5px 9px; min-height: 30px; margin: 3px 0 6px; }
+  .obs .rot { display: block; font-size: 7pt; font-weight: bold; color: #6b7684; letter-spacing: .4px; margin-bottom: 2px; }
+
+  .foot { margin-top: auto; padding-top: 6px; }
+  .data { text-align: right; margin: 4px 0 15px; }
+  .ass { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .ass > div { border-top: 1px solid #1a1a1a; padding-top: 3px; font-size: 8pt; text-align: center; color: #444; }
+  .ass b { display: block; font-size: 8.8pt; color: #1a1a1a; }
+  .test { margin-top: 10px; }
+  .test .rot { display: block; font-size: 7.2pt; font-weight: bold; color: #10303a; letter-spacing: .4px; margin-bottom: 15px; }
+  .test .ass > div { text-align: left; }
+  .campo { display: inline-block; border-bottom: 1px solid #1a1a1a; min-width: 150px; height: 11px; }
+  .campo.curto { min-width: 90px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="head">
+    <div class="brand">{{ loja.nome_fantasia|default:"Bahia Car" }}</div>
+    <div class="meta"><b>Contrato nº {{ numero|default:"____" }}</b>{{ cidade_uf }}, {{ data|date:"j \d\e F \d\e Y" }}</div>
+  </div>
+
+  <h1>{{ titulo }}</h1>
+
+  {% if eh_troca %}
+    {# ---------- TROCA / PERMUTA ---------- #}
+    <div class="partes">
+      {% include "contratos/mara/_parte.html" with p=parte_a loja=loja %}
+      {% include "contratos/mara/_parte.html" with p=parte_b loja=loja %}
+    </div>
+
+    <p class="cl"><b class="t">CLÁUSULA 1ª – DO OBJETO.</b> As partes, de comum acordo, permutam entre si os veículos abaixo, cada qual declarando ser legítimo proprietário do seu, livre e desembaraçado de ônus, salvo o declarado:</p>
+    <div class="veic-rot">VEÍCULO DA LOJA (entregue ao cliente)</div>
+    {% include "contratos/mara/_veiculo_grid.html" with v=veiculo_loja %}
+    <div class="veic-rot">VEÍCULO DO CLIENTE (entregue à loja)</div>
+    {% include "contratos/mara/_veiculo_grid.html" with v=veiculo_cliente %}
+
+    <p class="cl"><b class="t">CLÁUSULA 2ª – DOS VALORES E DA COMPLEMENTAÇÃO.</b> Para fins desta permuta, o veículo da loja é avaliado em {{ veiculo_loja.valor|reais }} e o do cliente em {{ veiculo_cliente.valor|reais }}.</p>
+    <div class="preco">
+      <div class="valor">{{ diferenca_abs|reais }}</div>
+      <div class="ext"><span>Diferença (torna)</span>
+        {% if diferenca > 0 %}O cliente paga a diferença à loja.{% elif diferenca < 0 %}A loja paga a diferença ao cliente.{% else %}Permuta sem diferença (valores iguais).{% endif %}
+      </div>
+    </div>
+  {% else %}
+    {# ---------- VENDA / COMPRA / VENDA DE TERCEIRO ---------- #}
+    <div class="partes">
+      {% include "contratos/mara/_parte.html" with p=vendedor loja=loja %}
+      {% include "contratos/mara/_parte.html" with p=comprador loja=loja %}
+    </div>
+    {% if interveniente %}
+      <div class="parte interv">
+        <div class="rot">INTERVENIENTE INTERMEDIÁRIA</div>
+        <span class="nome">{{ loja.razao_social|upper }}</span> ({{ loja.nome_fantasia|default:"Bahia Car" }}), CNPJ {{ loja.cnpj|cpf_cnpj }}, que intervém neste ato aproximando as partes, sem assumir a propriedade do veículo.
+      </div>
+    {% endif %}
+
+    <p class="cl"><b class="t">CLÁUSULA 1ª – DO OBJETO.</b> O(A) VENDEDOR(A) vende ao(à) COMPRADOR(A), que aceita, o veículo abaixo descrito, de sua legítima propriedade, livre e desembaraçado de quaisquer ônus, gravames ou restrições, salvo o expressamente declarado:</p>
+    {% include "contratos/mara/_veiculo_grid.html" with v=veiculo %}
+
+    <p class="cl"><b class="t">CLÁUSULA 2ª – DO PREÇO E DA FORMA DE PAGAMENTO.</b> O preço certo e ajustado, que o(a) COMPRADOR(A) pagará na forma abaixo, é de:</p>
+    <div class="preco">
+      <div class="valor">{{ valor|reais }}</div>
+      <div class="ext"><span>Por extenso · forma de pagamento</span>{{ valor|extenso|capfirst }}{% if forma_pagamento %} · {{ forma_pagamento }}{% endif %}{% if detalhes_pagamento %}, {{ detalhes_pagamento }}{% endif %}.</div>
+    </div>
+    <p class="cl">
+      <span class="p">§ 1º O comprovante de transferência bancária ou PIX, ou o recibo assinado pelo(a) VENDEDOR(A), valerá como prova de pagamento e quitação.</span>
+      <span class="p">§ 2º A entrega do veículo fica condicionada ao pagamento integral do preço, salvo ajuste diverso por escrito.</span>
+    </p>
+
+    <p class="cl"><b class="t">CLÁUSULA 3ª – DA VISTORIA E DO ESTADO.</b> Tratando-se de veículo usado, o(a) COMPRADOR(A) declara tê-lo vistoriado e recebê-lo no estado em que se encontra, ciente do desgaste próprio do uso e informado(a) das avarias e características declaradas acima.</p>
+
+    <p class="cl"><b class="t">CLÁUSULA 4ª – DA GARANTIA.</b> O veículo conta com a garantia legal do Código de Defesa do Consumidor contra vícios ocultos que o tornem impróprio ou inadequado ao uso, pelo prazo de 90 (noventa) dias contados da entrega (art. 26, II, do CDC). A garantia não abrange desgaste natural nem danos por mau uso, acidente ou falta de manutenção pelo(a) COMPRADOR(A).</p>
+
+    <p class="cl"><b class="t">CLÁUSULA 5ª – DA ENTREGA, DOS RISCOS E DOS DÉBITOS.</b> Os riscos sobre o veículo transferem-se ao(à) COMPRADOR(A) com a tradição (art. 492 do Código Civil). Multas, tributos, taxas, IPVA, licenciamento e quaisquer encargos com fato gerador até a data da entrega são de responsabilidade do(a) VENDEDOR(A); a partir dela, do(a) COMPRADOR(A).</p>
+
+    <p class="cl"><b class="t">CLÁUSULA 6ª – DA DOCUMENTAÇÃO E DA TRANSFERÊNCIA.</b> O(A) VENDEDOR(A) entregará o CRLV-e e assinará a Autorização para Transferência de Propriedade de Veículo em meio eletrônico (ATPV-e) em favor do(a) COMPRADOR(A), que se obriga a providenciar a transferência junto ao DETRAN/BA no prazo legal de 30 (trinta) dias (art. 123 do Código de Trânsito Brasileiro).</p>
+  {% endif %}
+
+  <p class="cl"><b class="t">CLÁUSULA {% if eh_troca %}3ª{% else %}7ª{% endif %} – DO DESCUMPRIMENTO.</b> A parte que descumprir qualquer obrigação deste contrato pagará à outra multa compensatória de {{ multa_pct|floatformat:0 }}% ({{ multa_pct|numero_extenso }} por cento) sobre o valor do contrato, limitada ao valor da obrigação principal (art. 412 do Código Civil), acrescida de juros de mora de 1% (um por cento) ao mês e correção monetária pelo IPCA desde o inadimplemento, sem prejuízo das perdas e danos.</p>
+
+  <p class="cl"><b class="t">CLÁUSULA {% if eh_troca %}4ª{% else %}8ª{% endif %} – DAS DISPOSIÇÕES GERAIS E DO FORO.</b> Este contrato obriga as partes e seus sucessores. A tolerância quanto ao descumprimento não implica renúncia ou novação, e qualquer alteração só terá validade se feita por escrito e assinada por ambas as partes. Os dados pessoais são tratados conforme a Lei nº 13.709/2018 (LGPD). Assinado pelas partes e por duas testemunhas, este instrumento constitui título executivo extrajudicial (art. 784, III, do CPC). Fica eleito o foro da comarca de {{ cidade_uf }}, com renúncia a qualquer outro, para dirimir questões decorrentes deste contrato.</p>
+
+  <div class="obs"><span class="rot">OBSERVAÇÕES</span></div>
+
+  <p class="cl">E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença das duas testemunhas abaixo, que também o subscrevem.</p>
+
+  <div class="foot">
+    <div class="data">{{ cidade_uf }}, {{ data|date:"j \d\e F \d\e Y" }}.</div>
+    <div class="ass">
+      {% if eh_troca %}
+        <div><b>{% if parte_a.eh_loja %}{{ parte_a.nome }} ({{ parte_a.fantasia }}){% else %}{{ parte_a.pessoa.nome }}{% endif %}</b>{{ parte_a.rotulo }}</div>
+        <div><b>{% if parte_b.eh_loja %}{{ parte_b.nome }} ({{ parte_b.fantasia }}){% else %}{{ parte_b.pessoa.nome }}{% endif %}</b>{{ parte_b.rotulo }}</div>
+      {% else %}
+        <div><b>{% if vendedor.eh_loja %}{{ vendedor.nome }} ({{ vendedor.fantasia }}){% else %}{{ vendedor.pessoa.nome }}{% endif %}</b>Vendedor(a){% if vendedor.eh_loja %} · {{ loja.representante_nome }}{% endif %}</div>
+        <div><b>{% if comprador.eh_loja %}{{ comprador.nome }} ({{ comprador.fantasia }}){% else %}{{ comprador.pessoa.nome }}{% endif %}</b>Comprador(a){% if comprador.eh_loja %} · {{ loja.representante_nome }}{% endif %}</div>
+      {% endif %}
+    </div>
+    <div class="test">
+      <span class="rot">TESTEMUNHAS</span>
+      <div class="ass">
+        <div>1. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
+        <div>2. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
