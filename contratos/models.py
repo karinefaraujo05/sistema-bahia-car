@@ -3,6 +3,7 @@ from django.db.models import Q
 
 from core.models import ModeloBase
 from core.tenancy import empresa_atual
+from pessoas.validators import so_digitos
 
 # Dados de identidade da loja que o contrato precisa ter preenchidos.
 # As regras do contrato (multa, IPVA, nº de vias, prazos) são definidas por contrato,
@@ -61,6 +62,11 @@ class ConfiguracaoLoja(ModeloBase):
 
     def __str__(self):
         return self.razao_social or "Configuração da loja"
+
+    def save(self, *args, **kwargs):
+        self.cnpj = so_digitos(self.cnpj)
+        self.representante_cpf = so_digitos(self.representante_cpf)
+        super().save(*args, **kwargs)
 
     @classmethod
     def carregar(cls, empresa=None):
