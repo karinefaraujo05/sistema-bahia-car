@@ -130,11 +130,11 @@
 
   <p class="cl"><b class="t">CLÁUSULA {% if eh_troca %}3ª{% else %}7ª{% endif %} – DO DESCUMPRIMENTO.</b> A parte que descumprir qualquer obrigação deste contrato pagará à outra multa compensatória de {{ multa_pct|floatformat:0 }}% ({{ multa_pct|numero_extenso }} por cento) sobre o valor do contrato, limitada ao valor da obrigação principal (art. 412 do Código Civil), acrescida de juros de mora de 1% (um por cento) ao mês e correção monetária pelo IPCA desde o inadimplemento, sem prejuízo das perdas e danos.</p>
 
-  <p class="cl"><b class="t">CLÁUSULA {% if eh_troca %}4ª{% else %}8ª{% endif %} – DAS DISPOSIÇÕES GERAIS E DO FORO.</b> Este contrato obriga as partes e seus sucessores. A tolerância quanto ao descumprimento não implica renúncia ou novação, e qualquer alteração só terá validade se feita por escrito e assinada por ambas as partes. Os dados pessoais são tratados conforme a Lei nº 13.709/2018 (LGPD). Assinado pelas partes e por duas testemunhas, este instrumento constitui título executivo extrajudicial (art. 784, III, do CPC). Fica eleito o foro da comarca de {{ cidade_uf }}, com renúncia a qualquer outro, para dirimir questões decorrentes deste contrato.</p>
+  <p class="cl"><b class="t">CLÁUSULA {% if eh_troca %}4ª{% else %}8ª{% endif %} – DAS DISPOSIÇÕES GERAIS E DO FORO.</b> Este contrato obriga as partes e seus sucessores. A tolerância quanto ao descumprimento não implica renúncia ou novação, e qualquer alteração só terá validade se feita por escrito e assinada por ambas as partes. Os dados pessoais são tratados conforme a Lei nº 13.709/2018 (LGPD). {% if num_testemunhas == 2 %}Assinado pelas partes e por duas testemunhas, este instrumento constitui título executivo extrajudicial (art. 784, III, do CPC). {% endif %}Fica eleito o foro da comarca de {{ cidade_uf }}, com renúncia a qualquer outro, para dirimir questões decorrentes deste contrato.</p>
 
-  <div class="obs"><span class="rot">OBSERVAÇÕES</span></div>
+  <div class="obs"><span class="rot">OBSERVAÇÕES</span>{% if observacoes %} {{ observacoes }}{% endif %}</div>
 
-  <p class="cl">E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença das duas testemunhas abaixo, que também o subscrevem.</p>
+  <p class="cl">E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma{% if num_testemunhas == 2 %}, na presença das duas testemunhas abaixo, que também o subscrevem{% elif num_testemunhas == 1 %}, na presença da testemunha abaixo, que também o subscreve{% endif %}.</p>
 
   <div class="foot">
     <div class="data">{{ cidade_uf }}, {{ data|date:"j \d\e F \d\e Y" }}.</div>
@@ -147,13 +147,15 @@
         <div><b>{% if comprador.eh_loja %}{{ comprador.nome }} ({{ comprador.fantasia }}){% else %}{{ comprador.pessoa.nome }}{% endif %}</b>Comprador(a){% if comprador.eh_loja %} · {{ loja.representante_nome }}{% endif %}</div>
       {% endif %}
     </div>
-    <div class="test">
-      <span class="rot">TESTEMUNHAS</span>
-      <div class="ass">
-        <div>1. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
-        <div>2. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
+    {% if num_testemunhas %}
+      <div class="test">
+        <span class="rot">TESTEMUNHA{{ num_testemunhas|pluralize }}</span>
+        <div class="ass">
+          <div>1. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
+          {% if num_testemunhas == 2 %}<div>2. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>{% endif %}
+        </div>
       </div>
-    </div>
+    {% endif %}
   </div>
 
 </div>

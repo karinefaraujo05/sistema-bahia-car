@@ -1,9 +1,5 @@
-import re
 import unicodedata
 from urllib.parse import quote
-
-# Campo em branco no contrato: 2 a 10 underscores isolados (não a linha de assinatura, ~40).
-_CAMPO_VAZIO = re.compile(r"(?<!_)_{2,10}(?!_)")
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -28,18 +24,6 @@ from .models import ConfiguracaoLoja, Contrato
 from .services import DocumentoError, adicionar_documentos
 
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-
-
-def _bloquear_se_incompleto(request, contrato):
-    """Impede baixar o contrato enquanto houver campo em branco (marcado com ____)."""
-    if _CAMPO_VAZIO.search(contrato.corpo):
-        messages.error(
-            request,
-            "Ainda há campos em branco no contrato (marcados com ____). "
-            "Preencha tudo, inclusive as testemunhas, antes de baixar.",
-        )
-        return redirect("contratos:editar_contrato", pk=contrato.pk)
-    return None
 
 
 def _disposicao_download(contrato, ext):
@@ -151,6 +135,12 @@ def editar_contrato(request, pk):
     contrato = get_object_or_404(Contrato.objetos, pk=pk)
     if request.method == "POST":
         contrato.corpo = request.POST.get("corpo", contrato.corpo)
+        contrato.observacoes = request.POST.get("observacoes", "").strip()
+        try:
+            n = int(request.POST.get("num_testemunhas", contrato.num_testemunhas))
+        except (TypeError, ValueError):
+            n = contrato.num_testemunhas
+        contrato.num_testemunhas = n if n in (0, 1, 2) else 2
         contrato.atualizado_por = request.user
         contrato.save()
         messages.success(request, "Contrato salvo.")
@@ -161,9 +151,6 @@ def editar_contrato(request, pk):
 @login_required
 def baixar_pdf(request, pk):
     contrato = get_object_or_404(Contrato.objetos, pk=pk)
-    bloqueio = _bloquear_se_incompleto(request, contrato)
-    if bloqueio:
-        return bloqueio
     pdf = renderizar_pdf(contrato)
     # O PDF gerado fica salvo como documento do negócio/consignação.
     salvar_pdf_como_documento(contrato, usuario=request.user)
@@ -175,9 +162,6 @@ def baixar_pdf(request, pk):
 @login_required
 def baixar_docx(request, pk):
     contrato = get_object_or_404(Contrato.objetos, pk=pk)
-    bloqueio = _bloquear_se_incompleto(request, contrato)
-    if bloqueio:
-        return bloqueio
     conteudo = renderizar_docx(contrato)
     resp = HttpResponse(conteudo, content_type=DOCX_MIME)
     resp["Content-Disposition"] = _disposicao_download(contrato, "docx")

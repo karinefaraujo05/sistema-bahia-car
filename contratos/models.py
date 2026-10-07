@@ -190,6 +190,8 @@ class Contrato(ModeloBase):
     titulo = models.CharField("título", max_length=200)
     versao = models.PositiveSmallIntegerField("versão", default=1)
     corpo = models.TextField("texto do contrato")
+    observacoes = models.TextField("observações", blank=True)
+    num_testemunhas = models.PositiveSmallIntegerField("nº de testemunhas", default=2)
 
     class Meta(ModeloBase.Meta):
         verbose_name = "contrato"

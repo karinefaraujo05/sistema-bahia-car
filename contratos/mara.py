@@ -53,6 +53,8 @@ def _contexto_consignacao(contrato, loja):
         "aviso_dias": cons.aviso_dias,
         "prazo_repasse_dias": cons.prazo_repasse_dias,
         "documentos": cons.documentos_entregues or "—",
+        "num_testemunhas": contrato.num_testemunhas,
+        "observacoes": contrato.observacoes,
     }
 
 
@@ -95,6 +97,8 @@ def contexto_mara(contrato):
         "eh_troca": False,
         "eh_consignacao": False,
         "interveniente": None,
+        "num_testemunhas": contrato.num_testemunhas,
+        "observacoes": contrato.observacoes,
     }
 
     if modelo == ModeloContrato.C:  # troca / permuta: dois carros

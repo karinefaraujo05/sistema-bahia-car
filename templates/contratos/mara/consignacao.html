@@ -95,11 +95,11 @@
 
   <p class="cl"><b class="t">CLÁUSULA 7ª – DO DESCUMPRIMENTO.</b> A parte que descumprir qualquer obrigação pagará à outra multa compensatória de {{ multa_pct|floatformat:0 }}% ({{ multa_pct|numero_extenso }} por cento) sobre o valor líquido mínimo da Cláusula 2ª, limitada ao valor da obrigação principal (art. 412 do Código Civil), sem prejuízo das perdas e danos.</p>
 
-  <p class="cl"><b class="t">CLÁUSULA 8ª – DAS DISPOSIÇÕES GERAIS E DO FORO.</b> Este contrato obriga as partes e seus sucessores; qualquer alteração só terá validade por escrito. Os dados pessoais são tratados conforme a Lei nº 13.709/2018 (LGPD). Assinado pelas partes e por duas testemunhas, constitui título executivo extrajudicial (art. 784, III, do CPC). Fica eleito o foro da comarca de {{ cidade_uf }}, com renúncia a qualquer outro, para dirimir questões decorrentes deste contrato.</p>
+  <p class="cl"><b class="t">CLÁUSULA 8ª – DAS DISPOSIÇÕES GERAIS E DO FORO.</b> Este contrato obriga as partes e seus sucessores; qualquer alteração só terá validade por escrito. Os dados pessoais são tratados conforme a Lei nº 13.709/2018 (LGPD). {% if num_testemunhas == 2 %}Assinado pelas partes e por duas testemunhas, constitui título executivo extrajudicial (art. 784, III, do CPC). {% endif %}Fica eleito o foro da comarca de {{ cidade_uf }}, com renúncia a qualquer outro, para dirimir questões decorrentes deste contrato.</p>
 
-  <div class="obs"><span class="rot">OBSERVAÇÕES</span></div>
+  <div class="obs"><span class="rot">OBSERVAÇÕES</span>{% if observacoes %} {{ observacoes }}{% endif %}</div>
 
-  <p class="cl">E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença das duas testemunhas abaixo, que também o subscrevem.</p>
+  <p class="cl">E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma{% if num_testemunhas == 2 %}, na presença das duas testemunhas abaixo, que também o subscrevem{% elif num_testemunhas == 1 %}, na presença da testemunha abaixo, que também o subscreve{% endif %}.</p>
 
   <div class="foot">
     <div class="data">{{ cidade_uf }}, {{ data|date:"j \d\e F \d\e Y" }}.</div>
@@ -107,13 +107,15 @@
       <div><b>{{ consignante.pessoa.nome }}</b>Consignante · CPF {{ consignante.pessoa.cpf_cnpj|cpf_cnpj }}</div>
       <div><b>{{ loja.razao_social|upper }} ({{ loja.nome_fantasia|default:"Bahia Car" }})</b>Consignatária · {{ loja.representante_nome }}</div>
     </div>
-    <div class="test">
-      <span class="rot">TESTEMUNHAS</span>
-      <div class="ass">
-        <div>1. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
-        <div>2. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
+    {% if num_testemunhas %}
+      <div class="test">
+        <span class="rot">TESTEMUNHA{{ num_testemunhas|pluralize }}</span>
+        <div class="ass">
+          <div>1. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
+          {% if num_testemunhas == 2 %}<div>2. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>{% endif %}
+        </div>
       </div>
-    </div>
+    {% endif %}
   </div>
 
 </div>
