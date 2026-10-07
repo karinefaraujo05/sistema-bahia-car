@@ -18,25 +18,26 @@
       </span>
       <p class="font-semibold">Consultar Tabela FIPE</p>
     </div>
-    <p class="mb-3 text-sm text-tinta-suave">Escolha o veículo pra pegar o preço de referência e já preencher marca, modelo e ano.</p>
+    <p class="mb-3 text-sm text-tinta-suave">Escolha o tipo, a marca, o modelo e o ano. A cada escolha, a gente já preenche os dados lá embaixo automaticamente. 👇</p>
     <div class="grid gap-3 sm:grid-cols-2">
       <select id="fipe-tipo" class="campo" aria-label="Tipo de veículo">
         <option value="carros">Carro</option>
         <option value="motos">Moto</option>
         <option value="caminhoes">Caminhão</option>
       </select>
-      <select id="fipe-marca" class="campo" aria-label="Marca (FIPE)"><option value="">Marca…</option></select>
-      <select id="fipe-modelo" class="campo" aria-label="Modelo (FIPE)" disabled><option value="">Modelo…</option></select>
-      <select id="fipe-ano" class="campo" aria-label="Ano (FIPE)" disabled><option value="">Ano…</option></select>
+      <select id="fipe-marca" class="campo" aria-label="Marca (FIPE)"><option value="">1. Marca…</option></select>
+      <select id="fipe-modelo" class="campo" aria-label="Modelo (FIPE)" disabled><option value="">2. Modelo…</option></select>
+      <select id="fipe-ano" class="campo" aria-label="Ano (FIPE)" disabled><option value="">3. Ano…</option></select>
     </div>
-    <div id="fipe-resultado" class="mt-3 hidden items-center justify-between gap-3 rounded-lg border border-acento-200 bg-superficie p-3">
+    <div id="fipe-resultado" class="mt-3 hidden items-center gap-3 rounded-lg border border-acento-200 bg-superficie p-3">
+      <svg class="h-5 w-5 shrink-0 text-verde" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
       <div>
-        <div class="text-xs text-tinta-suave">Preço FIPE</div>
+        <div class="text-xs text-tinta-suave">Preço de referência (FIPE) — é só uma sugestão, ajuste o valor de venda pra sua margem de lucro</div>
         <div id="fipe-preco" class="text-lg font-bold text-acento-700">—</div>
       </div>
-      <button type="button" id="fipe-usar" class="botao botao-primario shrink-0">Preencher dados</button>
     </div>
     <p id="fipe-erro" class="mt-2 hidden text-sm text-ambar"></p>
+    <p class="mt-2 text-xs text-tinta-suave">Carro fora da tabela? Sem problema — é só digitar os campos lá embaixo na mão.</p>
   </div>
 
   {% if form.non_field_errors %}
@@ -146,10 +147,8 @@
         ano = document.getElementById("fipe-ano"),
         resultado = document.getElementById("fipe-resultado"),
         precoEl = document.getElementById("fipe-preco"),
-        erroEl = document.getElementById("fipe-erro"),
-        usar = document.getElementById("fipe-usar");
+        erroEl = document.getElementById("fipe-erro");
       if (!tipo) return;
-      var ultimo = null;
       // Campos reais do formulário (ids do Django):
       var fMarca = document.getElementById("{{ form.marca.id_for_label }}"),
         fModelo = document.getElementById("{{ form.modelo.id_for_label }}"),
@@ -173,6 +172,9 @@
       function buscar(params) {
         return fetch(API + "?" + params).then(function (r) { return r.json(); });
       }
+      function textoDe(sel) {
+        return sel.value ? sel.options[sel.selectedIndex].text : "";
+      }
       function carregarMarcas() {
         marca.innerHTML = '<option value="">Carregando…</option>';
         modelo.disabled = true; ano.disabled = true;
@@ -187,18 +189,22 @@
       tipo.addEventListener("change", carregarMarcas);
       marca.addEventListener("change", function () {
         modelo.disabled = true; ano.disabled = true; resultado.classList.add("hidden"); erro("");
-        if (!marca.value) { opcoes(modelo, [], "Modelo…"); return; }
+        // Já preenche a marca lá embaixo assim que escolhe.
+        if (fMarca) fMarca.value = textoDe(marca);
+        if (!marca.value) { opcoes(modelo, [], "2. Modelo…"); return; }
         modelo.innerHTML = '<option value="">Carregando…</option>';
         buscar("q=modelos&tipo=" + tipo.value + "&marca=" + marca.value)
-          .then(function (d) { opcoes(modelo, d.dados, "Modelo…"); modelo.disabled = false; })
+          .then(function (d) { opcoes(modelo, d.dados, "2. Modelo…"); modelo.disabled = false; })
           .catch(function () { erro("Não deu pra buscar os modelos."); });
       });
       modelo.addEventListener("change", function () {
         ano.disabled = true; resultado.classList.add("hidden"); erro("");
-        if (!modelo.value) { opcoes(ano, [], "Ano…"); return; }
+        // Já preenche o modelo lá embaixo assim que escolhe.
+        if (fModelo) fModelo.value = textoDe(modelo);
+        if (!modelo.value) { opcoes(ano, [], "3. Ano…"); return; }
         ano.innerHTML = '<option value="">Carregando…</option>';
         buscar("q=anos&tipo=" + tipo.value + "&marca=" + marca.value + "&modelo=" + modelo.value)
-          .then(function (d) { opcoes(ano, d.dados, "Ano…"); ano.disabled = false; })
+          .then(function (d) { opcoes(ano, d.dados, "3. Ano…"); ano.disabled = false; })
           .catch(function () { erro("Não deu pra buscar os anos."); });
       });
       ano.addEventListener("change", function () {
@@ -206,26 +212,24 @@
         if (!ano.value) return;
         buscar("q=preco&tipo=" + tipo.value + "&marca=" + marca.value + "&modelo=" + modelo.value + "&ano=" + ano.value)
           .then(function (d) {
-            if (d.erro || !d.dados || !d.dados.Valor) { erro("Não achei o preço."); return; }
-            ultimo = d.dados;
-            precoEl.textContent = d.dados.Valor;
+            if (d.erro || !d.dados || !d.dados.Valor) { erro("Não achei o preço, mas pode seguir preenchendo na mão."); return; }
+            var dados = d.dados;
+            // Preenche tudo automaticamente (usa os nomes limpos que a FIPE devolve).
+            if (fMarca && dados.Marca) fMarca.value = dados.Marca;
+            if (fModelo && dados.Modelo) fModelo.value = dados.Modelo;
+            var am = parseInt(dados.AnoModelo, 10);
+            if (am && am > 1900 && am < 2100) {
+              if (fAnoMod) fAnoMod.value = am;
+              if (fAnoFab && !fAnoFab.value) fAnoFab.value = am - 1;
+            }
+            // Preço é só sugestão: preenche se estiver vazio; o preço de venda é decisão da loja.
+            var v = (dados.Valor || "").replace(/[^\d,]/g, "").replace(",", ".");
+            if (fValor && v && !fValor.value) fValor.value = Math.round(parseFloat(v));
+            precoEl.textContent = dados.Valor;
             resultado.classList.remove("hidden");
             resultado.classList.add("flex");
           })
           .catch(function () { erro("Não deu pra buscar o preço."); });
-      });
-      usar.addEventListener("click", function () {
-        if (!ultimo) return;
-        if (fMarca) fMarca.value = ultimo.Marca || "";
-        if (fModelo) fModelo.value = ultimo.Modelo || "";
-        var am = parseInt(ultimo.AnoModelo, 10);
-        if (am && am > 1900 && am < 2100) {
-          if (fAnoMod) fAnoMod.value = am;
-          if (fAnoFab && !fAnoFab.value) fAnoFab.value = am - 1;
-        }
-        var v = (ultimo.Valor || "").replace(/[^\d,]/g, "").replace(",", ".");
-        if (fValor && v) fValor.value = Math.round(parseFloat(v));
-        if (fMarca) fMarca.focus();
       });
       carregarMarcas();
     })();
