@@ -2,6 +2,21 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+class Empresa(models.Model):
+    """Uma loja/empresa. Cada usuário pertence a uma e os dados são separados por ela."""
+
+    nome = models.CharField("nome", max_length=120)
+    criado_em = models.DateTimeField("criado em", auto_now_add=True)
+
+    class Meta:
+        verbose_name = "empresa"
+        verbose_name_plural = "empresas"
+        ordering = ["nome"]
+
+    def __str__(self):
+        return self.nome
+
+
 class Usuario(AbstractUser):
     """
     Usuário do sistema. Dois papéis:
@@ -21,6 +36,14 @@ class Usuario(AbstractUser):
         max_length=20,
         choices=Papel.choices,
         default=Papel.VENDEDOR,
+    )
+    empresa = models.ForeignKey(
+        "contas.Empresa",
+        verbose_name="empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="usuarios",
     )
 
     class Meta(AbstractUser.Meta):

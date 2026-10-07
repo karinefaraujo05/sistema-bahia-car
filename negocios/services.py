@@ -12,6 +12,7 @@ from django.db import transaction
 from django.db.models import Max
 from django.utils import timezone
 
+from core.tenancy import empresa_atual
 from veiculos.models import Situacao, StatusVeiculo
 
 from .models import (
@@ -30,7 +31,12 @@ class RegraNegocioError(Exception):
 
 
 def _proximo_numero(modelo):
-    ultimo = modelo.todos.aggregate(maior=Max("numero_contrato"))["maior"] or 0
+    # Numeração sequencial por empresa (cada loja começa do 1).
+    qs = modelo.todos
+    empresa = empresa_atual()
+    if empresa is not None:
+        qs = qs.filter(empresa=empresa)
+    ultimo = qs.aggregate(maior=Max("numero_contrato"))["maior"] or 0
     return ultimo + 1
 
 

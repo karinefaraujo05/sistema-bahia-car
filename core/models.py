@@ -21,12 +21,21 @@ from django.db import models
 from django.utils import timezone
 from simple_history.models import HistoricalRecords
 
+from .tenancy import empresa_atual
+
 
 class NaoArquivadosManager(models.Manager):
-    """Manager padrão: devolve apenas os registros não arquivados."""
+    """
+    Manager padrão: devolve apenas os registros não arquivados e, quando há uma
+    empresa atual (usuário logado), apenas os daquela empresa.
+    """
 
     def get_queryset(self):
-        return super().get_queryset().filter(arquivado=False)
+        qs = super().get_queryset().filter(arquivado=False)
+        empresa = empresa_atual()
+        if empresa is not None:
+            qs = qs.filter(empresa=empresa)
+        return qs
 
 
 class ModeloBase(models.Model):
@@ -50,6 +59,14 @@ class ModeloBase(models.Model):
     )
     arquivado = models.BooleanField("arquivado", default=False)
     arquivado_em = models.DateTimeField("arquivado em", null=True, blank=True)
+    empresa = models.ForeignKey(
+        "contas.Empresa",
+        verbose_name="empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
 
     # Histórico automático (quem mudou o quê e quando) para todo modelo filho.
     historico = HistoricalRecords(inherit=True)
@@ -62,6 +79,14 @@ class ModeloBase(models.Model):
         # `objetos` é o padrão (esconde arquivados); `todos` é a base (vê tudo).
         default_manager_name = "objetos"
         base_manager_name = "todos"
+
+    def save(self, *args, **kwargs):
+        # Preenche a empresa automaticamente a partir do usuário logado.
+        if self.empresa_id is None:
+            empresa = empresa_atual()
+            if empresa is not None:
+                self.empresa = empresa
+        super().save(*args, **kwargs)
 
     def arquivar(self, salvar=True):
         """Arquiva o registro em vez de apagá-lo."""

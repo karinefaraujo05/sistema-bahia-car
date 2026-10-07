@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 
 from core.models import ModeloBase
+from core.tenancy import empresa_atual
 
 # Dados de identidade da loja que o contrato precisa ter preenchidos.
 # As regras do contrato (multa, IPVA, nº de vias, prazos) são definidas por contrato,
@@ -66,8 +67,15 @@ class ConfiguracaoLoja(ModeloBase):
         super().save(*args, **kwargs)
 
     @classmethod
-    def carregar(cls):
-        obj, _ = cls.todos.get_or_create(pk=1)
+    def carregar(cls, empresa=None):
+        """Configuração da empresa (a atual, se não for passada)."""
+        if empresa is None:
+            empresa = empresa_atual()
+        if empresa is None:
+            # Fora de uma requisição (migrações, testes sem login): singleton.
+            obj, _ = cls.todos.get_or_create(pk=1)
+            return obj
+        obj, _ = cls.todos.get_or_create(empresa=empresa)
         return obj
 
     def campos_faltando(self):
