@@ -38,30 +38,26 @@
 
   {# Atalhos em destaque. #}
   <nav class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Ações">
-    <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao gap-4">
-      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+    <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao gap-3">
+      <span class="indicador-icone shrink-0 bg-petroleo-50 text-petroleo-700">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
       </span>
-      <span>Comprei um carro</span>
-    </a>
-    <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao gap-4">
-      <span class="indicador-icone bg-verde-fundo text-verde">
+      <span class="leading-snug">Comprei um carro</span>    </a>
+    <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao gap-3">
+      <span class="indicador-icone shrink-0 bg-verde-fundo text-verde">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       </span>
-      <span>Vendi um carro</span>
-    </a>
-    <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao gap-4">
-      <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+      <span class="leading-snug">Vendi um carro</span>    </a>
+    <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao gap-3">
+      <span class="indicador-icone shrink-0 bg-petroleo-50 text-petroleo-700">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
       </span>
-      <span>Fiz uma troca</span>
-    </a>
-    <a href="{% url 'negocios:consignar' %}" class="cartao-acao gap-4">
-      <span class="indicador-icone bg-ambar-fundo text-ambar">
+      <span class="leading-snug">Fiz uma troca</span>    </a>
+    <a href="{% url 'negocios:consignar' %}" class="cartao-acao gap-3">
+      <span class="indicador-icone shrink-0 bg-ambar-fundo text-ambar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
       </span>
-      <span>Peguei um carro pra vender</span>
-    </a>
+      <span class="leading-snug">Peguei um carro pra vender</span>    </a>
   </nav>
 
   {# Indicadores. #}
@@ -100,42 +96,69 @@
   {# Gráfico de vendas ao lado dos últimos negócios. #}
   <div class="grid gap-6 lg:grid-cols-3">
     <section class="painel p-5 lg:col-span-2" aria-label="Vendas">
-      <h2 class="mb-1 text-lg">Vendas</h2>
-      <p class="mb-5 text-sm text-tinta-suave">Vendas e trocas nos últimos 6 meses</p>
-      <div class="flex h-44 gap-3 sm:gap-6">
+      <div class="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <h2 class="text-lg">Vendas</h2>
+          <p class="text-sm text-tinta-suave">Vendas e trocas nos últimos 6 meses</p>
+        </div>
+        <a href="{% url 'negocios:vendas' %}" class="nav-link shrink-0 text-sm text-petroleo-700">Ver tudo</a>
+      </div>
+      <div class="flex h-44 items-end gap-3 sm:gap-6">
         {% for m in grafico_vendas %}
-          <div class="flex flex-1 flex-col items-center">
-            <div class="flex w-full flex-1 items-end">
+          <div class="flex h-full flex-1 flex-col items-center">
+            <span class="mb-2 text-sm font-bold {% if m.valor %}text-tinta{% else %}text-cinza{% endif %}">{{ m.valor }}</span>
+            {# Trilha de fundo: cada mês ocupa a mesma coluna, mesmo quando zerado. #}
+            <div class="relative flex w-full flex-1 items-end rounded-md bg-petroleo-50">
               <div
-                class="w-full rounded-t-md bg-petroleo-500"
-                style="height: {{ m.altura }}%; min-height: 3px;"
+                class="w-full rounded-md transition-[height] duration-500 {% if forloop.last %}bg-petroleo-700{% else %}bg-petroleo-400{% endif %}"
+                style="height: {{ m.altura }}%; min-height: {% if m.valor %}6px{% else %}0{% endif %};"
                 title="{{ m.valor }} no mês"
               ></div>
             </div>
-            <span class="mt-2 text-xs font-medium">{{ m.valor }}</span>
-            <span class="text-xs text-tinta-suave">{{ m.rotulo }}</span>
+            <span class="mt-2 text-xs {% if forloop.last %}font-semibold text-tinta{% else %}text-tinta-suave{% endif %}">{{ m.rotulo }}</span>
           </div>
         {% endfor %}
       </div>
     </section>
 
-    <section class="painel p-5 lg:col-span-1" aria-label="Últimos negócios">
+    <section class="painel flex flex-col p-5 lg:col-span-1" aria-label="Últimos negócios">
       <h2 class="mb-3 text-lg">Últimos negócios</h2>
       {% if ultimos_negocios %}
-        <ul class="-mx-2 divide-y divide-borda">
+        <ul class="-mx-2 flex-1 divide-y divide-borda">
           {% for negocio in ultimos_negocios %}
             <li>
-              <a href="{% url 'negocios:detalhe' negocio.pk %}" class="flex items-center justify-between rounded-lg px-2 py-2.5 hover:bg-petroleo-50">
-                <span class="font-medium">
-                  {{ negocio.get_tipo_display }}{% if negocio.numero_contrato %} nº {{ negocio.numero_contrato }}{% endif %}
-                </span>
-                <span class="text-sm text-tinta-suave">{{ negocio.data|date:"d/m/Y" }}</span>
+              <a href="{% url 'negocios:detalhe' negocio.pk %}" class="group flex items-center gap-3 rounded-lg px-2 py-2.5 hover:bg-petroleo-50">
+                {% if negocio.tipo == 'venda' %}
+                  <span class="chip h-9 w-9 shrink-0 bg-verde-fundo text-verde">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                  </span>
+                {% elif negocio.tipo == 'troca' %}
+                  <span class="chip h-9 w-9 shrink-0 bg-petroleo-50 text-petroleo-700">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+                  </span>
+                {% elif negocio.tipo == 'compra' %}
+                  <span class="chip h-9 w-9 shrink-0 bg-petroleo-50 text-petroleo-700">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+                  </span>
+                {% else %}
+                  <span class="chip h-9 w-9 shrink-0 bg-ambar-fundo text-ambar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                  </span>
+                {% endif %}
+                <div class="min-w-0 flex-1">
+                  <div class="truncate font-medium">
+                    {{ negocio.get_tipo_display }}{% if negocio.numero_contrato %} nº {{ negocio.numero_contrato }}{% endif %}
+                  </div>
+                  <div class="text-xs text-tinta-suave">{{ negocio.data|date:"d/m/Y" }}</div>
+                </div>
+                <svg class="h-4 w-4 shrink-0 text-tinta-suave opacity-0 transition group-hover:opacity-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
               </a>
             </li>
           {% endfor %}
         </ul>
+        <a href="{% url 'negocios:vendas' %}" class="mt-3 block rounded-lg border border-borda py-2 text-center text-sm font-medium text-petroleo-700 hover:bg-petroleo-50">Ver todos os negócios</a>
       {% else %}
-        <p class="py-6 text-center text-tinta-suave">Nenhum negócio registrado ainda.</p>
+        <p class="flex-1 py-6 text-center text-tinta-suave">Nenhum negócio registrado ainda.</p>
       {% endif %}
     </section>
   </div>
