@@ -1,22 +1,40 @@
 {% extends "base.html" %}
 {% load formato %}
 
-{% block titulo %}Negócio · Bahia Car{% endblock %}
+{% block titulo %}{{ negocio.get_tipo_display }}{% if negocio.numero_contrato %} nº {{ negocio.numero_contrato }}{% endif %} · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-2">
     {% url 'inicio' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Início" %}
   </div>
 
-  <div class="mb-4 flex items-start justify-between gap-3">
-    <div>
-      <h1 class="text-2xl">
-        {{ negocio.get_tipo_display }}
-        {% if negocio.numero_contrato %}nº {{ negocio.numero_contrato }}{% endif %}
-      </h1>
-      <p class="text-tinta-suave">{{ negocio.get_modalidade_display }} · {{ negocio.data|date:"d/m/Y" }}</p>
+  {# Cabeçalho: ícone do tipo + título + status. #}
+  <div class="mb-6 flex items-start justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <span class="indicador-icone shrink-0
+        {% if negocio.tipo == 'venda' %}bg-verde-fundo text-verde
+        {% elif negocio.tipo == 'consignacao' %}bg-ambar-fundo text-ambar
+        {% else %}bg-petroleo-50 text-petroleo-700{% endif %}">
+        {% if negocio.tipo == 'venda' %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        {% elif negocio.tipo == 'compra' %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+        {% elif negocio.tipo == 'troca' %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+        {% elif negocio.tipo == 'consignacao' %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+        {% else %}
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        {% endif %}
+      </span>
+      <div>
+        <h1 class="text-2xl">
+          {{ negocio.get_tipo_display }}{% if negocio.numero_contrato %} nº {{ negocio.numero_contrato }}{% endif %}
+        </h1>
+        <p class="text-tinta-suave">{{ negocio.get_modalidade_display }} · {{ negocio.data|date:"d/m/Y" }}</p>
+      </div>
     </div>
-    <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-sm font-medium{% if negocio.status == 'concluido' %} bg-verde-fundo text-verde{% elif negocio.status == 'cancelado' %} bg-cinza-fundo text-cinza{% else %} bg-ambar-fundo text-ambar{% endif %}">
+    <span class="shrink-0 inline-flex items-center rounded-full px-3 py-1 text-sm font-medium{% if negocio.status == 'concluido' %} bg-verde-fundo text-verde{% elif negocio.status == 'cancelado' %} bg-cinza-fundo text-cinza{% else %} bg-ambar-fundo text-ambar{% endif %}">
       {{ negocio.get_status_display }}
     </span>
   </div>
@@ -28,216 +46,233 @@
     </div>
   {% endif %}
 
-  <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
-  <div>
-  <section class="mb-6" aria-label="Valores">
-    <dl class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-      <div class="flex justify-between gap-4 px-4 py-3">
-        <dt class="text-tinta-suave">Valor total</dt>
-        <dd class="text-right font-medium">{{ negocio.valor_total|reais }}</dd>
+  {# Resumo em destaque: o valor total é o número principal. #}
+  <div class="mb-6 rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+    <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+      <div>
+        <div class="text-sm text-tinta-suave">Valor total</div>
+        <div class="text-3xl font-bold text-petroleo-700">{{ negocio.valor_total|reais }}</div>
       </div>
-      {% if diferenca %}
-        <div class="flex justify-between gap-4 px-4 py-3">
-          <dt class="text-tinta-suave">Diferença</dt>
-          <dd class="text-right font-medium">
-            {% if diferenca > 0 %}Cliente paga {{ diferenca|reais }}
-            {% elif diferenca < 0 %}Loja paga {{ diferenca|reais }}
-            {% else %}Sem diferença{% endif %}
-          </dd>
-        </div>
-      {% endif %}
-      {% if negocio.forma_pagamento %}
-        <div class="flex justify-between gap-4 px-4 py-3">
-          <dt class="text-tinta-suave">Pagamento</dt>
-          <dd class="text-right font-medium">{{ negocio.get_forma_pagamento_display }}</dd>
-        </div>
-      {% endif %}
-    </dl>
-  </section>
-
-  <section class="mb-6" aria-label="Carros">
-    <h2 class="mb-2 text-lg">Carros</h2>
-    <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-      {% for item in itens %}
-        <li class="px-4 py-3">
-          <a href="{% url 'veiculos:detalhe' item.veiculo.pk %}" class="font-medium text-petroleo-700">
-            {{ item.veiculo.marca }} {{ item.veiculo.modelo }} ({{ item.veiculo.placa_formatada }})
-          </a>
-          <div class="text-sm text-tinta-suave">
-            {{ item.de_pessoa.nome|default:"Loja" }} → {{ item.para_pessoa.nome|default:"Loja" }}
-            · {{ item.valor|reais }}
+      <dl class="flex flex-wrap gap-x-8 gap-y-3 text-sm">
+        {% if diferenca %}
+          <div>
+            <dt class="text-tinta-suave">Diferença</dt>
+            <dd class="font-semibold">
+              {% if diferenca > 0 %}Cliente paga {{ diferenca|reais }}
+              {% elif diferenca < 0 %}Loja paga {{ diferenca|reais }}
+              {% else %}Sem diferença{% endif %}
+            </dd>
           </div>
-        </li>
-      {% empty %}
-        <li class="px-4 py-3 text-tinta-suave">Nenhum carro.</li>
-      {% endfor %}
-    </ul>
-  </section>
-
-  <section class="mb-6" aria-label="Pessoas">
-    <h2 class="mb-2 text-lg">Pessoas</h2>
-    <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-      {% for parte in partes %}
-        <li class="flex items-center justify-between px-4 py-3">
-          <a href="{% url 'pessoas:detalhe' parte.pessoa.pk %}" class="font-medium text-petroleo-700">
-            {{ parte.pessoa.nome }}
-          </a>
-          <span class="text-sm text-tinta-suave">{{ parte.get_papel_display }}</span>
-        </li>
-      {% empty %}
-        <li class="px-4 py-3 text-tinta-suave">Nenhuma pessoa.</li>
-      {% endfor %}
-    </ul>
-  </section>
-  </div>
-
-  <div>
-  {# Contrato gerado pelo sistema. #}
-  <section class="mb-6" aria-label="Contrato">
-    <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-      <h2 class="text-lg">Contrato</h2>
-      <div class="flex flex-wrap gap-2">
-        <form method="post" action="{% url 'contratos:gerar' negocio.pk %}">
-          {% csrf_token %}
-          <button type="submit" class="botao botao-secundario{% if tem_contrato %} opacity-60{% endif %}"
-            {% if tem_contrato %}title="Já existe contrato. Gerar cria uma nova versão."{% endif %}>
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
-            {% if tem_contrato %}Gerar de novo{% else %}Gerar contrato{% endif %}
-          </button>
-        </form>
-        <form method="post" action="{% url 'contratos:gerar_termo' negocio.pk %}">
-          {% csrf_token %}
-          <button type="submit" class="botao botao-secundario{% if tem_termo %} opacity-60{% endif %}"
-            {% if tem_termo %}title="Termo já gerado. Gerar cria de novo."{% endif %}>
-            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
-            {% if tem_termo %}Gerar termo de novo{% else %}Gerar termo de vistoria{% endif %}
-          </button>
-        </form>
-      </div>
+        {% endif %}
+        {% if negocio.forma_pagamento %}
+          <div>
+            <dt class="text-tinta-suave">Pagamento</dt>
+            <dd class="font-semibold">{{ negocio.get_forma_pagamento_display }}</dd>
+          </div>
+        {% endif %}
+      </dl>
     </div>
-    {% if contratos_info %}
-      <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-        {% for info in contratos_info %}
-          <li class="px-4 py-3">
-            <div class="flex items-center justify-between gap-3">
-              <span class="flex min-w-0 items-center gap-2">
-                <svg class="h-5 w-5 shrink-0 text-petroleo-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>
-                <span class="truncate">{{ info.c.titulo }} <span class="text-tinta-suave">(v{{ info.c.versao }})</span></span>
-              </span>
-              <a href="{% url 'contratos:editar_contrato' info.c.pk %}" class="inline-flex shrink-0 items-center gap-1.5 text-petroleo-700">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                Abrir / editar
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
+    <div class="space-y-6">
+      <section aria-label="Carros">
+        <h2 class="mb-2 text-lg">Carros</h2>
+        <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
+          {% for item in itens %}
+            <li class="px-4 py-3">
+              <a href="{% url 'veiculos:detalhe' item.veiculo.pk %}" class="font-medium text-petroleo-700">
+                {{ item.veiculo.marca }} {{ item.veiculo.modelo }} ({{ item.veiculo.placa_formatada }})
               </a>
-            </div>
-            {% if info.mudancas %}
-              {% if info.mudancas.sem_mudanca %}
-                <p class="mt-1 text-xs text-tinta-suave">Igual à versão anterior.</p>
-              {% else %}
-                <details class="mt-2 text-sm">
-                  <summary class="text-tinta-suave">O que mudou da versão anterior</summary>
-                  <div class="mt-2 space-y-1">
-                    {% for l in info.mudancas.adicionadas %}<p class="text-verde">+ {{ l|truncatechars:90 }}</p>{% endfor %}
-                    {% for l in info.mudancas.removidas %}<p class="text-tinta-suave line-through">- {{ l|truncatechars:90 }}</p>{% endfor %}
-                  </div>
-                </details>
-              {% endif %}
-            {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-4 text-center text-tinta-suave">
-        Nenhum contrato gerado ainda.
-      </p>
-    {% endif %}
-  </section>
-
-  {# Documentos do negócio. #}
-  <section class="mb-6" aria-label="Documentos">
-    <h2 class="mb-2 text-lg">Documentos</h2>
-
-    {% if documentos %}
-      <ul class="mb-3 divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-        {% for documento in documentos %}
-          <li class="flex items-center justify-between gap-3 px-4 py-3">
-            <div class="min-w-0">
-              <div class="truncate font-medium">{{ documento.get_tipo_display }}</div>
-              <div class="truncate text-sm text-tinta-suave">
-                {{ documento.nome_arquivo }}{% if documento.gerado_pelo_sistema %} · gerado pelo sistema{% endif %}
+              <div class="text-sm text-tinta-suave">
+                {{ item.de_pessoa.nome|default:"Loja" }} &rarr; {{ item.para_pessoa.nome|default:"Loja" }}
+                · {{ item.valor|reais }}
               </div>
-            </div>
-            <div class="flex shrink-0 items-center gap-4 text-sm">
-              <a href="{{ documento.arquivo.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-petroleo-700">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                Abrir
+            </li>
+          {% empty %}
+            <li class="px-4 py-3 text-tinta-suave">Nenhum carro.</li>
+          {% endfor %}
+        </ul>
+      </section>
+
+      <section aria-label="Pessoas">
+        <h2 class="mb-2 text-lg">Pessoas</h2>
+        <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
+          {% for parte in partes %}
+            <li class="flex items-center justify-between gap-3 px-4 py-3">
+              <a href="{% url 'pessoas:detalhe' parte.pessoa.pk %}" class="flex min-w-0 items-center gap-2.5">
+                <span class="avatar h-9 w-9 text-sm">{{ parte.pessoa.nome|first|upper }}</span>
+                <span class="truncate font-medium text-petroleo-700">{{ parte.pessoa.nome }}</span>
               </a>
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 text-petroleo-700"
-                data-url="{{ request.scheme }}://{{ request.get_host }}{{ documento.arquivo.url }}"
-                onclick="compartilhar(this.dataset.url, '{{ documento.get_tipo_display|escapejs }}')"
-              >
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
-                Compartilhar
+              <span class="shrink-0 text-sm text-tinta-suave">{{ parte.get_papel_display }}</span>
+            </li>
+          {% empty %}
+            <li class="px-4 py-3 text-tinta-suave">Nenhuma pessoa.</li>
+          {% endfor %}
+        </ul>
+      </section>
+    </div>
+
+    <div class="space-y-6">
+      {# Contrato gerado pelo sistema. #}
+      <section aria-label="Contrato">
+        <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h2 class="text-lg">Contrato</h2>
+          <div class="flex flex-wrap gap-2">
+            <form method="post" action="{% url 'contratos:gerar' negocio.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="botao botao-secundario{% if tem_contrato %} opacity-60{% endif %}"
+                {% if tem_contrato %}title="Já existe contrato. Gerar cria uma nova versão."{% endif %}>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+                {% if tem_contrato %}Gerar de novo{% else %}Gerar contrato{% endif %}
               </button>
-            </div>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="mb-3 rounded-xl border border-borda bg-superficie shadow-sm px-4 py-4 text-center text-tinta-suave">
-        Nenhum documento anexado ainda.
-      </p>
-    {% endif %}
+            </form>
+            <form method="post" action="{% url 'contratos:gerar_termo' negocio.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="botao botao-secundario{% if tem_termo %} opacity-60{% endif %}"
+                {% if tem_termo %}title="Termo já gerado. Gerar cria de novo."{% endif %}>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+                {% if tem_termo %}Gerar termo de novo{% else %}Gerar termo de vistoria{% endif %}
+              </button>
+            </form>
+          </div>
+        </div>
+        {% if contratos_info %}
+          <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
+            {% for info in contratos_info %}
+              <li class="px-4 py-3">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="flex min-w-0 items-center gap-2">
+                    <svg class="h-5 w-5 shrink-0 text-petroleo-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>
+                    <span class="truncate">{{ info.c.titulo }} <span class="text-tinta-suave">(v{{ info.c.versao }})</span></span>
+                  </span>
+                  <a href="{% url 'contratos:editar_contrato' info.c.pk %}" class="inline-flex shrink-0 items-center gap-1.5 text-petroleo-700">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    Abrir / editar
+                  </a>
+                </div>
+                {% if info.mudancas %}
+                  {% if info.mudancas.sem_mudanca %}
+                    <p class="mt-1 text-xs text-tinta-suave">Igual à versão anterior.</p>
+                  {% else %}
+                    <details class="mt-2 text-sm">
+                      <summary class="text-tinta-suave">O que mudou da versão anterior</summary>
+                      <div class="mt-2 space-y-1">
+                        {% for l in info.mudancas.adicionadas %}<p class="text-verde">+ {{ l|truncatechars:90 }}</p>{% endfor %}
+                        {% for l in info.mudancas.removidas %}<p class="text-tinta-suave line-through">- {{ l|truncatechars:90 }}</p>{% endfor %}
+                      </div>
+                    </details>
+                  {% endif %}
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="rounded-xl border border-dashed border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+            Nenhum contrato gerado ainda.
+          </p>
+        {% endif %}
+      </section>
 
-    <form
-      method="post"
-      action="{% url 'contratos:upload_documentos' negocio.pk %}"
-      enctype="multipart/form-data"
-      class="space-y-4 rounded-2xl border border-borda bg-superficie p-5 shadow-sm"
-    >
-      {% csrf_token %}
-      <div class="flex items-center gap-2.5">
-        <span class="chip bg-petroleo-50 text-petroleo-700">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-        </span>
-        <p class="font-semibold">Anexar documento</p>
-      </div>
+      {# Documentos do negócio. #}
+      <section aria-label="Documentos">
+        <h2 class="mb-2 text-lg">Documentos</h2>
 
-      <div>
-        <label for="{{ doc_form.tipo.id_for_label }}" class="mb-1 block text-sm font-medium">Tipo</label>
-        {{ doc_form.tipo }}
-      </div>
+        {% if documentos %}
+          <ul class="mb-3 divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
+            {% for documento in documentos %}
+              <li class="flex items-center justify-between gap-3 px-4 py-3">
+                <div class="flex min-w-0 items-center gap-2.5">
+                  <span class="chip h-9 w-9 shrink-0 bg-petroleo-50 text-petroleo-700">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                  </span>
+                  <div class="min-w-0">
+                    <div class="truncate font-medium">{{ documento.get_tipo_display }}</div>
+                    <div class="truncate text-sm text-tinta-suave">
+                      {{ documento.nome_arquivo }}{% if documento.gerado_pelo_sistema %} · gerado pelo sistema{% endif %}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex shrink-0 items-center gap-4 text-sm">
+                  <a href="{{ documento.arquivo.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-petroleo-700">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                    Abrir
+                  </a>
+                  <button
+                    type="button"
+                    class="inline-flex items-center gap-1.5 text-petroleo-700"
+                    data-url="{{ request.scheme }}://{{ request.get_host }}{{ documento.arquivo.url }}"
+                    onclick="compartilhar(this.dataset.url, '{{ documento.get_tipo_display|escapejs }}')"
+                  >
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+                    Compartilhar
+                  </button>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="mb-3 rounded-xl border border-dashed border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+            Nenhum documento anexado ainda.
+          </p>
+        {% endif %}
 
-      <div id="doc-descricao" class="hidden">
-        <label for="{{ doc_form.descricao.id_for_label }}" class="mb-1 block text-sm font-medium">Nome do documento</label>
-        {{ doc_form.descricao }}
-        <p class="mt-1 text-xs text-tinta-suave">Como é “Outro”, dê um nome pra saber o que é depois.</p>
-      </div>
+        <form
+          method="post"
+          action="{% url 'contratos:upload_documentos' negocio.pk %}"
+          enctype="multipart/form-data"
+          class="space-y-4 rounded-2xl border border-borda bg-superficie p-5 shadow-sm"
+        >
+          {% csrf_token %}
+          <div class="flex items-center gap-2.5">
+            <span class="chip bg-petroleo-50 text-petroleo-700">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            </span>
+            <p class="font-semibold">Anexar documento</p>
+          </div>
 
-      <div>
-        <label for="arquivos-doc" class="mb-1 block text-sm font-medium">Arquivo (foto ou PDF)</label>
-        <input
-          id="arquivos-doc"
-          type="file"
-          name="arquivos"
-          accept="image/*,application/pdf"
-          capture="environment"
-          multiple
-          class="campo-arquivo"
-        />
-      </div>
+          <div>
+            <label for="{{ doc_form.tipo.id_for_label }}" class="mb-1 block text-sm font-medium">Tipo</label>
+            {{ doc_form.tipo }}
+          </div>
 
-      <label class="flex items-center gap-2 text-sm">
-        {{ doc_form.juntar_pdf }} <span>{{ doc_form.juntar_pdf.label }}</span>
-      </label>
+          <div id="doc-descricao" class="hidden">
+            <label for="{{ doc_form.descricao.id_for_label }}" class="mb-1 block text-sm font-medium">Nome do documento</label>
+            {{ doc_form.descricao }}
+            <p class="mt-1 text-xs text-tinta-suave">Como é "Outro", dê um nome pra saber o que é depois.</p>
+          </div>
 
-      <button type="submit" class="botao botao-primario">Anexar documento</button>
-    </form>
+          <div>
+            <label for="arquivos-doc" class="mb-1 block text-sm font-medium">Arquivo (foto ou PDF)</label>
+            <input
+              id="arquivos-doc"
+              type="file"
+              name="arquivos"
+              accept="image/*,application/pdf"
+              capture="environment"
+              multiple
+              class="campo-arquivo"
+            />
+          </div>
 
-  </section>
+          <label class="flex items-center gap-2 text-sm">
+            {{ doc_form.juntar_pdf }} <span>{{ doc_form.juntar_pdf.label }}</span>
+          </label>
+
+          <button type="submit" class="botao botao-primario">Anexar documento</button>
+        </form>
+      </section>
+    </div>
   </div>
-  </div>
+
+  {% if negocio.status == 'concluido' %}
+    <div class="mt-8 flex justify-end border-t border-borda pt-4">
+      <a href="{% url 'negocios:confirmar_cancelamento' negocio.pk %}" class="inline-flex items-center gap-1.5 text-sm font-medium text-cinza hover:text-tinta">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+        Cancelar negócio
+      </a>
+    </div>
+  {% endif %}
 
   <script>
     function compartilhar(url, titulo) {
@@ -258,10 +293,4 @@
       alternar();
     })();
   </script>
-
-  {% if negocio.status == 'concluido' %}
-    <a href="{% url 'negocios:confirmar_cancelamento' negocio.pk %}" class="botao botao-secundario">
-      Cancelar negócio
-    </a>
-  {% endif %}
 {% endblock %}

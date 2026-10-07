@@ -27,27 +27,22 @@
         padding-bottom: 4pt;
         margin-bottom: 8pt;
       }
-      .aviso {
-        border: 0.75pt solid #c9a24a;
-        background: #fbf5e6;
-        color: #6b4e12;
-        padding: 4pt 7pt;
-        margin-bottom: 9pt;
-        font-family: "DejaVu Sans", sans-serif;
-        font-size: 7pt;
-      }
       .titulo {
         text-align: center;
-        font-size: 11pt;
+        font-size: 12pt;
+        font-weight: bold;
         text-transform: uppercase;
-        letter-spacing: 0.3pt;
-        margin: 0 0 1pt;
+        letter-spacing: 0.4pt;
+        margin: 2pt 0 2pt;
       }
       .subtitulo {
         text-align: center;
         font-size: 8.5pt;
         color: #555;
-        margin: 0 0 9pt;
+        margin: 0 auto 9pt;
+        padding-bottom: 7pt;
+        border-bottom: 0.6pt solid #c7d2d4;
+        width: 60%;
       }
       p {
         text-align: justify;
@@ -72,16 +67,11 @@
     </style>
   </head>
   <body>
-    <!-- REVISAR COM ADVOGADO -->
     {% if loja.nome_fantasia or loja.razao_social %}
       <div class="marca">
         {{ loja.nome_fantasia|default:loja.razao_social }}{% if loja.cidade %} · {{ loja.cidade }}{% if loja.uf %} - {{ loja.uf }}{% endif %}{% endif %}
       </div>
     {% endif %}
-
-    <div class="aviso">
-      MODELO PROVISÓRIO. Este documento precisa da revisão de um advogado antes de ser usado com clientes.
-    </div>
 
     {{ contrato.corpo|formatar_contrato }}
   </body>

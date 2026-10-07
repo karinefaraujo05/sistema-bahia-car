@@ -21,8 +21,20 @@ def formatar_contrato(corpo):
     if not corpo:
         return ""
 
+    def realcar(linha):
+        # Opera em texto JÁ escapado. Põe em negrito o que "salta aos olhos".
+        # Valores em reais.
+        linha = re.sub(r"(R\$\s?[\d.]+,\d{2})", r"<strong>\1</strong>", linha)
+        # Marcadores de parágrafo.
+        linha = re.sub(r"^(§\s*\d+º|Parágrafo único\.)", r"<strong>\1</strong>", linha)
+        # Rótulo no começo da linha (dados do carro, pagamento etc.): "Placa:", "Marca/Modelo:".
+        linha = re.sub(
+            r"^([A-Za-zÀ-Úà-ú][\w/ ().-]{1,34}:)(\s)", r"<strong>\1</strong>\2", linha
+        )
+        return linha
+
     def por_linhas(texto):
-        return "<br>".join(escape(l) for l in texto.split("\n"))
+        return "<br>".join(realcar(escape(l)) for l in texto.split("\n"))
 
     blocos = re.split(r"\n\s*\n", corpo.strip())
     partes = []
