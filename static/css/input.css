@@ -320,6 +320,35 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-vermelho) 18%, transparent);
   }
 
+  /* Botão flutuante de ajuda, presente em todas as telas. */
+  .botao-ajuda {
+    position: fixed;
+    right: 1rem;
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+    z-index: 30;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 3rem;
+    padding: 0 1.125rem;
+    border-radius: 9999px;
+    background-color: var(--color-acento-600);
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 10px 24px -6px color-mix(in srgb, var(--color-acento-600) 55%, transparent);
+    transition: background-color 0.15s ease, transform 0.05s ease;
+  }
+  .botao-ajuda:hover {
+    background-color: var(--color-acento-700);
+  }
+  .botao-ajuda:active {
+    transform: translateY(1px);
+  }
+  .botao-ajuda svg {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
   /* Cartões da Central de ajuda (cada um abre um passo a passo). */
   .cartao-guia {
     display: flex;
