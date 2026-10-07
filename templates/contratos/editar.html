@@ -11,8 +11,8 @@
     {% endif %}
   </div>
 
-  <h1 class="mb-1 text-2xl">{{ contrato.titulo }}</h1>
-  <p class="mb-5 text-tinta-suave">Versão {{ contrato.versao }} · o PDF é montado automaticamente dos dados.</p>
+  <h1 class="mb-1 text-2xl">{{ contrato.nome_amigavel }}</h1>
+  <p class="mb-5 text-tinta-suave">{{ contrato.titulo|capfirst }} · versão {{ contrato.versao }} · o PDF é montado automaticamente dos dados.</p>
 
   <form method="post" class="space-y-5">
     {% csrf_token %}

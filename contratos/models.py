@@ -210,3 +210,10 @@ class Contrato(ModeloBase):
 
     def __str__(self):
         return f"{self.titulo} (v{self.versao})"
+
+    @property
+    def nome_amigavel(self):
+        """Nome fácil pro dia a dia: "[nº] Troca do X por Y - Cliente"."""
+        from .geracao import nome_arquivo_contrato
+
+        return nome_arquivo_contrato(self)

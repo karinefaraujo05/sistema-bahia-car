@@ -219,14 +219,14 @@ def nome_arquivo_contrato(contrato):
             carro = ", ".join(_nome_carro(i.veiculo) for i in itens)
         nome = f"[{numero}] {negocio.get_tipo_display()}"
         if carro.strip():
-            nome += f" {carro.strip()}"
+            nome += f" do {carro.strip()}"
         cliente = _cliente_do_negocio(negocio)
         if cliente:
             nome += f" - {cliente}"
     elif contrato.consignacao:
         cons = contrato.consignacao
         numero = cons.numero_contrato or "rascunho"
-        nome = f"[{numero}] Consignação {_nome_carro(cons.veiculo)} - {cons.proprietario.nome}"
+        nome = f"[{numero}] Consignação do {_nome_carro(cons.veiculo)} - {cons.proprietario.nome}"
     else:
         nome = f"contrato-{contrato.pk}"
     nome = re.sub(r'[\\/:*?"<>|\n\r\t]+', "", nome)
