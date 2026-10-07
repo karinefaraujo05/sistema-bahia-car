@@ -51,16 +51,20 @@
   .obs { border: 1px dashed #c9d2de; border-radius: 3px; padding: 5px 9px; min-height: 30px; margin: 3px 0 6px; }
   .obs .rot { display: block; font-size: 7pt; font-weight: bold; color: #6b7684; letter-spacing: .4px; margin-bottom: 2px; }
 
-  .foot { margin-top: auto; padding-top: 6px; }
-  .data { text-align: right; margin: 4px 0 15px; }
+  .foot { margin-top: auto; padding-top: 4px; }
+  .data { text-align: right; margin: 3px 0 7px; }
   .ass { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
   .ass > div { border-top: 1px solid #1a1a1a; padding-top: 3px; font-size: 8pt; text-align: center; color: #444; }
   .ass b { display: block; font-size: 8.8pt; color: #1a1a1a; }
-  .test { margin-top: 10px; }
-  .test .rot { display: block; font-size: 7.2pt; font-weight: bold; color: #10303a; letter-spacing: .4px; margin-bottom: 15px; }
-  .test .ass > div { text-align: left; }
-  .campo { display: inline-block; border-bottom: 1px solid #1a1a1a; min-width: 150px; height: 11px; }
-  .campo.curto { min-width: 90px; }
+  .test { margin-top: 8px; }
+  .test .rot { display: block; font-size: 7.2pt; font-weight: bold; color: #10303a; letter-spacing: .4px; text-transform: uppercase; margin-bottom: 5px; }
+  .test-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 26px; }
+  .test-linha { display: flex; align-items: flex-end; gap: 5px; font-size: 8pt; color: #444; }
+  .test-linha .n { font-weight: bold; color: #1a1a1a; }
+  .test-linha .lbl { white-space: nowrap; }
+  .campo { border-bottom: 1px solid #1a1a1a; height: 12px; }
+  .campo-nome { flex: 1 1 auto; }
+  .campo-cpf { flex: 0 0 80px; }
 </style>
 </head>
 <body>
@@ -132,7 +136,7 @@
 
   <p class="cl"><b class="t">CLÁUSULA {% if eh_troca %}4ª{% else %}8ª{% endif %} – DAS DISPOSIÇÕES GERAIS E DO FORO.</b> Este contrato obriga as partes e seus sucessores. A tolerância quanto ao descumprimento não implica renúncia ou novação, e qualquer alteração só terá validade se feita por escrito e assinada por ambas as partes. Os dados pessoais são tratados conforme a Lei nº 13.709/2018 (LGPD). {% if num_testemunhas == 2 %}Assinado pelas partes e por duas testemunhas, este instrumento constitui título executivo extrajudicial (art. 784, III, do CPC). {% endif %}Fica eleito o foro da comarca de {{ cidade_uf }}, com renúncia a qualquer outro, para dirimir questões decorrentes deste contrato.</p>
 
-  <div class="obs"><span class="rot">OBSERVAÇÕES</span>{% if observacoes %} {{ observacoes }}{% endif %}</div>
+  {% if observacoes %}<div class="obs"><span class="rot">OBSERVAÇÕES</span> {{ observacoes }}</div>{% endif %}
 
   <p class="cl">E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma{% if num_testemunhas == 2 %}, na presença das duas testemunhas abaixo, que também o subscrevem{% elif num_testemunhas == 1 %}, na presença da testemunha abaixo, que também o subscreve{% endif %}.</p>
 
@@ -150,9 +154,9 @@
     {% if num_testemunhas %}
       <div class="test">
         <span class="rot">TESTEMUNHA{{ num_testemunhas|pluralize }}</span>
-        <div class="ass">
-          <div>1. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
-          {% if num_testemunhas == 2 %}<div>2. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>{% endif %}
+        <div class="test-grid">
+          <div class="test-linha"><span class="n">1.</span><span class="lbl">Nome:</span><span class="campo campo-nome"></span><span class="lbl">CPF:</span><span class="campo campo-cpf"></span></div>
+          {% if num_testemunhas == 2 %}<div class="test-linha"><span class="n">2.</span><span class="lbl">Nome:</span><span class="campo campo-nome"></span><span class="lbl">CPF:</span><span class="campo campo-cpf"></span></div>{% endif %}
         </div>
       </div>
     {% endif %}
