@@ -1,6 +1,7 @@
-{% load static %}// Service worker do Bahia Car. Deixa o sistema instalável como app e
-// serve os arquivos estáticos do cache quando a internet oscila.
-const CACHE = "bahiacar-v1";
+{% load static %}// Service worker do Bahia Car. Deixa o sistema instalável como app.
+// Estáticos: REDE primeiro (sempre a versão nova), com cache só de reserva
+// pra quando a internet cair. Assim uma atualização de visual aparece na hora.
+const CACHE = "bahiacar-v3";
 const ASSETS = [
   "{% static 'css/output.css' %}",
   "{% static 'js/htmx.min.js' %}",
@@ -27,16 +28,19 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  // Só mexe nos estáticos (cache primeiro). As páginas vão sempre pela rede,
-  // pra nunca mostrar dado velho do negócio.
   if (url.origin === location.origin && url.pathname.includes("/static/")) {
+    // Rede primeiro; se falhar (offline), usa o que estiver no cache.
     e.respondWith((async () => {
-      const cacheado = await caches.match(req);
-      if (cacheado) return cacheado;
-      const resp = await fetch(req);
-      const c = await caches.open(CACHE);
-      c.put(req, resp.clone());
-      return resp;
+      try {
+        const resp = await fetch(req);
+        const c = await caches.open(CACHE);
+        c.put(req, resp.clone());
+        return resp;
+      } catch (err) {
+        const cacheado = await caches.match(req);
+        if (cacheado) return cacheado;
+        throw err;
+      }
     })());
   }
 });
