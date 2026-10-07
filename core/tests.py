@@ -1,3 +1,6 @@
+import io
+import zipfile
+
 import pytest
 from django.urls import reverse
 
@@ -64,3 +67,42 @@ def test_view_de_busca(client):
     resp = client.get(reverse("buscar"), {"q": "abc1d23"})
     assert resp.status_code == 200
     assert "ABC1D23" in resp.content.decode()
+
+
+# --- App no celular (PWA) ---
+
+
+def test_manifest_abre_com_icone():
+    from django.test import Client
+
+    resp = Client().get(reverse("manifest"))
+    assert resp.status_code == 200
+    assert "icon-192" in resp.content.decode()
+
+
+def test_service_worker_abre():
+    from django.test import Client
+
+    resp = Client().get(reverse("service_worker"))
+    assert resp.status_code == 200
+    assert resp["Content-Type"].startswith("application/javascript")
+
+
+# --- Backup ---
+
+
+def test_backup_so_para_superusuario(client):
+    Usuario.objects.create_user(username="vendedor", password="x-123456")
+    client.login(username="vendedor", password="x-123456")
+    assert client.get(reverse("backup")).status_code == 403
+
+
+def test_backup_gera_zip_com_dados(client):
+    Usuario.objects.create_superuser(username="dono", password="x-123456")
+    client.login(username="dono", password="x-123456")
+    resp = client.get(reverse("backup"))
+    assert resp.status_code == 200
+    assert resp["Content-Type"] == "application/zip"
+    dados = b"".join(resp.streaming_content)
+    zf = zipfile.ZipFile(io.BytesIO(dados))
+    assert "dados.json" in zf.namelist()

@@ -1,6 +1,11 @@
+import io
+import zipfile
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
+from django.core.files.storage import default_storage
+from django.core.management import call_command
+from django.http import FileResponse, HttpResponseForbidden
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils import timezone
@@ -139,3 +144,84 @@ def buscar(request):
 def ajuda(request):
     """Guia de uso passo a passo, em linguagem simples."""
     return render(request, "ajuda.html")
+
+
+# --- App no celular (PWA) ---
+
+
+def manifest(request):
+    """Manifesto do app, pra poder instalar na tela inicial do celular."""
+    return render(
+        request, "pwa/manifest.webmanifest", content_type="application/manifest+json"
+    )
+
+
+def service_worker(request):
+    """Service worker na raiz do site (escopo /), pra deixar o sistema instalável."""
+    resposta = render(request, "pwa/sw.js", content_type="application/javascript")
+    resposta["Service-Worker-Allowed"] = "/"
+    resposta["Cache-Control"] = "no-cache"
+    return resposta
+
+
+# --- Backup para baixar na hora ---
+
+
+def _arquivos_media(prefixo=""):
+    """Lista todos os arquivos enviados (fotos/documentos), em dev ou no bucket."""
+    try:
+        pastas, arquivos = default_storage.listdir(prefixo)
+    except Exception:
+        return
+    for nome in arquivos:
+        yield f"{prefixo}/{nome}" if prefixo else nome
+    for pasta in pastas:
+        sub = f"{prefixo}/{pasta}" if prefixo else pasta
+        yield from _arquivos_media(sub)
+
+
+@login_required
+def baixar_backup(request):
+    """Gera um .zip com todos os dados (banco) e as fotos, pra guardar/salvar."""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Só o responsável pode baixar o backup.")
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        dados = io.StringIO()
+        call_command(
+            "dumpdata",
+            natural_foreign=True,
+            natural_primary=True,
+            exclude=[
+                "contenttypes",
+                "auth.permission",
+                "admin.logentry",
+                "sessions.session",
+            ],
+            indent=2,
+            stdout=dados,
+        )
+        zf.writestr("dados.json", dados.getvalue())
+
+        for caminho in _arquivos_media():
+            try:
+                with default_storage.open(caminho, "rb") as fh:
+                    zf.writestr(f"media/{caminho}", fh.read())
+            except Exception:
+                continue
+
+        zf.writestr(
+            "LEIA-ME.txt",
+            "Backup do Sistema Bahia Car\n\n"
+            "dados.json  -> todos os dados (pessoas, carros, vendas, contratos).\n"
+            "media/      -> fotos e documentos enviados.\n\n"
+            "Guarde este arquivo em um lugar seguro (pen drive, Google Drive).\n"
+            "Para restaurar, procure o desenvolvedor do sistema.\n",
+        )
+
+    buffer.seek(0)
+    nome = f"bahiacar-backup-{timezone.localdate():%Y-%m-%d}.zip"
+    return FileResponse(
+        buffer, as_attachment=True, filename=nome, content_type="application/zip"
+    )

@@ -5,7 +5,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
-from core.views import ajuda, buscar, inicio
+from core.views import (
+    ajuda,
+    baixar_backup,
+    buscar,
+    inicio,
+    manifest,
+    service_worker,
+)
 
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
@@ -16,6 +23,9 @@ urlpatterns = [
     path("", include("contratos.urls")),
     path("buscar/", buscar, name="buscar"),
     path("ajuda/", ajuda, name="ajuda"),
+    path("backup/", baixar_backup, name="backup"),
+    path("manifest.webmanifest", manifest, name="manifest"),
+    path("sw.js", service_worker, name="service_worker"),
     path("", inicio, name="inicio"),
 ]
 
