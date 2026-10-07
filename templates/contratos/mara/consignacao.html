@@ -1,0 +1,121 @@
+<!doctype html>
+{% load formato contratos_extras pessoas_extras %}
+<html lang="pt-br">
+<head>
+<meta charset="utf-8" />
+<title>{{ titulo }} — Bahia Car</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "DejaVu Serif", Georgia, serif; color: #1a1a1a; font-size: 8.8pt; line-height: 1.32; }
+  .sans, h1, .rot, .meta, .veic span, .preco .valor, .preco .ext span, .cl b.t, .obs .rot, .brand, .ass b { font-family: "DejaVu Sans", Arial, sans-serif; }
+
+  .page { width: 210mm; min-height: 297mm; padding: 11mm 15mm 9mm; display: flex; flex-direction: column; }
+  .page > * { flex-shrink: 0; }
+
+  .head { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #10303a; padding-bottom: 6px; }
+  .brand { font-size: 16pt; font-weight: bold; letter-spacing: 1.5px; color: #10303a; line-height: 1; text-transform: uppercase; }
+  .meta { font-size: 7.5pt; color: #555; text-align: right; line-height: 1.35; }
+  .meta b { display: block; font-size: 10.5pt; color: #10303a; }
+
+  h1 { font-size: 12pt; font-weight: bold; text-align: center; margin: 9px 0 8px; letter-spacing: .4px; color: #10303a; }
+
+  .partes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 7px; }
+  .parte { border-left: 2.5px solid #10303a; padding: 1px 0 1px 8px; text-align: justify; }
+  .rot { font-size: 7.2pt; font-weight: bold; color: #10303a; letter-spacing: .4px; }
+  .parte .nome { font-weight: bold; }
+
+  .veic { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #c9d2de; border-radius: 3px; margin: 4px 0 7px; overflow: hidden; }
+  .veic > div { padding: 3px 7px; border-right: 1px solid #e1e7ef; border-bottom: 1px solid #e1e7ef; }
+  .veic > div:nth-child(4n) { border-right: 0; }
+  .veic > div:nth-last-child(-n+4) { border-bottom: 0; }
+  .veic span { display: block; font-size: 6.8pt; color: #6b7684; }
+  .veic b { font-size: 9pt; }
+  .veic .id b { font-family: "DejaVu Sans Mono", "Courier New", monospace; font-size: 8.6pt; }
+  .veic .wide { grid-column: span 2; }
+
+  .preco { display: grid; grid-template-columns: auto 1fr; gap: 0 14px; align-items: center; background: #eef4f4; border: 1px solid #c9d2de; border-radius: 3px; padding: 5px 11px; margin: 3px 0 6px; }
+  .preco .valor { font-size: 14pt; font-weight: bold; color: #10303a; white-space: nowrap; }
+  .preco .ext { font-size: 9pt; }
+  .preco .ext span { display: block; font-size: 6.8pt; color: #6b7684; }
+
+  .cl { margin: 0 0 5px; text-align: justify; }
+  .cl b.t { font-size: 8.2pt; color: #10303a; }
+  .cl .p { display: block; padding-left: 12px; }
+
+  .obs { border: 1px dashed #c9d2de; border-radius: 3px; padding: 5px 9px; min-height: 30px; margin: 3px 0 6px; }
+  .obs .rot { display: block; font-size: 7pt; font-weight: bold; color: #6b7684; letter-spacing: .4px; margin-bottom: 2px; }
+
+  .foot { margin-top: auto; padding-top: 6px; }
+  .data { text-align: right; margin: 4px 0 15px; }
+  .ass { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .ass > div { border-top: 1px solid #1a1a1a; padding-top: 3px; font-size: 8pt; text-align: center; color: #444; }
+  .ass b { display: block; font-size: 8.8pt; color: #1a1a1a; }
+  .test { margin-top: 10px; }
+  .test .rot { display: block; font-size: 7.2pt; font-weight: bold; color: #10303a; letter-spacing: .4px; margin-bottom: 15px; }
+  .test .ass > div { text-align: left; }
+  .campo { display: inline-block; border-bottom: 1px solid #1a1a1a; min-width: 150px; height: 11px; }
+  .campo.curto { min-width: 90px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="head">
+    <div class="brand">{{ loja.nome_fantasia|default:"Bahia Car" }}</div>
+    <div class="meta"><b>Contrato nº {{ numero|default:"____" }}</b>{{ cidade_uf }}, {{ data|date:"j \d\e F \d\e Y" }}</div>
+  </div>
+
+  <h1>{{ titulo }}</h1>
+
+  <div class="partes">
+    {% include "contratos/mara/_parte.html" with p=consignante loja=loja %}
+    {% include "contratos/mara/_parte.html" with p=consignataria loja=loja %}
+  </div>
+
+  <p class="cl"><b class="t">CLÁUSULA 1ª – DO OBJETO.</b> O(A) CONSIGNANTE entrega à CONSIGNATÁRIA, que recebe em consignação para exposição e venda a terceiros, o veículo de sua propriedade abaixo descrito (art. 534 do Código Civil):</p>
+  {% include "contratos/mara/_veiculo_grid.html" with v=veiculo %}
+  <p class="cl"><span class="p">Parágrafo único. A propriedade permanece com o(a) CONSIGNANTE até a venda a terceiro; a CONSIGNATÁRIA figura como depositária e intermediária, não adquirindo o veículo para si.</span></p>
+
+  <p class="cl"><b class="t">CLÁUSULA 2ª – DO VALOR LÍQUIDO MÍNIMO E DA COMISSÃO.</b> O(A) CONSIGNANTE fixa como valor líquido mínimo a receber:</p>
+  <div class="preco">
+    <div class="valor">{{ valor_minimo|reais }}</div>
+    <div class="ext"><span>Valor mínimo ao dono · comissão da loja</span>{{ valor_minimo|extenso|capfirst }}. Comissão: {% if comissao_tipo == "percentual" %}{{ comissao_valor|floatformat:0 }}% ({{ comissao_valor|numero_extenso }} por cento) sobre o preço de venda{% elif comissao_tipo == "fixa" %}quantia fixa de {{ comissao_valor|reais }}{% else %}todo o valor que exceder o mínimo (sobrepreço){% endif %}.</div>
+  </div>
+  <p class="cl"><span class="p">Parágrafo único. A venda por valor que resulte repasse inferior ao mínimo depende de autorização escrita do(a) CONSIGNANTE.</span></p>
+
+  <p class="cl"><b class="t">CLÁUSULA 3ª – DO PRAZO E DO REPASSE.</b> A consignação vigora por {{ prazo_dias|default:"____" }} dias contados da entrada, com aviso de {{ aviso_dias|default:"____" }} dias para encerramento por qualquer das partes. Concretizada a venda, a CONSIGNATÁRIA repassa ao(à) CONSIGNANTE o valor líquido devido em até {{ prazo_repasse_dias|default:"____" }} dias úteis contados do recebimento integral do preço.</p>
+
+  <p class="cl"><b class="t">CLÁUSULA 4ª – DA GUARDA E DAS OBRIGAÇÕES DA CONSIGNATÁRIA.</b> Enquanto o veículo estiver em seu poder, a CONSIGNATÁRIA responde pela guarda e conservação, fica autorizada a expô-lo e a realizar testes de rodagem acompanhados por preposto, obriga-se a prestar contas e a restituir o veículo ao término do prazo caso não vendido.</p>
+
+  <p class="cl"><b class="t">CLÁUSULA 5ª – DAS OBRIGAÇÕES DO(A) CONSIGNANTE.</b> O(A) CONSIGNANTE declara ser legítimo(a) proprietário(a), com o veículo livre de alienação fiduciária, penhora ou bloqueio não informado, e obriga-se a assinar a ATPV-e em favor do comprador indicado em até 5 (cinco) dias úteis, bem como a arcar com os débitos (multas, IPVA, licenciamento) com fato gerador até a entrega.</p>
+
+  <p class="cl"><b class="t">CLÁUSULA 6ª – DOS DOCUMENTOS ENTREGUES.</b> O(A) CONSIGNANTE entrega nesta data à CONSIGNATÁRIA: {{ documentos }}.</p>
+
+  <p class="cl"><b class="t">CLÁUSULA 7ª – DO DESCUMPRIMENTO.</b> A parte que descumprir qualquer obrigação pagará à outra multa compensatória de {{ multa_pct|floatformat:0 }}% ({{ multa_pct|numero_extenso }} por cento) sobre o valor líquido mínimo da Cláusula 2ª, limitada ao valor da obrigação principal (art. 412 do Código Civil), sem prejuízo das perdas e danos.</p>
+
+  <p class="cl"><b class="t">CLÁUSULA 8ª – DAS DISPOSIÇÕES GERAIS E DO FORO.</b> Este contrato obriga as partes e seus sucessores; qualquer alteração só terá validade por escrito. Os dados pessoais são tratados conforme a Lei nº 13.709/2018 (LGPD). Assinado pelas partes e por duas testemunhas, constitui título executivo extrajudicial (art. 784, III, do CPC). Fica eleito o foro da comarca de {{ cidade_uf }}, com renúncia a qualquer outro, para dirimir questões decorrentes deste contrato.</p>
+
+  <div class="obs"><span class="rot">OBSERVAÇÕES</span></div>
+
+  <p class="cl">E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença das duas testemunhas abaixo, que também o subscrevem.</p>
+
+  <div class="foot">
+    <div class="data">{{ cidade_uf }}, {{ data|date:"j \d\e F \d\e Y" }}.</div>
+    <div class="ass">
+      <div><b>{{ consignante.pessoa.nome }}</b>Consignante · CPF {{ consignante.pessoa.cpf_cnpj|cpf_cnpj }}</div>
+      <div><b>{{ loja.razao_social|upper }} ({{ loja.nome_fantasia|default:"Bahia Car" }})</b>Consignatária · {{ loja.representante_nome }}</div>
+    </div>
+    <div class="test">
+      <span class="rot">TESTEMUNHAS</span>
+      <div class="ass">
+        <div>1. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
+        <div>2. Nome: <span class="campo"></span> &nbsp;CPF: <span class="campo curto"></span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

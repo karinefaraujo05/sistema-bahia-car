@@ -10,8 +10,7 @@ from negocios.services import diferenca_troca
 from .models import ConfiguracaoLoja, ModeloContrato
 
 
-def _veiculo(item):
-    v = item.veiculo
+def _veiculo_de(v, km=None, valor=None):
     return {
         "marca_modelo": f"{v.marca} {v.modelo}".strip(),
         "ano": f"{v.ano_fabricacao}/{v.ano_modelo}",
@@ -20,10 +19,40 @@ def _veiculo(item):
         "placa": v.placa_formatada,
         "renavam": v.renavam or "",
         "chassi": v.chassi or "",
-        "km": item.km_entrega,
+        "km": km,
         "chave": "Sim" if v.tem_chave_reserva else "Não",
         "avarias": v.avarias_declaradas or "Nenhuma aparente",
-        "valor": item.valor,
+        "valor": valor,
+    }
+
+
+def _veiculo(item):
+    return _veiculo_de(item.veiculo, item.km_entrega, item.valor)
+
+
+def _contexto_consignacao(contrato, loja):
+    cons = contrato.consignacao
+    return {
+        "loja": loja,
+        "contrato": contrato,
+        "titulo": contrato.titulo,
+        "numero": cons.numero_contrato,
+        "data": cons.data_entrada,
+        "cidade_uf": f"{loja.cidade}/{loja.uf}",
+        "multa_pct": loja.multa_percentual or 10,
+        "eh_troca": False,
+        "eh_consignacao": True,
+        "interveniente": None,
+        "consignante": _pessoa_parte("CONSIGNANTE", cons.proprietario),
+        "consignataria": _loja_parte("CONSIGNATÁRIA", loja),
+        "veiculo": _veiculo_de(cons.veiculo),
+        "valor_minimo": cons.valor_liquido_minimo,
+        "comissao_tipo": cons.comissao_tipo,
+        "comissao_valor": cons.comissao_valor,
+        "prazo_dias": cons.prazo_dias,
+        "aviso_dias": cons.aviso_dias,
+        "prazo_repasse_dias": cons.prazo_repasse_dias,
+        "documentos": cons.documentos_entregues or "—",
     }
 
 
@@ -42,6 +71,8 @@ def _pessoa_parte(rotulo, pessoa):
 
 def contexto_mara(contrato):
     loja = ConfiguracaoLoja.carregar()
+    if contrato.consignacao_id:
+        return _contexto_consignacao(contrato, loja)
     negocio = contrato.negocio
     partes = list(negocio.partes.select_related("pessoa"))
 
@@ -62,6 +93,7 @@ def contexto_mara(contrato):
         "multa_pct": loja.multa_percentual or 10,
         "cidade_uf": f"{loja.cidade}/{loja.uf}",
         "eh_troca": False,
+        "eh_consignacao": False,
         "interveniente": None,
     }
 
