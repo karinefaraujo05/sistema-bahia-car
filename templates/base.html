@@ -37,7 +37,7 @@
       <div class="flex min-w-0 flex-1 flex-col">
         {% if user.is_authenticated %}
           <header class="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-borda bg-superficie px-4 sm:px-6">
-            <button type="button" onclick="abrirMenu()" aria-label="Abrir menu" class="-ml-1 shrink-0 rounded-lg p-2 text-tinta-suave hover:bg-petroleo-50 md:hidden">
+            <button type="button" onclick="abrirMenu()" aria-label="Abrir menu" class="-ml-1 shrink-0 rounded-lg p-2 text-tinta-suave hover:bg-acento-50 md:hidden">
               <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
             </button>
 
@@ -59,16 +59,21 @@
               <div id="busca-dropdown" class="busca-dropdown"></div>
             </form>
 
-            <div class="relative ml-auto shrink-0">
+            <a href="{% url 'agenda' %}" aria-label="Agenda" title="Agenda" class="relative ml-auto shrink-0 rounded-lg p-2 text-tinta-suave hover:bg-acento-50">
+              <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              {% if n_lembretes %}<span class="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-acento-600 px-1 text-[10px] font-bold text-white">{{ n_lembretes }}</span>{% endif %}
+            </a>
+
+            <div class="relative shrink-0">
               <button
                 type="button"
                 id="botao-usuario"
                 onclick="alternarMenuUsuario()"
                 aria-haspopup="true"
                 aria-expanded="false"
-                class="flex items-center gap-2.5 rounded-lg p-1 hover:bg-petroleo-50 sm:pr-2.5"
+                class="flex items-center gap-2.5 rounded-lg p-1 hover:bg-acento-50 sm:pr-2.5"
               >
-                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-petroleo-600 text-sm font-semibold text-white">
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-acento-600 text-sm font-semibold text-white">
                   {{ user.get_full_name|default:user.username|first|upper }}
                 </span>
                 <span class="hidden text-left leading-tight sm:block">
@@ -83,17 +88,17 @@
                   <div class="text-sm font-medium">{{ user.get_full_name|default:user.username|capfirst }}</div>
                   <div class="text-xs text-tinta-suave">{% if user.eh_administrador %}Administrador{% else %}Vendedor{% endif %}</div>
                 </div>
-                <a href="{% url 'ajuda' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-tinta hover:bg-petroleo-50">
+                <a href="{% url 'ajuda' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-tinta hover:bg-acento-50">
                   <svg class="h-5 w-5 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
                   Como usar
                 </a>
                 {% if user.eh_administrador %}
-                  <a href="{% url 'contratos:configuracao' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-tinta hover:bg-petroleo-50">
+                  <a href="{% url 'contratos:configuracao' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-tinta hover:bg-acento-50">
                     <svg class="h-5 w-5 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
                     Configuração
                   </a>
                   {% if user.is_superuser %}
-                    <a href="{% url 'backup' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-tinta hover:bg-petroleo-50">
+                    <a href="{% url 'backup' %}" class="flex items-center gap-2.5 rounded-lg px-3 py-2.5 font-medium text-tinta hover:bg-acento-50">
                       <svg class="h-5 w-5 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                       Baixar backup
                     </a>
@@ -102,7 +107,7 @@
                 {% endif %}
                 <form method="post" action="{% url 'contas:sair' %}">
                   {% csrf_token %}
-                  <button type="submit" class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left font-medium text-tinta hover:bg-petroleo-50">
+                  <button type="submit" class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left font-medium text-tinta hover:bg-acento-50">
                     <svg class="h-5 w-5 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
                     Sair
                   </button>

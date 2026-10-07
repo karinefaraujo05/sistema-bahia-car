@@ -11,7 +11,7 @@
     <ul class="mb-5 divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
       {% for carro in carros %}
         <li>
-          <a href="{% url 'veiculos:detalhe' carro.pk %}" class="flex items-center gap-3 px-3 py-2 hover:bg-petroleo-50">
+          <a href="{% url 'veiculos:detalhe' carro.pk %}" class="flex items-center gap-3 px-3 py-2 hover:bg-acento-50">
             <span class="h-12 w-16 shrink-0 overflow-hidden rounded bg-cinza-fundo">
               {% if carro.foto_capa %}
                 <img
@@ -37,7 +37,7 @@
     <ul class="divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
       {% for pessoa in pessoas %}
         <li>
-          <a href="{% url 'pessoas:detalhe' pessoa.pk %}" class="block px-3 py-2 hover:bg-petroleo-50">
+          <a href="{% url 'pessoas:detalhe' pessoa.pk %}" class="block px-3 py-2 hover:bg-acento-50">
             <span class="block font-medium">{{ pessoa.nome }}</span>
             <span class="block text-sm text-tinta-suave">
               {% if pessoa.cpf_cnpj %}{{ pessoa.cpf_cnpj_formatado }}{% endif %}

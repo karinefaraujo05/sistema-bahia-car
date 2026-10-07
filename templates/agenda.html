@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block titulo %}Agenda · Bahia Car{% endblock %}
+
+{% block conteudo %}
+  <div class="mb-6">
+    <h1 class="text-2xl">Agenda</h1>
+    <p class="text-tinta-suave">Tudo que precisa de atenção, em ordem de urgência. Clique pra resolver.</p>
+  </div>
+
+  {% if itens %}
+    <ul class="divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
+      {% for a in itens %}
+        <li>
+          <a href="{{ a.url }}" class="group flex items-center gap-3 px-4 py-3.5 hover:bg-acento-50">
+            <span class="chip shrink-0
+              {% if a.nivel == 'atrasado' %}bg-acento-50 text-acento-700
+              {% elif a.nivel == 'atencao' %}bg-ambar-fundo text-ambar
+              {% else %}bg-cinza-fundo text-cinza{% endif %}">
+              {% if a.nivel == 'atrasado' %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              {% elif a.nivel == 'atencao' %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {% else %}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+              {% endif %}
+            </span>
+            <div class="min-w-0 flex-1">
+              <div class="truncate font-medium">{{ a.titulo }}</div>
+              <div class="truncate text-sm text-tinta-suave">{{ a.detalhe }}</div>
+            </div>
+            {% if a.nivel == 'atrasado' %}
+              <span class="shrink-0 rounded-full bg-acento-50 px-2.5 py-0.5 text-xs font-semibold text-acento-700">Atrasado</span>
+            {% endif %}
+            <svg class="h-5 w-5 shrink-0 text-tinta-suave transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="rounded-xl border border-borda bg-superficie px-4 py-16 text-center shadow-sm">
+      <span class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-verde-fundo text-verde">
+        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      </span>
+      <p class="font-medium">Tudo em dia!</p>
+      <p class="text-sm text-tinta-suave">Nenhuma pendência no momento.</p>
+    </div>
+  {% endif %}
+{% endblock %}

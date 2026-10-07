@@ -23,7 +23,7 @@
       {{ carro.ano_fabricacao }}/{{ carro.ano_modelo }} · {{ carro.cor }} · {{ carro.placa_formatada }}
     </p>
     <div class="mt-3 flex items-center justify-between gap-2">
-      <span class="text-lg font-bold text-petroleo-700">{{ carro.valor_anunciado|reais }}</span>
+      <span class="text-lg font-bold text-acento-700">{{ carro.valor_anunciado|reais }}</span>
       {% if carro.eh_consignado %}
         <span class="rounded-full bg-cinza-fundo px-2.5 py-0.5 text-xs font-medium text-cinza">Consignado</span>
       {% endif %}

@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from core.views import (
+    agenda,
     ajuda,
     baixar_backup,
     buscar,
@@ -23,6 +24,7 @@ urlpatterns = [
     path("", include("contratos.urls")),
     path("buscar/", buscar, name="buscar"),
     path("ajuda/", ajuda, name="ajuda"),
+    path("agenda/", agenda, name="agenda"),
     path("backup/", baixar_backup, name="backup"),
     path("manifest.webmanifest", manifest, name="manifest"),
     path("sw.js", service_worker, name="service_worker"),

@@ -37,7 +37,7 @@
     <ul class="divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
       {% for pessoa in pessoas %}
         <li>
-          <a href="{% url 'pessoas:detalhe' pessoa.pk %}" class="flex items-center gap-3 px-4 py-3 hover:bg-petroleo-50">
+          <a href="{% url 'pessoas:detalhe' pessoa.pk %}" class="flex items-center gap-3 px-4 py-3 hover:bg-acento-50">
             <span class="avatar">{{ pessoa.nome|first|upper }}</span>
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
@@ -72,7 +72,7 @@
         {% if termo %}Ninguém encontrado para "{{ termo }}".{% else %}Nenhuma pessoa cadastrada ainda.{% endif %}
       </p>
       {% if not termo %}
-        <a href="{% url 'pessoas:novo' %}" class="mt-3 inline-flex text-petroleo-700">Cadastrar a primeira pessoa</a>
+        <a href="{% url 'pessoas:novo' %}" class="mt-3 inline-flex text-acento-700">Cadastrar a primeira pessoa</a>
       {% endif %}
     </div>
   {% endif %}

@@ -46,7 +46,7 @@
     <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
       {% for parte in pessoa.participacoes.all %}
         <li>
-          <a href="{% url 'negocios:detalhe' parte.negocio.pk %}" class="block px-4 py-3 hover:bg-petroleo-50">
+          <a href="{% url 'negocios:detalhe' parte.negocio.pk %}" class="block px-4 py-3 hover:bg-acento-50">
             <div class="flex items-center justify-between gap-2">
               <span class="font-medium">
                 {{ parte.negocio.get_tipo_display }}{% if parte.negocio.numero_contrato %} nº {{ parte.negocio.numero_contrato }}{% endif %}

@@ -13,7 +13,7 @@
     {% for valor, rotulo in abas %}
       <a
         href="?status={{ valor }}&origem={{ origem_atual }}&ordem={{ ordem_atual }}"
-        class="whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium{% if status_atual == valor %} border-petroleo-600 bg-petroleo-600 text-white{% else %} border-borda bg-superficie text-tinta{% endif %}"
+        class="whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium{% if status_atual == valor %} border-acento-600 bg-acento-600 text-white{% else %} border-borda bg-superficie text-tinta{% endif %}"
         >{{ rotulo }}</a
       >
     {% endfor %}
@@ -25,7 +25,7 @@
       {% for valor, rotulo in origens %}
         <a
           href="?status={{ status_atual }}&origem={{ valor }}&ordem={{ ordem_atual }}"
-          class="rounded-full px-3 py-1{% if origem_atual == valor %} bg-petroleo-50 text-petroleo-700{% else %} text-tinta-suave{% endif %}"
+          class="rounded-full px-3 py-1{% if origem_atual == valor %} bg-acento-50 text-acento-700{% else %} text-tinta-suave{% endif %}"
           >{{ rotulo }}</a
         >
       {% endfor %}
@@ -33,12 +33,12 @@
     <div class="flex gap-2">
       <a
         href="?status={{ status_atual }}&origem={{ origem_atual }}&ordem=recentes"
-        class="rounded-full px-3 py-1{% if ordem_atual == 'recentes' %} bg-petroleo-50 text-petroleo-700{% else %} text-tinta-suave{% endif %}"
+        class="rounded-full px-3 py-1{% if ordem_atual == 'recentes' %} bg-acento-50 text-acento-700{% else %} text-tinta-suave{% endif %}"
         >Mais recentes</a
       >
       <a
         href="?status={{ status_atual }}&origem={{ origem_atual }}&ordem=antigos"
-        class="rounded-full px-3 py-1{% if ordem_atual == 'antigos' %} bg-petroleo-50 text-petroleo-700{% else %} text-tinta-suave{% endif %}"
+        class="rounded-full px-3 py-1{% if ordem_atual == 'antigos' %} bg-acento-50 text-acento-700{% else %} text-tinta-suave{% endif %}"
         >Mais antigos na loja</a
       >
     </div>

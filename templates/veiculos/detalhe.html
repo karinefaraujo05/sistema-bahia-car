@@ -64,7 +64,7 @@
                 {% for contrato in contratos %}
                   <li class="flex items-center justify-between gap-3 py-2">
                     <span>{{ contrato.titulo }} (v{{ contrato.versao }})</span>
-                    <a href="{% url 'contratos:editar_contrato' contrato.pk %}" class="text-petroleo-700">Abrir / editar</a>
+                    <a href="{% url 'contratos:editar_contrato' contrato.pk %}" class="text-acento-700">Abrir / editar</a>
                   </li>
                 {% endfor %}
               </ul>
@@ -119,7 +119,7 @@
                   <div class="truncate text-sm text-tinta-suave">{{ documento.descricao }}</div>
                 {% endif %}
               </div>
-              <a href="{{ documento.arquivo.url }}" target="_blank" class="shrink-0 text-petroleo-700">Abrir</a>
+              <a href="{{ documento.arquivo.url }}" target="_blank" class="shrink-0 text-acento-700">Abrir</a>
             </li>
           {% endfor %}
         </ul>
@@ -227,7 +227,7 @@
     <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
       {% for item in veiculo.itens_negocio.all %}
         <li>
-          <a href="{% url 'negocios:detalhe' item.negocio.pk %}" class="block px-4 py-3 hover:bg-petroleo-50">
+          <a href="{% url 'negocios:detalhe' item.negocio.pk %}" class="block px-4 py-3 hover:bg-acento-50">
             <div class="flex items-center justify-between gap-2">
               <span class="font-medium">
                 {{ item.negocio.get_tipo_display }}{% if item.negocio.numero_contrato %} nº {{ item.negocio.numero_contrato }}{% endif %}

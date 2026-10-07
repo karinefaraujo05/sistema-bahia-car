@@ -20,12 +20,12 @@
   {# Navegação por mês. #}
   <div class="mb-5 flex items-center gap-3">
     <a href="?ano={{ ano_anterior }}&mes={{ mes_anterior }}&tipo={{ tipo }}" aria-label="Mês anterior"
-      class="chip border border-borda bg-superficie text-tinta-suave shadow-sm hover:bg-petroleo-50">
+      class="chip border border-borda bg-superficie text-tinta-suave shadow-sm hover:bg-acento-50">
       <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
     </a>
     <span class="min-w-40 text-center text-lg font-semibold capitalize">{{ mes_ref|date:"F Y" }}</span>
     <a href="?ano={{ ano_proximo }}&mes={{ mes_proximo }}&tipo={{ tipo }}" aria-label="Próximo mês"
-      class="chip border border-borda bg-superficie text-tinta-suave shadow-sm hover:bg-petroleo-50">
+      class="chip border border-borda bg-superficie text-tinta-suave shadow-sm hover:bg-acento-50">
       <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
     </a>
   </div>
@@ -42,7 +42,7 @@
         </div>
       </div>
       <div class="indicador flex items-center gap-4">
-        <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <span class="indicador-icone bg-acento-50 text-acento-700">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
         </span>
         <div>
@@ -51,7 +51,7 @@
         </div>
       </div>
       <div class="indicador flex items-center gap-4">
-        <span class="indicador-icone bg-petroleo-50 text-petroleo-700">
+        <span class="indicador-icone bg-acento-50 text-acento-700">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
         </span>
         <div>
@@ -65,10 +65,10 @@
   {# Filtro por tipo. #}
   <nav class="mb-5 flex gap-2 overflow-x-auto" aria-label="Tipo">
     <a href="?ano={{ mes_ref|date:'Y' }}&mes={{ mes_ref|date:'n' }}"
-      class="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium{% if not tipo %} bg-petroleo-600 text-white shadow-sm{% else %} border border-borda bg-superficie text-tinta-suave{% endif %}">Todos ({{ total_mes }})</a>
+      class="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium{% if not tipo %} bg-acento-600 text-white shadow-sm{% else %} border border-borda bg-superficie text-tinta-suave{% endif %}">Todos ({{ total_mes }})</a>
     {% for valor, rotulo, n in tipos_contagem %}
       <a href="?ano={{ mes_ref|date:'Y' }}&mes={{ mes_ref|date:'n' }}&tipo={{ valor }}"
-        class="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium{% if tipo == valor %} bg-petroleo-600 text-white shadow-sm{% else %} border border-borda bg-superficie text-tinta-suave{% endif %}">{{ rotulo }} ({{ n }})</a>
+        class="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium{% if tipo == valor %} bg-acento-600 text-white shadow-sm{% else %} border border-borda bg-superficie text-tinta-suave{% endif %}">{{ rotulo }} ({{ n }})</a>
     {% endfor %}
   </nav>
 
@@ -76,17 +76,17 @@
     <ul class="divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
       {% for linha in linhas %}
         <li>
-          <a href="{% url 'negocios:detalhe' linha.negocio.pk %}" class="flex items-center gap-3 px-4 py-3 hover:bg-petroleo-50">
+          <a href="{% url 'negocios:detalhe' linha.negocio.pk %}" class="flex items-center gap-3 px-4 py-3 hover:bg-acento-50">
             {% if linha.negocio.tipo == 'venda' %}
               <span class="chip bg-verde-fundo text-verde">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </span>
             {% elif linha.negocio.tipo == 'troca' %}
-              <span class="chip bg-petroleo-50 text-petroleo-700">
+              <span class="chip bg-acento-50 text-acento-700">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
               </span>
             {% else %}
-              <span class="chip bg-petroleo-50 text-petroleo-700">
+              <span class="chip bg-acento-50 text-acento-700">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
               </span>
             {% endif %}
@@ -100,7 +100,7 @@
               </div>
             </div>
             <div class="shrink-0 text-right">
-              <div class="font-bold text-petroleo-700">{{ linha.negocio.valor_total|reais }}</div>
+              <div class="font-bold text-acento-700">{{ linha.negocio.valor_total|reais }}</div>
             </div>
           </a>
         </li>
