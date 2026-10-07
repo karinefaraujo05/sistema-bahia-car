@@ -32,3 +32,12 @@ services:
         sync: false
       - key: AWS_S3_REGION_NAME
         sync: false
+      # Login do dono da loja (criado automaticamente no primeiro deploy):
+      - key: RESP_USUARIO
+        sync: false
+      - key: RESP_SENHA
+        sync: false
+      - key: RESP_NOME
+        sync: false
+      - key: RESP_EMPRESA
+        sync: false
