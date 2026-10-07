@@ -52,11 +52,9 @@
     document.querySelectorAll(".botao-whats").forEach(function (btn) {
       btn.addEventListener("click", function () {
         var msg = btn.getAttribute("data-msg") || "";
-        if (navigator.share) {
-          navigator.share({ text: msg }).catch(function () {});
-        } else {
-          window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
-        }
+        // Abre o WhatsApp direto com a mensagem pronta: no celular abre o app,
+        // no computador abre o WhatsApp Web. É só escolher o contato e enviar.
+        window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
       });
     });
   </script>
