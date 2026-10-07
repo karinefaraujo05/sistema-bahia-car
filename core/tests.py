@@ -134,3 +134,17 @@ def test_dados_sao_separados_por_empresa():
         assert Veiculo.objetos.count() == 0  # a empresa B NÃO vê o carro da A
     finally:
         limpar_empresa_atual()
+
+
+# --- Consulta FIPE ---
+
+
+def test_fipe_exige_login(client):
+    assert client.get(reverse("fipe") + "?q=marcas&tipo=carros").status_code == 302
+
+
+def test_fipe_rejeita_tipo_invalido(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    resp = client.get(reverse("fipe") + "?q=marcas&tipo=aviao")
+    assert resp.status_code == 400

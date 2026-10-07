@@ -4,7 +4,7 @@ import zipfile
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 from django.core.management import call_command
-from django.http import FileResponse, HttpResponseForbidden
+from django.http import FileResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -105,6 +105,36 @@ def buscar(request):
 def ajuda(request):
     """Guia de uso passo a passo, em linguagem simples."""
     return render(request, "ajuda.html")
+
+
+@login_required
+def consulta_fipe(request):
+    """Proxy da consulta FIPE (marcas, modelos, anos e preço), com cache."""
+    from . import fipe
+
+    q = request.GET.get("q")
+    tipo = request.GET.get("tipo", "carros")
+    if tipo not in fipe.TIPOS:
+        return JsonResponse({"erro": "Tipo inválido."}, status=400)
+    try:
+        if q == "marcas":
+            dados = fipe.marcas(tipo)
+        elif q == "modelos":
+            dados = fipe.modelos(tipo, request.GET.get("marca", ""))
+        elif q == "anos":
+            dados = fipe.anos(tipo, request.GET.get("marca", ""), request.GET.get("modelo", ""))
+        elif q == "preco":
+            dados = fipe.preco(
+                tipo,
+                request.GET.get("marca", ""),
+                request.GET.get("modelo", ""),
+                request.GET.get("ano", ""),
+            )
+        else:
+            return JsonResponse({"erro": "Consulta inválida."}, status=400)
+    except Exception:
+        return JsonResponse({"erro": "A consulta FIPE não respondeu. Tente de novo."}, status=502)
+    return JsonResponse({"dados": dados})
 
 
 # --- App no celular (PWA) ---
