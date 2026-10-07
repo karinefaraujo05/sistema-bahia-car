@@ -29,3 +29,9 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+
+# Arquivos internos da ferramenta de design (não vão pro GitHub)
+/PRODUCT.md
+/DESIGN.md
+/.impeccable/
+/design-system/
