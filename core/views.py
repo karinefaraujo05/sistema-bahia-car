@@ -62,6 +62,15 @@ def inicio(request):
         data__month=hoje.month,
     ).count()
 
+    # Onboarding: aparece sozinho toda segunda-feira (uma vez por semana).
+    # "?onboarding=1" força a abrir (pra rever quando quiser).
+    iso = hoje.isocalendar()
+    ano_semana = f"{iso.year}-{iso.week:02d}"
+    auto_segunda = hoje.weekday() == 0 and request.session.get("onboarding_semana") != ano_semana
+    if auto_segunda:
+        request.session["onboarding_semana"] = ano_semana
+    mostrar_onboarding = auto_segunda or request.GET.get("onboarding") == "1"
+
     pendencias = lembretes(hoje)
     contexto = {
         "carros_na_loja": na_loja,
@@ -71,6 +80,7 @@ def inicio(request):
         "grafico_vendas": _vendas_por_mes(hoje),
         "alertas": pendencias[:4],
         "mais_alertas": max(len(pendencias) - 4, 0),
+        "mostrar_onboarding": mostrar_onboarding,
     }
     return render(request, "inicio.html", contexto)
 

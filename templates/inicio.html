@@ -176,4 +176,54 @@
       {% endif %}
     </section>
   </div>
+
+  {# Onboarding da semana: aparece sozinho toda segunda-feira. #}
+  {% if mostrar_onboarding %}
+    <div id="onboarding" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onclick="if(event.target===this)fecharOnboarding()">
+      <div class="w-full max-w-lg rounded-2xl bg-superficie p-6 shadow-md">
+        <div class="mb-5 flex items-start gap-3">
+          <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-acento-600 text-white">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+          </span>
+          <div>
+            <h2 class="text-xl font-bold">Bem-vindo de volta!</h2>
+            <p class="text-sm text-tinta-suave">Um lembrete rápido pra começar bem a semana.</p>
+          </div>
+        </div>
+
+        <ul class="space-y-3">
+          <li class="flex items-start gap-3">
+            <span class="chip h-8 w-8 shrink-0 bg-acento-50 text-acento-700"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg></span>
+            <div><div class="font-medium">Registre um negócio</div><div class="text-sm text-tinta-suave">Use os atalhos: Comprei, Vendi, Fiz uma troca ou Peguei um carro pra vender.</div></div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="chip h-8 w-8 shrink-0 bg-acento-50 text-acento-700"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg></span>
+            <div><div class="font-medium">Gere o contrato</div><div class="text-sm text-tinta-suave">No negócio, toque em Gerar contrato e depois Baixar PDF.</div></div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="chip h-8 w-8 shrink-0 bg-acento-50 text-acento-700"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg></span>
+            <div><div class="font-medium">Guarde os documentos</div><div class="text-sm text-tinta-suave">Tire foto do carro e do contrato assinado e anexe no negócio.</div></div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="chip h-8 w-8 shrink-0 bg-ambar-fundo text-ambar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+            <div><div class="font-medium">Veja a agenda</div><div class="text-sm text-tinta-suave">O sininho mostra o que precisa de atenção (repasses, prazos, carros parados).</div></div>
+          </li>
+        </ul>
+
+        <div class="mt-6 flex flex-wrap gap-2">
+          <button type="button" onclick="fecharOnboarding()" class="botao botao-primario">Começar a semana</button>
+          <a href="{% url 'ajuda' %}" class="botao botao-secundario">Ver guia completo</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      function fecharOnboarding() {
+        var o = document.getElementById("onboarding");
+        if (o) o.remove();
+      }
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") fecharOnboarding();
+      });
+    </script>
+  {% endif %}
 {% endblock %}
