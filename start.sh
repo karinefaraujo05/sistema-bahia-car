@@ -3,7 +3,8 @@
 set -e
 
 python manage.py migrate --noinput
-python manage.py collectstatic --noinput
+# Ignora o input.css (fonte do Tailwind com @import "tailwindcss"): o site usa o output.css já gerado.
+python manage.py collectstatic --noinput --ignore=input.css
 
 # Cria a loja e o login do dono, se as variáveis RESP_* estiverem definidas (idempotente).
 if [ -n "${RESP_USUARIO:-}" ]; then
