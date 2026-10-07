@@ -492,6 +492,16 @@ def cancelar(request, pk):
     return redirect("negocios:detalhe", pk=negocio.pk)
 
 
+@login_required
+@require_POST
+def descartar(request, pk):
+    """Apaga (arquiva) um negócio que ainda é rascunho."""
+    negocio = get_object_or_404(Negocio.objetos, pk=pk, status=StatusNegocio.RASCUNHO)
+    negocio.arquivar()
+    messages.success(request, "Rascunho descartado.")
+    return redirect("inicio")
+
+
 # --- Consignação ---
 
 

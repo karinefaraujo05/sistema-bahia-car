@@ -24,9 +24,18 @@
   </div>
 
   {% if negocio.status == 'rascunho' %}
-    <div class="mb-6 aviso aviso-atencao">
-      Este negócio ainda é um rascunho.
-      <a href="{% url 'negocios:passo_pessoa' negocio.pk %}" class="font-medium text-acento-700">Continuar</a>.
+    <div class="mb-6 aviso aviso-atencao flex flex-wrap items-center justify-between gap-3">
+      <span>
+        Este negócio ainda é um rascunho.
+        <a href="{% url 'negocios:passo_pessoa' negocio.pk %}" class="font-medium text-acento-700">Continuar</a>.
+      </span>
+      <form method="post" action="{% url 'negocios:descartar' negocio.pk %}" onsubmit="return confirm('Descartar este rascunho? Não dá pra desfazer.');">
+        {% csrf_token %}
+        <button type="submit" class="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-cinza hover:text-tinta">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Descartar rascunho
+        </button>
+      </form>
     </div>
   {% endif %}
 

@@ -28,6 +28,7 @@ urlpatterns = [
         name="confirmar_cancelamento",
     ),
     path("negocios/<int:pk>/cancelar/confirmar/", views.cancelar, name="cancelar"),
+    path("negocios/<int:pk>/descartar/", views.descartar, name="descartar"),
     # Consignação
     path("consignacoes/nova/", views.consignar, name="consignar"),
     path(
