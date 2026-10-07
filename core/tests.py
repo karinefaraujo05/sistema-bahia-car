@@ -106,3 +106,31 @@ def test_backup_gera_zip_com_dados(client):
     dados = b"".join(resp.streaming_content)
     zf = zipfile.ZipFile(io.BytesIO(dados))
     assert "dados.json" in zf.namelist()
+
+
+# --- Multi-empresa: isolamento de dados ---
+
+
+def test_dados_sao_separados_por_empresa():
+    from contas.models import Empresa
+    from core.tenancy import limpar_empresa_atual, set_empresa_atual
+    from veiculos.models import Veiculo
+
+    a = Empresa.objects.create(nome="Empresa A")
+    b = Empresa.objects.create(nome="Empresa B")
+
+    set_empresa_atual(a)
+    try:
+        Veiculo.objetos.create(
+            placa="AAA1A11", marca="X", modelo="Y",
+            ano_fabricacao=2020, ano_modelo=2021, cor="Preto",
+        )
+        assert Veiculo.objetos.count() == 1  # a empresa A vê o próprio carro
+    finally:
+        limpar_empresa_atual()
+
+    set_empresa_atual(b)
+    try:
+        assert Veiculo.objetos.count() == 0  # a empresa B NÃO vê o carro da A
+    finally:
+        limpar_empresa_atual()

@@ -80,27 +80,25 @@
   {# Fotos #}
   <section class="mb-6" aria-label="Fotos">
     <h2 class="mb-2 text-lg">Fotos</h2>
-    <form
-      method="post"
-      action="{% url 'veiculos:adicionar_fotos' veiculo.pk %}"
-      enctype="multipart/form-data"
-      hx-post="{% url 'veiculos:adicionar_fotos' veiculo.pk %}"
-      hx-target="#galeria"
-      hx-swap="outerHTML"
-      hx-encoding="multipart/form-data"
-      class="mb-3"
-    >
+    <form class="mb-3">
       {% csrf_token %}
-      <input
-        id="fotos-detalhe"
-        type="file"
-        name="fotos"
-        accept="image/*"
-        capture="environment"
-        multiple
-        class="campo-arquivo mb-2"
-      />
-      <button type="submit" class="botao botao-secundario">Adicionar foto</button>
+      <label class="botao botao-secundario cursor-pointer">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        Adicionar foto
+        <input
+          type="file"
+          name="fotos"
+          accept="image/*"
+          capture="environment"
+          multiple
+          class="hidden"
+          hx-post="{% url 'veiculos:adicionar_fotos' veiculo.pk %}"
+          hx-target="#galeria"
+          hx-swap="outerHTML"
+          hx-encoding="multipart/form-data"
+          hx-trigger="change"
+        />
+      </label>
     </form>
     {% include "veiculos/partials/galeria.html" with veiculo=veiculo %}
   </section>

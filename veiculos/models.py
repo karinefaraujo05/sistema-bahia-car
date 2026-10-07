@@ -118,9 +118,10 @@ class Veiculo(ModeloBase):
         ordering = ["-criado_em"]
         constraints = [
             models.UniqueConstraint(
-                fields=["placa"],
+                fields=["empresa", "placa"],
                 condition=Q(arquivado=False),
                 name="placa_unica_entre_nao_arquivados",
+                nulls_distinct=False,
             )
         ]
 

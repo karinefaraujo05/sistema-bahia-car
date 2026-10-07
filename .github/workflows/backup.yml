@@ -1,9 +1,13 @@
 name: Backup diário do banco
 
+# Agendamento DESLIGADO até os secrets serem configurados no repositório
+# (Settings > Secrets and variables > Actions):
+#   DATABASE_URL, BACKUP_BUCKET, AWS_S3_ENDPOINT_URL, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+# Com os secrets definidos, reative descomentando o bloco "schedule" abaixo.
 on:
-  schedule:
-    - cron: "0 6 * * *" # 06:00 UTC ≈ 03:00 no horário da Bahia
-  workflow_dispatch: {} # permite rodar manualmente também
+  # schedule:
+  #   - cron: "0 6 * * *" # 06:00 UTC ≈ 03:00 no horário da Bahia
+  workflow_dispatch: {} # por enquanto, roda só manualmente
 
 jobs:
   backup:

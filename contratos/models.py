@@ -62,10 +62,6 @@ class ConfiguracaoLoja(ModeloBase):
     def __str__(self):
         return self.razao_social or "Configuração da loja"
 
-    def save(self, *args, **kwargs):
-        self.pk = 1  # registro único
-        super().save(*args, **kwargs)
-
     @classmethod
     def carregar(cls, empresa=None):
         """Configuração da empresa (a atual, se não for passada)."""

@@ -49,9 +49,10 @@ class Pessoa(ModeloBase):
         ordering = ["nome"]
         constraints = [
             models.UniqueConstraint(
-                fields=["cpf_cnpj"],
+                fields=["empresa", "cpf_cnpj"],
                 condition=Q(arquivado=False) & ~Q(cpf_cnpj=""),
                 name="cpf_cnpj_unico_entre_nao_arquivados",
+                nulls_distinct=False,
             )
         ]
 

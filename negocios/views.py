@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from core.tenancy import empresa_atual
 from veiculos.forms import VeiculoForm
 from veiculos.models import Situacao, StatusVeiculo, Veiculo
 
@@ -713,7 +714,7 @@ def exportar_excel(request):
             "Valor anunciado",
         ]
     )
-    for v in Veiculo.todos.all():
+    for v in Veiculo.todos.filter(empresa=empresa_atual()):
         aba_veiculos.append(
             [
                 v.placa_formatada,
@@ -745,7 +746,7 @@ def exportar_excel(request):
 
     aba_negocios = wb.create_sheet("Negócios")
     aba_negocios.append(["Contrato", "Tipo", "Modalidade", "Data", "Valor total", "Status"])
-    for n in Negocio.todos.all():
+    for n in Negocio.todos.filter(empresa=empresa_atual()):
         aba_negocios.append(
             [
                 n.numero_contrato,
