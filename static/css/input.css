@@ -320,6 +320,13 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-vermelho) 18%, transparent);
   }
 
+  /* Botão/link desligado (ex.: baixar contrato só depois de salvar). */
+  .botao-desativado {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
   /* Barra do guia que acompanha o usuário pelas telas. */
   .guia-bar {
     position: sticky;

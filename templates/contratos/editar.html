@@ -53,23 +53,52 @@
       </details>
     </div>
 
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap items-center gap-2">
       <button type="submit" class="botao botao-primario">Salvar</button>
-      <a href="{% url 'contratos:baixar_pdf' contrato.pk %}" class="botao botao-secundario">
+      <a id="baixar-pdf" href="{% url 'contratos:baixar_pdf' contrato.pk %}" class="botao botao-secundario">
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
         Baixar PDF
       </a>
-      <a href="{% url 'contratos:baixar_docx' contrato.pk %}" class="botao botao-secundario">Baixar Word (.docx)</a>
+      <a id="baixar-docx" href="{% url 'contratos:baixar_docx' contrato.pk %}" class="botao botao-secundario">Baixar Word (.docx)</a>
     </div>
+    <p id="aviso-salvar" class="mt-2 hidden text-sm font-medium text-acento-700">
+      Você mudou algo. Toque em <b>Salvar</b> pra baixar o contrato já atualizado.
+    </p>
   </form>
 
   <script>
+    var carregado = false;
+
+    function marcarAlterado() {
+      if (!carregado) return;
+      ["baixar-pdf", "baixar-docx"].forEach(function (id) {
+        document.getElementById(id).classList.add("botao-desativado");
+      });
+      document.getElementById("aviso-salvar").classList.remove("hidden");
+    }
+
     function escolherTest(n) {
       document.getElementById("num_testemunhas").value = n;
       document.querySelectorAll("[data-test-opt]").forEach(function (b) {
         b.classList.toggle("botao-regra-ativo", b.getAttribute("data-test-opt") === String(n));
       });
+      marcarAlterado();
     }
+
     escolherTest({{ contrato.num_testemunhas }});
+
+    // Qualquer mudança nos campos desliga os botões de baixar até salvar.
+    document.getElementById("observacoes").addEventListener("input", marcarAlterado);
+    var corpo = document.querySelector("textarea[name='corpo']");
+    if (corpo) corpo.addEventListener("input", marcarAlterado);
+
+    // Impede baixar enquanto estiver "desligado".
+    ["baixar-pdf", "baixar-docx"].forEach(function (id) {
+      document.getElementById(id).addEventListener("click", function (e) {
+        if (this.classList.contains("botao-desativado")) e.preventDefault();
+      });
+    });
+
+    carregado = true;
   </script>
 {% endblock %}
