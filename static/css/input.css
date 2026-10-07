@@ -409,6 +409,22 @@
     }
   }
 
+  /* Botõezinhos de margem no cadastro de carro (FIPE, +10%, +20%). */
+  .chip-margem {
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-acento-300);
+    padding: 0.25rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-acento-700);
+    background-color: var(--color-superficie);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+  .chip-margem:hover {
+    background-color: var(--color-acento-50);
+  }
+
   /* Botão flutuante de ajuda, presente em todas as telas. */
   .botao-ajuda {
     position: fixed;
