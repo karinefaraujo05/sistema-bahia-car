@@ -659,12 +659,29 @@ def vendas(request):
         status=StatusNegocio.CONCLUIDO, data__year=ano, data__month=mes
     )
     tipos_do_mes = list(base.values_list("tipo", flat=True))
-    negocios = (base.filter(tipo=tipo) if tipo else base).order_by("-data", "-numero_contrato")
+    negocios = (
+        (base.filter(tipo=tipo) if tipo else base)
+        .order_by("-data", "-numero_contrato")
+        .prefetch_related("itens__veiculo")
+    )
 
     eh_admin = request.user.eh_administrador
-    negocios_com_lucro = [
-        {"negocio": n, "lucro": lucro_bruto(n) if eh_admin else None} for n in negocios
-    ]
+    negocios_com_lucro = []
+    for n in negocios:
+        saiu = entrou = None
+        for it in n.itens.all():
+            if it.de_pessoa_id is None:
+                saiu = it.veiculo  # carro da loja que foi pro cliente
+            elif it.para_pessoa_id is None:
+                entrou = it.veiculo  # carro do cliente que entrou no estoque
+        negocios_com_lucro.append(
+            {
+                "negocio": n,
+                "lucro": lucro_bruto(n) if eh_admin else None,
+                "saiu": saiu,
+                "entrou": entrou,
+            }
+        )
 
     contexto = {
         "linhas": negocios_com_lucro,
