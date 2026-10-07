@@ -1,31 +1,197 @@
 {% extends "base.html" %}
 
-{% block titulo %}Editar contrato — Bahia Car{% endblock %}
+{% block titulo %}Editar contrato · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-2">
     {% if contrato.negocio_id %}
-      <a href="{% url 'negocios:detalhe' contrato.negocio_id %}" class="text-tinta-suave">← Voltar ao negócio</a>
+      {% url 'negocios:detalhe' contrato.negocio_id as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar ao negócio" %}
     {% else %}
-      <a href="{% url 'veiculos:detalhe' contrato.consignacao.veiculo_id %}" class="text-tinta-suave">← Voltar ao carro</a>
+      {% url 'veiculos:detalhe' contrato.consignacao.veiculo_id as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar ao carro" %}
     {% endif %}
   </div>
 
   <h1 class="mb-1 text-2xl">{{ contrato.titulo }}</h1>
   <p class="mb-3 text-tinta-suave">Versão {{ contrato.versao }}</p>
 
-  <div class="mb-4 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3 text-sm">
-    Modelo provisório — revise o texto e, antes de usar com clientes, passe por um advogado.
+  <div class="mb-4 aviso aviso-atencao text-sm">
+    Modelo provisório. Revise o texto e, antes de usar com clientes, passe por um advogado.
     Ajuste o que quiser abaixo e baixe em PDF ou Word.
   </div>
 
   <form method="post" class="space-y-3">
     {% csrf_token %}
-    <textarea name="corpo" rows="24" class="campo w-full font-mono text-sm">{{ contrato.corpo }}</textarea>
+
+    {# Botões que preenchem as regras direto no texto do contrato. #}
+    <div class="rounded-xl border border-borda bg-superficie p-3 shadow-sm">
+      <p class="mb-2 text-sm font-medium">Preencher as regras no contrato</p>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" onclick="preencherMulta()" class="inline-flex items-center gap-1.5 rounded-lg border border-borda bg-superficie px-3 py-1.5 text-sm font-medium text-tinta hover:bg-petroleo-50">
+          <svg class="h-4 w-4 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          Multa (%)
+        </button>
+        <button type="button" onclick="preencherIpva()" class="inline-flex items-center gap-1.5 rounded-lg border border-borda bg-superficie px-3 py-1.5 text-sm font-medium text-tinta hover:bg-petroleo-50">
+          <svg class="h-4 w-4 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          IPVA e licenciamento
+        </button>
+        <button type="button" onclick="preencherPrazo()" class="inline-flex items-center gap-1.5 rounded-lg border border-borda bg-superficie px-3 py-1.5 text-sm font-medium text-tinta hover:bg-petroleo-50">
+          <svg class="h-4 w-4 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          Prazo (dias)
+        </button>
+        <button type="button" onclick="adicionarTestemunha(1)" class="inline-flex items-center gap-1.5 rounded-lg border border-borda bg-superficie px-3 py-1.5 text-sm font-medium text-tinta hover:bg-petroleo-50">
+          <svg class="h-4 w-4 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          1 testemunha
+        </button>
+        <button type="button" onclick="adicionarTestemunha(2)" class="inline-flex items-center gap-1.5 rounded-lg border border-borda bg-superficie px-3 py-1.5 text-sm font-medium text-tinta hover:bg-petroleo-50">
+          <svg class="h-4 w-4 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          2 testemunhas
+        </button>
+      </div>
+      <p class="mt-2 text-xs text-tinta-suave">Clique para preencher direto no texto. Depois é só conferir e salvar.</p>
+    </div>
+
+    <textarea id="corpo-contrato" name="corpo" rows="24" class="campo w-full font-mono text-sm">{{ contrato.corpo }}</textarea>
     <div class="flex flex-wrap gap-2">
       <button type="submit" class="botao botao-primario">Salvar alterações</button>
       <a href="{% url 'contratos:baixar_pdf' contrato.pk %}" class="botao botao-secundario">Baixar PDF</a>
       <a href="{% url 'contratos:baixar_docx' contrato.pk %}" class="botao botao-secundario">Baixar Word (.docx)</a>
     </div>
+    <div class="flex flex-wrap items-center gap-3">
+      <p id="aviso-vazios" class="text-sm"></p>
+      <button type="button" id="btn-achar-vazio" onclick="irParaVazio()" class="hidden inline-flex items-center gap-1.5 rounded-lg border border-borda bg-superficie px-3 py-1.5 text-sm font-medium text-tinta hover:bg-petroleo-50">
+        <svg class="h-4 w-4 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        Achar campo em branco
+      </button>
+    </div>
   </form>
+
+  <script>
+    function _corpoContrato() {
+      return document.getElementById("corpo-contrato");
+    }
+
+    // Inteiro por extenso (0 a 100), usado na multa.
+    function extensoPt(n) {
+      n = parseInt(n, 10);
+      if (isNaN(n)) return "";
+      var u = ["zero","um","dois","três","quatro","cinco","seis","sete","oito","nove","dez",
+        "onze","doze","treze","quatorze","quinze","dezesseis","dezessete","dezoito","dezenove"];
+      var d = ["","","vinte","trinta","quarenta","cinquenta","sessenta","setenta","oitenta","noventa"];
+      if (n < 20) return u[n];
+      if (n < 100) { var r = n % 10; return d[Math.floor(n / 10)] + (r ? " e " + u[r] : ""); }
+      if (n === 100) return "cem";
+      return "" + n;
+    }
+
+    function preencherMulta() {
+      var v = prompt("Multa por descumprimento — digite só o número inteiro do percentual (%):", "10");
+      if (v === null) return;
+      v = v.replace(/[^0-9]/g, "");
+      if (!v) return;
+      var pct = Math.min(parseInt(v, 10), 100);
+      var ext = extensoPt(pct);
+      var ta = _corpoContrato();
+      if (/de\s+\d+%\s*\([^)]*por cento\)/.test(ta.value)) {
+        ta.value = ta.value.replace(/de\s+\d+%\s*\([^)]*por cento\)/g, "de " + pct + "% (" + ext + " por cento)");
+      } else if (/_+\s*%/.test(ta.value)) {
+        ta.value = ta.value.replace(/_+\s*%/g, pct + "%");
+      } else if (/multa de\s+[\d.,]+\s*%/i.test(ta.value)) {
+        ta.value = ta.value.replace(/multa de\s+[\d.,]+\s*%/gi, "multa de " + pct + "%");
+      } else {
+        alert("Não encontrei o campo de multa neste contrato.");
+      }
+    }
+
+    function adicionarTestemunha(qtd) {
+      var ta = _corpoContrato();
+      if (ta.value.indexOf("Nome: ____") === -1) {
+        alert("Este contrato não tem campos de testemunha em branco (ou já estão preenchidos).");
+        return;
+      }
+      var n1 = prompt("Nome da 1ª testemunha:");
+      if (n1 === null || !n1.trim()) return;
+      var c1 = prompt("CPF da 1ª testemunha:", "");
+      if (c1 === null) c1 = "";
+      ta.value = ta.value.replace("Nome: ____", "Nome: " + n1.trim()).replace("CPF: ____", "CPF: " + c1.trim());
+      if (qtd === 2) {
+        if (ta.value.indexOf("Nome: ____") === -1) return;
+        var n2 = prompt("Nome da 2ª testemunha:");
+        if (n2 === null || !n2.trim()) return;
+        var c2 = prompt("CPF da 2ª testemunha:", "");
+        if (c2 === null) c2 = "";
+        ta.value = ta.value.replace("Nome: ____", "Nome: " + n2.trim()).replace("CPF: ____", "CPF: " + c2.trim());
+      }
+    }
+
+    function preencherIpva() {
+      var padrao = "até a entrega, por conta do vendedor; a partir dela, do comprador";
+      var v = prompt("Quem paga o IPVA e o licenciamento?", padrao);
+      if (v === null || !v.trim()) return;
+      v = v.trim().replace(/\.*$/, "");
+      var ta = _corpoContrato();
+      if (/IPVA e licenciamento:/.test(ta.value)) {
+        ta.value = ta.value.replace(/IPVA e licenciamento:[^.]*\./g, "IPVA e licenciamento: " + v + ".");
+      } else {
+        alert("Este contrato não tem a linha de IPVA e licenciamento para preencher.");
+      }
+    }
+
+    function preencherPrazo() {
+      var v = prompt("Prazo para assinar a transferência (ATPV-e), em dias úteis:", "5");
+      if (v === null) return;
+      v = v.replace(/[^0-9]/g, "");
+      if (!v) return;
+      var ta = _corpoContrato();
+      if (/em até\s+\d+\s+dias úteis/.test(ta.value)) {
+        ta.value = ta.value.replace(/em até\s+\d+\s+dias úteis/g, "em até " + v + " dias úteis");
+      } else {
+        alert("Esta venda usa o prazo legal de 30 dias para a transferência, então não há prazo de assinatura para ajustar aqui.");
+      }
+    }
+
+    // Conta os campos em branco (2 a 10 underscores; não as linhas de assinatura).
+    function _contarVazios() {
+      var el = document.getElementById("aviso-vazios");
+      var btn = document.getElementById("btn-achar-vazio");
+      if (!el) return;
+      var achados = _corpoContrato().value.match(/(?<!_)_{2,10}(?!_)/g);
+      var n = achados ? achados.length : 0;
+      if (n > 0) {
+        el.textContent = "Faltam " + n + " campo(s) em branco. Clique em “Achar campo em branco” para ir até cada um.";
+        el.className = "text-sm font-medium text-ambar";
+        if (btn) btn.classList.remove("hidden");
+      } else {
+        el.textContent = "Sem campos em branco. Pronto pra baixar.";
+        el.className = "text-sm font-medium text-verde";
+        if (btn) btn.classList.add("hidden");
+      }
+    }
+
+    // Pula para o próximo campo em branco (____) e o seleciona, pra digitar por cima.
+    function irParaVazio() {
+      var ta = _corpoContrato();
+      var re = /(?<!_)_{2,10}(?!_)/g;
+      re.lastIndex = ta.selectionEnd || 0;
+      var m = re.exec(ta.value);
+      if (!m) { re.lastIndex = 0; m = re.exec(ta.value); }
+      if (!m) { alert("Não há mais campos em branco."); return; }
+      ta.focus();
+      ta.setSelectionRange(m.index, m.index + m[0].length);
+      var linhasAntes = ta.value.substring(0, m.index).split("\n").length;
+      ta.scrollTop = Math.max(0, (linhasAntes - 4) * 18);
+    }
+
+    (function () {
+      var ta = _corpoContrato();
+      if (ta) ta.addEventListener("input", _contarVazios);
+      // Os botões mudam o texto por código (não disparam "input"); reconferimos depois deles.
+      ["preencherMulta", "preencherIpva", "preencherPrazo", "adicionarTestemunha"].forEach(function (nome) {
+        var orig = window[nome];
+        if (typeof orig === "function") {
+          window[nome] = function () { var r = orig.apply(this, arguments); _contarVazios(); return r; };
+        }
+      });
+      _contarVazios();
+    })();
+  </script>
 {% endblock %}

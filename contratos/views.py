@@ -1,3 +1,10 @@
+import re
+import unicodedata
+from urllib.parse import quote
+
+# Campo em branco no contrato: 2 a 10 underscores isolados (não a linha de assinatura, ~40).
+_CAMPO_VAZIO = re.compile(r"(?<!_)_{2,10}(?!_)")
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -12,6 +19,7 @@ from .geracao import (
     gerar_contrato,
     gerar_contrato_consignacao,
     gerar_termo_vistoria,
+    nome_arquivo_contrato,
     renderizar_docx,
     renderizar_pdf,
     salvar_pdf_como_documento,
@@ -22,6 +30,26 @@ from .services import DocumentoError, adicionar_documentos
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
 
+def _bloquear_se_incompleto(request, contrato):
+    """Impede baixar o contrato enquanto houver campo em branco (marcado com ____)."""
+    if _CAMPO_VAZIO.search(contrato.corpo):
+        messages.error(
+            request,
+            "Ainda há campos em branco no contrato (marcados com ____). "
+            "Preencha tudo, inclusive as testemunhas, antes de baixar.",
+        )
+        return redirect("contratos:editar_contrato", pk=contrato.pk)
+    return None
+
+
+def _disposicao_download(contrato, ext):
+    """Content-Disposition com o nome amigável do contrato (trata acentos)."""
+    completo = f"{nome_arquivo_contrato(contrato)}.{ext}"
+    ascii_fb = unicodedata.normalize("NFKD", completo).encode("ascii", "ignore").decode()
+    ascii_fb = ascii_fb.replace('"', "") or f"contrato.{ext}"
+    return "attachment; filename=\"%s\"; filename*=UTF-8''%s" % (ascii_fb, quote(completo))
+
+
 @login_required
 def configuracao(request):
     if not request.user.eh_administrador:
@@ -29,6 +57,8 @@ def configuracao(request):
         return redirect("inicio")
 
     config = ConfiguracaoLoja.carregar()
+    # Os dados da loja ficam travados por padrão (não mudam). Só edita com ?editar=1.
+    editando = request.GET.get("editar") == "1"
     if request.method == "POST":
         form = ConfiguracaoLojaForm(request.POST, instance=config)
         if form.is_valid():
@@ -37,13 +67,19 @@ def configuracao(request):
             obj.save()
             messages.success(request, "Configuração da loja salva.")
             return redirect("contratos:configuracao")
+        editando = True  # com erro, continua no modo de edição
     else:
         form = ConfiguracaoLojaForm(instance=config)
 
     return render(
         request,
         "contratos/configuracao.html",
-        {"form": form, "faltando": config.campos_faltando()},
+        {
+            "form": form,
+            "config": config,
+            "faltando": config.campos_faltando(),
+            "editando": editando,
+        },
     )
 
 
@@ -68,7 +104,8 @@ def upload_documentos(request, negocio_pk):
             return redirect("negocios:detalhe", pk=negocio.pk)
         messages.success(request, f"{len(criados)} documento(s) anexado(s).")
     else:
-        messages.error(request, "Escolha o tipo e ao menos um arquivo.")
+        erros = [e for lista in form.errors.values() for e in lista]
+        messages.error(request, erros[0] if erros else "Escolha o tipo e ao menos um arquivo.")
     return redirect("negocios:detalhe", pk=negocio.pk)
 
 
@@ -124,18 +161,24 @@ def editar_contrato(request, pk):
 @login_required
 def baixar_pdf(request, pk):
     contrato = get_object_or_404(Contrato.objetos, pk=pk)
+    bloqueio = _bloquear_se_incompleto(request, contrato)
+    if bloqueio:
+        return bloqueio
     pdf = renderizar_pdf(contrato)
     # O PDF gerado fica salvo como documento do negócio/consignação.
     salvar_pdf_como_documento(contrato, usuario=request.user)
     resp = HttpResponse(pdf, content_type="application/pdf")
-    resp["Content-Disposition"] = f'attachment; filename="contrato-{contrato.pk}.pdf"'
+    resp["Content-Disposition"] = _disposicao_download(contrato, "pdf")
     return resp
 
 
 @login_required
 def baixar_docx(request, pk):
     contrato = get_object_or_404(Contrato.objetos, pk=pk)
+    bloqueio = _bloquear_se_incompleto(request, contrato)
+    if bloqueio:
+        return bloqueio
     conteudo = renderizar_docx(contrato)
     resp = HttpResponse(conteudo, content_type=DOCX_MIME)
-    resp["Content-Disposition"] = f'attachment; filename="contrato-{contrato.pk}.docx"'
+    resp["Content-Disposition"] = _disposicao_download(contrato, "docx")
     return resp

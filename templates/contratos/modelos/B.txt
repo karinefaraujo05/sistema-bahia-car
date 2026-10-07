@@ -1,23 +1,66 @@
-{% load formato contratos_extras %}CONTRATO DE COMPRA E VENDA DE VEÍCULO AUTOMOTOR
-Contrato nº {{ negocio.numero_contrato }}
+{% load formato contratos_extras pessoas_extras %}CONTRATO DE COMPRA E VENDA DE VEÍCULO AUTOMOTOR
+Contrato nº {{ negocio.numero_contrato|default:"____" }}
 
-VENDEDORA: {% include "contratos/modelos/_loja.txt" with papel_loja="VENDEDORA" %}
+VENDEDORA: {{ loja.razao_social|upper }}, nome fantasia {{ loja.nome_fantasia|default:"Bahia Car" }}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{ loja.cnpj|cpf_cnpj }}, com sede na {{ loja.endereco }}, {{ loja.cidade }}/{{ loja.uf }}, CEP {{ loja.cep|cep }}, neste ato representada por seu titular {{ loja.representante_nome }}, inscrito no CPF sob o nº {{ loja.representante_cpf|cpf_cnpj }}, doravante denominada VENDEDORA.
 
-COMPRADOR(A): {% include "contratos/modelos/_pessoa.txt" with p=comprador papel_pessoa="COMPRADOR(A)" %}
+COMPRADOR(A): {{ comprador.nome }}, {{ comprador.nacionalidade|default:"____" }}, {{ comprador.estado_civil|default:"____" }}, {{ comprador.profissao|default:"____" }}, portador(a) do RG nº {{ comprador.rg|default:"____" }} {{ comprador.rg_orgao_emissor }}, inscrito(a) no CPF sob o nº {{ comprador.cpf_cnpj|cpf_cnpj }}, residente e domiciliado(a) em {{ comprador.endereco|default:"____" }}, {{ comprador.cidade|default:"____" }}/{{ comprador.uf|default:"__" }}, CEP {{ comprador.cep|cep }}, doravante denominado(a) COMPRADOR(A).
 
-CLÁUSULA 1ª — OBJETO. A VENDEDORA vende ao(à) COMPRADOR(A), de sua propriedade, o veículo:
-{% include "contratos/modelos/_veiculo.txt" with v=item.veiculo item=item %}
+As partes, de comum acordo, celebram o presente contrato, que se regerá pelas cláusulas seguintes, pela legislação civil e pelo Código de Defesa do Consumidor.
 
-CLÁUSULA 2ª — PREÇO E PAGAMENTO. O preço total é de {{ item.valor|reais }} ({{ item.valor|extenso }}), pago da seguinte forma: {{ negocio.detalhes_pagamento|default:"a combinar" }}.
+CLÁUSULA 1ª – DO OBJETO. A VENDEDORA vende ao(à) COMPRADOR(A), que aceita, o veículo abaixo descrito, de sua legítima propriedade, livre e desembaraçado de quaisquer ônus, gravames ou restrições, salvo o expressamente declarado:
+Marca/Modelo: {{ item.veiculo.marca }} {{ item.veiculo.modelo }}
+Ano de fabricação/modelo: {{ item.veiculo.ano_fabricacao }}/{{ item.veiculo.ano_modelo }}
+Cor: {{ item.veiculo.cor }}
+Combustível: {{ item.veiculo.get_combustivel_display|default:"____" }}
+Placa: {{ item.veiculo.placa_formatada }}
+Renavam: {{ item.veiculo.renavam }}
+Chassi: {{ item.veiculo.chassi }}
+Quilometragem na entrega: {{ item.km_entrega|default:"____" }} km
 
-CLÁUSULA 3ª — ESTADO DO VEÍCULO. O(A) COMPRADOR(A) declara ter vistoriado o veículo, informado(a) das seguintes avarias e características: {{ item.veiculo.avarias_declaradas|default:"nenhuma" }}.
+CLÁUSULA 2ª – DO PREÇO E DA FORMA DE PAGAMENTO. O preço certo e ajustado é de {{ item.valor|reais }} ({{ item.valor|extenso }}), que o(a) COMPRADOR(A) pagará da seguinte forma: {{ negocio.get_forma_pagamento_display|default:"____" }}{% if negocio.detalhes_pagamento %}, {{ negocio.detalhes_pagamento }}{% endif %}.
 
-CLÁUSULA 4ª — GARANTIA. O veículo conta com a garantia legal prevista no Código de Defesa do Consumidor. (Nota para o advogado: avaliar garantia contratual e exclusões; não inserir cláusula que afaste a garantia legal.)
+§ 1º O comprovante de transferência bancária ou PIX, ou o recibo assinado pela VENDEDORA, valerá como prova de pagamento e quitação da parcela correspondente.
 
-CLÁUSULA 5ª — ENTREGA E DÉBITOS. A entrega ocorre em {{ negocio.data_hora_entrega|date:"d/m/Y H:i"|default:"data a combinar" }}, no endereço {{ negocio.local_entrega|default:loja.endereco }}. Multas, tributos e encargos com fato gerador até a entrega são da VENDEDORA; a partir dela, do(a) COMPRADOR(A). IPVA e licenciamento: {{ loja.regra_ipva }}.
+§ 2º A entrega do veículo fica condicionada ao pagamento integral do preço, salvo ajuste diverso por escrito.
 
-CLÁUSULA 6ª — DOCUMENTAÇÃO. A VENDEDORA providenciará a documentação de transferência; o(a) COMPRADOR(A) fará a transferência no prazo legal de 30 dias. Chave reserva: {{ item.veiculo.tem_chave_reserva|sim_nao }}.
+CLÁUSULA 3ª – DA VISTORIA E DO ESTADO DO VEÍCULO. Tratando-se de veículo usado, o(a) COMPRADOR(A) declara tê-lo vistoriado e recebê-lo no estado em que se encontra, ciente do desgaste próprio do uso, informado(a) das seguintes avarias e características:
+Avarias declaradas: {{ item.veiculo.avarias_declaradas|default:"nenhuma" }}
 
-CLÁUSULA 7ª — DESCUMPRIMENTO. A parte que descumprir qualquer obrigação pagará à outra multa de {{ loja.multa_percentual }}% sobre o valor total, sem prejuízo de perdas e danos.
+CLÁUSULA 4ª – DA GARANTIA. O veículo conta com a garantia legal prevista no Código de Defesa do Consumidor contra vícios ocultos que o tornem impróprio ou inadequado ao uso, pelo prazo de 90 (noventa) dias contados da entrega (art. 26, II, do CDC). A garantia não abrange o desgaste natural, nem danos decorrentes de mau uso, acidente ou falta de manutenção pelo(a) COMPRADOR(A).
 
-{% include "contratos/modelos/_rodape.txt" %}
+CLÁUSULA 5ª – DA ENTREGA, DOS RISCOS E DOS DÉBITOS. A entrega do veículo e das chaves ocorrerá em {{ negocio.data_hora_entrega|date:"d/m/Y"|default:"____" }}, na sede da VENDEDORA ({{ loja.endereco }}, {{ loja.cidade }}/{{ loja.uf }}), mediante assinatura do termo de entrega.
+
+§ 1º Os riscos sobre o veículo transferem-se ao(à) COMPRADOR(A) com a tradição (art. 492 do Código Civil).
+
+§ 2º Multas, tributos, taxas, IPVA, licenciamento e quaisquer encargos com fato gerador até a data da entrega são de responsabilidade da VENDEDORA; a partir dela, do(a) COMPRADOR(A).
+
+CLÁUSULA 6ª – DA DOCUMENTAÇÃO E DA TRANSFERÊNCIA. A VENDEDORA entregará o CRLV-e e assinará a Autorização para Transferência de Propriedade de Veículo em meio eletrônico (ATPV-e) em favor do(a) COMPRADOR(A). O(A) COMPRADOR(A) obriga-se a providenciar a transferência da propriedade junto ao DETRAN/BA no prazo legal de 30 (trinta) dias (art. 123 do Código de Trânsito Brasileiro). Chave reserva: {{ item.veiculo.tem_chave_reserva|sim_nao }}.
+
+CLÁUSULA 7ª – DO DESCUMPRIMENTO. A parte que descumprir qualquer obrigação deste contrato pagará à outra multa compensatória de {{ loja.multa_percentual|default:10|floatformat:0 }}% ({{ loja.multa_percentual|default:10|numero_extenso }} por cento) sobre o valor total da Cláusula 2ª, acrescida de juros de mora de 1% (um por cento) ao mês e correção monetária pelo IPCA desde a data do inadimplemento, sem prejuízo das perdas e danos.
+
+Parágrafo único. A multa não excederá o valor da obrigação principal (art. 412 do Código Civil).
+
+CLÁUSULA 8ª – DA PROTEÇÃO DE DADOS. Os dados pessoais das partes serão tratados exclusivamente para a execução deste contrato e o cumprimento de obrigações legais e regulatórias, nos termos da Lei nº 13.709/2018 (LGPD), e serão conservados pelo prazo legal.
+
+CLÁUSULA 9ª – DAS DISPOSIÇÕES GERAIS. Este contrato obriga as partes e seus sucessores a qualquer título. A tolerância quanto ao descumprimento de qualquer cláusula não implica renúncia ou novação. Qualquer alteração só terá validade se feita por escrito e assinada por ambas as partes. Este instrumento, assinado pelas partes e por duas testemunhas, constitui título executivo extrajudicial (art. 784, III, do Código de Processo Civil).
+
+CLÁUSULA 10 – DO FORO. Fica eleito o foro da comarca de {{ loja.cidade }}/{{ loja.uf }}, com renúncia a qualquer outro, por mais privilegiado que seja, para dirimir quaisquer questões decorrentes deste contrato.
+
+E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença das duas testemunhas abaixo, que também o subscrevem.
+
+{{ loja.cidade }}/{{ loja.uf }}, {{ negocio.data|date:"j \d\e F \d\e Y" }}.
+
+
+________________________________________
+{{ loja.razao_social|upper }} ({{ loja.nome_fantasia|default:"Bahia Car" }})
+VENDEDORA · {{ loja.representante_nome }}, CPF {{ loja.representante_cpf|cpf_cnpj }}
+
+
+________________________________________
+{{ comprador.nome }}
+COMPRADOR(A) · CPF {{ comprador.cpf_cnpj|cpf_cnpj }}
+
+
+TESTEMUNHAS
+1. ______________________________  Nome: ____  CPF: ____
+2. ______________________________  Nome: ____  CPF: ____

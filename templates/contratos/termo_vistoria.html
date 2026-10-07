@@ -1,60 +1,142 @@
 <!doctype html>
+{% load contratos_extras %}
 <html lang="pt-br">
   <head>
     <meta charset="utf-8" />
     <style>
-      @page { size: A4; margin: 1.5cm; }
-      body { font-family: "DejaVu Sans", "Helvetica", sans-serif; font-size: 10pt; color: #000; }
-      h1 { font-size: 14pt; text-align: center; margin: 0 0 6pt; }
-      h2 { font-size: 11pt; border-bottom: 1px solid #999; margin: 14pt 0 4pt; }
-      .cab { font-size: 9pt; color: #333; }
-      table { width: 100%; border-collapse: collapse; }
-      td { padding: 2pt 0; vertical-align: top; }
-      .itens { margin: 4pt 0; }
-      .fotos { margin-top: 6pt; }
-      .fotos img { width: 31%; margin: 1%; border: 1px solid #ccc; vertical-align: top; }
-      .assin { margin-top: 20pt; width: 100%; }
-      .linha { border-top: 1px solid #000; padding-top: 3pt; text-align: center; font-size: 9pt; }
+      @page {
+        size: A4;
+        margin: 1.4cm 1.6cm 1.2cm;
+      }
+      body {
+        font-family: "DejaVu Serif", "Times New Roman", serif;
+        font-size: 9.5pt;
+        line-height: 1.35;
+        color: #1b1b1b;
+      }
+      .marca {
+        text-align: center;
+        font-family: "DejaVu Sans", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 1.2pt;
+        font-size: 7.5pt;
+        font-weight: bold;
+        color: #16525c;
+        border-bottom: 1pt solid #16525c;
+        padding-bottom: 4pt;
+        margin-bottom: 10pt;
+      }
+      .titulo {
+        text-align: center;
+        font-size: 12pt;
+        text-transform: uppercase;
+        letter-spacing: 0.4pt;
+        margin: 0 0 2pt;
+      }
+      .subtitulo {
+        text-align: center;
+        font-size: 9pt;
+        color: #555;
+        margin: 0 0 14pt;
+      }
+      .veiculo {
+        font-weight: bold;
+        font-size: 10.5pt;
+        border-bottom: 0.75pt solid #c9ccd1;
+        padding-bottom: 3pt;
+        margin: 14pt 0 6pt;
+      }
+      table.dados {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 6pt;
+      }
+      table.dados td {
+        padding: 2pt 4pt 2pt 0;
+        vertical-align: top;
+        width: 50%;
+      }
+      .rotulo {
+        color: #666;
+      }
+      .itens {
+        margin: 6pt 0;
+      }
+      .avarias {
+        margin: 6pt 0;
+      }
+      .fotos {
+        margin-top: 8pt;
+      }
+      .fotos img {
+        width: 31%;
+        margin: 1%;
+        border: 1pt solid #c9ccd1;
+        border-radius: 3pt;
+        vertical-align: top;
+      }
+      table.assin {
+        width: 100%;
+        margin-top: 22pt;
+      }
+      .linha {
+        border-top: 0.75pt solid #1b1b1b;
+        padding-top: 3pt;
+        text-align: center;
+        font-size: 8.5pt;
+      }
+      .fill {
+        display: inline-block;
+        min-width: 90pt;
+        border-bottom: 0.5pt solid #777;
+      }
     </style>
   </head>
   <body>
-    <div class="cab">
-      {{ loja.razao_social|default:"(configurar dados da loja)" }} — {{ loja.cidade }}/{{ loja.uf }}
+    {% if loja.nome_fantasia or loja.razao_social %}
+      <div class="marca">
+        {{ loja.nome_fantasia|default:loja.razao_social }}{% if loja.cidade %} · {{ loja.cidade }}{% if loja.uf %} - {{ loja.uf }}{% endif %}{% endif %}
+      </div>
+    {% endif %}
+
+    <div class="titulo">Termo de Vistoria e Entrega</div>
+    <div class="subtitulo">
+      Entrega em {{ negocio.data_hora_entrega|date:"d/m/Y \à\s H:i"|default:"____/____/______" }}
+      · Local: {{ negocio.local_entrega|default:loja.endereco }}
     </div>
-    <h1>TERMO DE VISTORIA E ENTREGA</h1>
-    <p>
-      Entrega em
-      {{ negocio.data_hora_entrega|date:"d/m/Y H:i"|default:"____/____/______  ____:____" }}
-      — Local: {{ negocio.local_entrega|default:loja.endereco }}
-    </p>
 
     {% for b in blocos %}
-      <h2>{{ b.veiculo.marca }} {{ b.veiculo.modelo }} — {{ b.veiculo.placa_formatada }}</h2>
-      <table>
+      <div class="veiculo">{{ b.veiculo.marca }} {{ b.veiculo.modelo }} · {{ b.veiculo.placa_formatada }}</div>
+      <table class="dados">
         <tr>
-          <td>Ano: {{ b.veiculo.ano_fabricacao }}/{{ b.veiculo.ano_modelo }}</td>
-          <td>Cor: {{ b.veiculo.cor }}</td>
+          <td><span class="rotulo">Ano fab./modelo:</span> {{ b.veiculo.ano_fabricacao }}/{{ b.veiculo.ano_modelo }}</td>
+          <td><span class="rotulo">Cor:</span> {{ b.veiculo.cor }}</td>
         </tr>
         <tr>
-          <td>Chassi: {{ b.veiculo.chassi|default:"—" }}</td>
-          <td>Renavam: {{ b.veiculo.renavam|default:"—" }}</td>
+          <td><span class="rotulo">Chassi:</span> {{ b.veiculo.chassi|default:"—" }}</td>
+          <td><span class="rotulo">Renavam:</span> {{ b.veiculo.renavam|default:"—" }}</td>
         </tr>
         <tr>
-          <td>Km na entrega: {{ b.item.km_entrega|default:"____________" }}</td>
-          <td>Nível de combustível: ____________</td>
+          <td><span class="rotulo">Km na entrega:</span> {{ b.item.km_entrega|default:"____________" }}</td>
+          <td><span class="rotulo">Nível de combustível:</span> <span class="fill"></span></td>
         </tr>
       </table>
 
-      <p class="itens">
-        Itens entregues: chave reserva
-        ({% if b.veiculo.tem_chave_reserva %}sim{% elif b.veiculo.tem_chave_reserva == False %}não{% else %}☐{% endif %})
-        · manual ☐ · estepe ☐ · macaco ☐ · triângulo ☐ · chave de roda ☐
-      </p>
-      <p>Avarias observadas: {{ b.veiculo.avarias_declaradas|default:"________________________________________" }}</p>
+      <div class="itens">
+        <span class="rotulo">Itens conferidos:</span>
+        ( {% if b.veiculo.tem_chave_reserva %}x{% else %} {% endif %} ) chave reserva ·
+        ( ) manual · ( ) estepe · ( ) macaco · ( ) triângulo · ( ) chave de roda ·
+        ( ) extintor
+      </div>
+
+      <div class="avarias">
+        <span class="rotulo">Avarias observadas na entrega:</span>
+        {{ b.veiculo.avarias_declaradas|default:"______________________________________________________________" }}
+      </div>
 
       {% if b.fotos %}
         <div class="fotos">
-          {% for f in b.fotos %}<img src="{{ f }}" alt="" />{% endfor %}
+          {% for f in b.fotos %}<img src="{{ f }}" alt="foto do veículo" />{% endfor %}
         </div>
       {% endif %}
 

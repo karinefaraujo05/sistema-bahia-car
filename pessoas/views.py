@@ -72,6 +72,10 @@ def editar(request, pk):
 @login_required
 @require_POST
 def arquivar(request, pk):
+    # Só o responsável (superusuário) pode arquivar pessoas.
+    if not request.user.is_superuser:
+        messages.error(request, "Só o responsável pode arquivar uma pessoa.")
+        return redirect("pessoas:detalhe", pk=pk)
     pessoa = get_object_or_404(Pessoa.objetos, pk=pk)
     arquivar_pessoa(pessoa, usuario=request.user)
     messages.success(request, "Pessoa arquivada. Nada é apagado.")

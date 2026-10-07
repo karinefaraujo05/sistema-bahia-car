@@ -1,21 +1,17 @@
 {% extends "base.html" %}
 {% block largura %}max-w-3xl{% endblock %}
 
-{% block titulo %}{% if veiculo %}Editar carro{% else %}Cadastrar carro{% endif %} — Bahia Car{% endblock %}
+{% block titulo %}{% if veiculo %}Editar carro{% else %}Cadastrar carro{% endif %} · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-2">
-    <a
-      href="{% if veiculo %}{% url 'veiculos:detalhe' veiculo.pk %}{% else %}{% url 'veiculos:estoque' %}{% endif %}"
-      class="text-tinta-suave"
-      >← Voltar</a
-    >
+    {% if veiculo %}{% url 'veiculos:detalhe' veiculo.pk as voltar_url %}{% else %}{% url 'veiculos:estoque' as voltar_url %}{% endif %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar" %}
   </div>
 
   <h1 class="mb-5 text-2xl">{% if veiculo %}Editar carro{% else %}Cadastrar carro{% endif %}</h1>
 
   {% if form.non_field_errors %}
-    <div class="mb-4 rounded-lg border border-ambar bg-ambar-fundo px-4 py-3">
+    <div class="mb-4 aviso aviso-atencao">
       {{ form.non_field_errors }}
     </div>
   {% endif %}
@@ -88,12 +84,14 @@
     <fieldset class="space-y-2">
       <legend class="mb-2 text-lg font-semibold">Fotos</legend>
       <input
+        id="fotos-novo"
         type="file"
         name="fotos"
         accept="image/*"
         capture="environment"
         multiple
-        class="block w-full text-sm"
+        class="campo-arquivo"
+        aria-label="Escolher fotos do carro"
       />
       <p class="text-sm text-tinta-suave">
         Pode tirar na hora pela câmera ou escolher várias da galeria.

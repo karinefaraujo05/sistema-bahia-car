@@ -1,35 +1,58 @@
-{% load formato contratos_extras %}CONTRATO DE CONSIGNAÇÃO DE VEÍCULO PARA VENDA
-Contrato nº {{ consignacao.numero_contrato }}
+{% load formato contratos_extras pessoas_extras %}CONTRATO DE CONSIGNAÇÃO DE VEÍCULO PARA VENDA
+Contrato nº {{ consignacao.numero_contrato|default:"____" }}
 
-CONSIGNANTE: {% include "contratos/modelos/_pessoa.txt" with p=proprietario papel_pessoa="CONSIGNANTE" %}
+CONSIGNANTE: {{ proprietario.nome }}, {{ proprietario.nacionalidade|default:"____" }}, {{ proprietario.estado_civil|default:"____" }}, {{ proprietario.profissao|default:"____" }}, portador(a) do RG nº {{ proprietario.rg|default:"____" }} {{ proprietario.rg_orgao_emissor }}, inscrito(a) no CPF sob o nº {{ proprietario.cpf_cnpj|cpf_cnpj }}, residente e domiciliado(a) em {{ proprietario.endereco|default:"____" }}, {{ proprietario.cidade|default:"____" }}/{{ proprietario.uf|default:"__" }}, CEP {{ proprietario.cep|cep }}, doravante denominado(a) CONSIGNANTE.
 
-CONSIGNATÁRIA: {% include "contratos/modelos/_loja.txt" with papel_loja="CONSIGNATÁRIA" %}
+CONSIGNATÁRIA: {{ loja.razao_social|upper }}, nome fantasia {{ loja.nome_fantasia|default:"Bahia Car" }}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{ loja.cnpj|cpf_cnpj }}, com sede na {{ loja.endereco }}, {{ loja.cidade }}/{{ loja.uf }}, CEP {{ loja.cep|cep }}, neste ato representada por seu titular {{ loja.representante_nome }}, inscrito no CPF sob o nº {{ loja.representante_cpf|cpf_cnpj }}, doravante denominada CONSIGNATÁRIA.
 
-CLÁUSULA 1ª — OBJETO. O(A) CONSIGNANTE entrega à CONSIGNATÁRIA, em consignação, para intermediar a venda a terceiros, o veículo abaixo. A propriedade permanece com o(a) CONSIGNANTE até a venda.
+As partes celebram o presente contrato de consignação para venda (art. 534 do Código Civil), que se regerá pelas cláusulas seguintes.
+
+CLÁUSULA 1ª – DO OBJETO. O(A) CONSIGNANTE entrega à CONSIGNATÁRIA, que recebe em consignação para exposição e venda a terceiros, o veículo de sua propriedade abaixo descrito:
 Marca/Modelo: {{ v.marca }} {{ v.modelo }}
-Ano fabricação/modelo: {{ v.ano_fabricacao }}/{{ v.ano_modelo }}   Cor: {{ v.cor }}
-Placa: {{ v.placa_formatada }}   Renavam: {{ v.renavam }}   Chassi: {{ v.chassi }}
+Ano de fabricação/modelo: {{ v.ano_fabricacao }}/{{ v.ano_modelo }}
+Cor: {{ v.cor }}
+Combustível: {{ v.get_combustivel_display|default:"____" }}
+Placa: {{ v.placa_formatada }}
+Renavam: {{ v.renavam }}
+Chassi: {{ v.chassi }}
 
-CLÁUSULA 2ª — VALOR E REMUNERAÇÃO. O(A) CONSIGNANTE receberá, no mínimo, {{ consignacao.valor_liquido_minimo|reais }} ({{ consignacao.valor_liquido_minimo|extenso }}) líquidos pela venda. A remuneração da CONSIGNATÁRIA será {% if consignacao.comissao_tipo == 'percentual' %}de {{ consignacao.comissao_valor }}% sobre o preço de venda{% elif consignacao.comissao_tipo == 'fixa' %}de {{ consignacao.comissao_valor|reais }}{% else %}o valor que exceder o mínimo líquido acima{% endif %}. Venda por valor inferior ao mínimo depende de autorização escrita do(a) CONSIGNANTE.
+Parágrafo único. A propriedade do veículo permanece com o(a) CONSIGNANTE até a efetivação da venda a terceiro; a CONSIGNATÁRIA figura como depositária e intermediária, não adquirindo o veículo para si.
 
-CLÁUSULA 3ª — REPASSE. A CONSIGNATÁRIA repassará o valor devido em até {{ consignacao.prazo_repasse_dias }} dias úteis após o recebimento integral do preço.
+CLÁUSULA 2ª – DO VALOR LÍQUIDO MÍNIMO E DA COMISSÃO. O(A) CONSIGNANTE fixa como valor líquido mínimo a lhe ser repassado a quantia de {{ consignacao.valor_liquido_minimo|reais }} ({{ consignacao.valor_liquido_minimo|extenso }}). A título de comissão, a CONSIGNATÁRIA fará jus a {% if consignacao.comissao_tipo == "percentual" %}{{ consignacao.comissao_valor|floatformat:0 }}% ({{ consignacao.comissao_valor|numero_extenso }} por cento) sobre o preço de venda{% elif consignacao.comissao_tipo == "fixa" %}quantia fixa de {{ consignacao.comissao_valor|reais }}{% else %}todo o valor que exceder o valor líquido mínimo acima (sobrepreço){% endif %}. A venda por valor que resulte repasse inferior ao mínimo depende de autorização escrita do(a) CONSIGNANTE.
 
-CLÁUSULA 4ª — PRAZO. A consignação vigora por {{ consignacao.prazo_dias }} dias a partir de {{ consignacao.data_entrada|date:"d/m/Y" }}, com aviso de {{ consignacao.aviso_dias }} dias para encerramento por qualquer parte.
+CLÁUSULA 3ª – DO PRAZO E DO REPASSE. A consignação vigorará por {{ consignacao.prazo_dias|default:"____" }} dias contados da data de entrada, com aviso de {{ consignacao.aviso_dias|default:"____" }} dias para encerramento por qualquer das partes. Concretizada a venda, a CONSIGNATÁRIA repassará ao(à) CONSIGNANTE o valor líquido devido em até {{ consignacao.prazo_repasse_dias|default:"____" }} dias úteis contados do recebimento integral do preço.
 
-CLÁUSULA 5ª — GUARDA. Enquanto o veículo estiver em seu poder, a CONSIGNATÁRIA responde pela guarda e conservação, e fica autorizada a realizar testes de rodagem acompanhados por seu preposto.
+CLÁUSULA 4ª – DA GUARDA E DAS OBRIGAÇÕES DA CONSIGNATÁRIA. Enquanto o veículo estiver em seu poder, a CONSIGNATÁRIA responde pela guarda e conservação, fica autorizada a expô-lo e a realizar testes de rodagem acompanhados por seu preposto, obriga-se a prestar contas e a restituir o veículo ao término do prazo caso não vendido.
 
-CLÁUSULA 6ª — DOCUMENTAÇÃO. O(A) CONSIGNANTE entrega nesta data: {{ consignacao.documentos_entregues|default:"—" }}. Concluída a venda, assinará a ATPV-e em favor do comprador em até {{ loja.prazo_assinatura_dias }} dias úteis.
+CLÁUSULA 5ª – DAS DECLARAÇÕES E OBRIGAÇÕES DO(A) CONSIGNANTE. O(A) CONSIGNANTE declara ser legítimo(a) proprietário(a) do veículo, livre de alienação fiduciária, penhora, bloqueio judicial (RENAJUD) ou restrição não informada, e obriga-se a assinar a Autorização para Transferência de Propriedade de Veículo em meio eletrônico (ATPV-e) em favor do comprador indicado pela CONSIGNATÁRIA em até 5 (cinco) dias úteis, bem como a arcar com os débitos (multas, IPVA, licenciamento) com fato gerador até a entrega.
 
-CLÁUSULA 7ª — DADOS PESSOAIS. Os dados pessoais serão tratados para a execução deste contrato e o cumprimento de obrigações legais, nos termos da Lei nº 13.709/2018 (LGPD).
+CLÁUSULA 6ª – DOS DOCUMENTOS ENTREGUES. O(A) CONSIGNANTE entrega nesta data à CONSIGNATÁRIA: {{ consignacao.documentos_entregues|default:"____" }}.
 
-CLÁUSULA 8ª — FORO. Fica eleito o foro da comarca de {{ loja.cidade }}/{{ loja.uf }} para dirimir questões deste contrato.
+CLÁUSULA 7ª – DO DESCUMPRIMENTO. A parte que descumprir qualquer obrigação deste contrato pagará à outra multa compensatória de {{ loja.multa_percentual|default:10|floatformat:0 }}% ({{ loja.multa_percentual|default:10|numero_extenso }} por cento) sobre o valor líquido mínimo da Cláusula 2ª, sem prejuízo das perdas e danos.
+
+Parágrafo único. A multa não excederá o valor da obrigação principal (art. 412 do Código Civil).
+
+CLÁUSULA 8ª – DA PROTEÇÃO DE DADOS. Os dados pessoais das partes serão tratados exclusivamente para a execução deste contrato e o cumprimento de obrigações legais, nos termos da Lei nº 13.709/2018 (LGPD).
+
+CLÁUSULA 9ª – DAS DISPOSIÇÕES GERAIS. Este contrato obriga as partes e seus sucessores. Qualquer alteração só terá validade se feita por escrito. Este instrumento, assinado pelas partes e por duas testemunhas, constitui título executivo extrajudicial (art. 784, III, do Código de Processo Civil).
+
+CLÁUSULA 10 – DO FORO. Fica eleito o foro da comarca de {{ loja.cidade }}/{{ loja.uf }}, com renúncia a qualquer outro, para dirimir quaisquer questões decorrentes deste contrato.
+
+E, por estarem justas e contratadas, as partes assinam o presente instrumento em 2 (duas) vias de igual teor e forma, na presença das duas testemunhas abaixo, que também o subscrevem.
 
 {{ loja.cidade }}/{{ loja.uf }}, {{ consignacao.data_entrada|date:"j \d\e F \d\e Y" }}.
 
 
-__________________________________        __________________________________
-CONSIGNANTE                                CONSIGNATÁRIA
+________________________________________
+{{ proprietario.nome }}
+CONSIGNANTE · CPF {{ proprietario.cpf_cnpj|cpf_cnpj }}
 
-Testemunhas:
-1. ______________________________  CPF:
-2. ______________________________  CPF:
+
+________________________________________
+{{ loja.razao_social|upper }} ({{ loja.nome_fantasia|default:"Bahia Car" }})
+CONSIGNATÁRIA · {{ loja.representante_nome }}, CPF {{ loja.representante_cpf|cpf_cnpj }}
+
+
+TESTEMUNHAS
+1. ______________________________  Nome: ____  CPF: ____
+2. ______________________________  Nome: ____  CPF: ____

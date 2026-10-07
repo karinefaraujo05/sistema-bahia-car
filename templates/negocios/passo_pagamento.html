@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block largura %}max-w-3xl{% endblock %}
 
-{% block titulo %}{{ titulo }} — Bahia Car{% endblock %}
+{% block titulo %}{{ titulo }} · Bahia Car{% endblock %}
 
 {% block conteudo %}
   {% include "negocios/partials/cabecalho_passo.html" %}
@@ -12,8 +12,8 @@
     {% include "negocios/partials/campo.html" with campo=form.km_entrega %}
 
     {% if form.quitacao_opcao %}
-      <div class="rounded-lg border border-ambar bg-ambar-fundo p-3">
-        <p class="mb-2 text-sm">Esse carro tem financiamento ativo.</p>
+      <div class="aviso aviso-atencao">
+        <p class="mb-2 text-sm font-medium">Esse carro tem financiamento ativo.</p>
         {% include "negocios/partials/campo.html" with campo=form.quitacao_opcao %}
       </div>
     {% endif %}

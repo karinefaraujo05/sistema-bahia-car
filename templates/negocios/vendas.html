@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load formato %}
 
-{% block titulo %}Vendas — Bahia Car{% endblock %}
+{% block titulo %}Vendas · Bahia Car{% endblock %}
 
 {% block conteudo %}
   <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -65,10 +65,10 @@
   {# Filtro por tipo. #}
   <nav class="mb-5 flex gap-2 overflow-x-auto" aria-label="Tipo">
     <a href="?ano={{ mes_ref|date:'Y' }}&mes={{ mes_ref|date:'n' }}"
-      class="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium{% if not tipo %} bg-petroleo-600 text-white shadow-sm{% else %} border border-borda bg-superficie text-tinta-suave{% endif %}">Todos</a>
-    {% for valor, rotulo in tipos %}
+      class="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium{% if not tipo %} bg-petroleo-600 text-white shadow-sm{% else %} border border-borda bg-superficie text-tinta-suave{% endif %}">Todos ({{ total_mes }})</a>
+    {% for valor, rotulo, n in tipos_contagem %}
       <a href="?ano={{ mes_ref|date:'Y' }}&mes={{ mes_ref|date:'n' }}&tipo={{ valor }}"
-        class="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium{% if tipo == valor %} bg-petroleo-600 text-white shadow-sm{% else %} border border-borda bg-superficie text-tinta-suave{% endif %}">{{ rotulo }}</a>
+        class="whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium{% if tipo == valor %} bg-petroleo-600 text-white shadow-sm{% else %} border border-borda bg-superficie text-tinta-suave{% endif %}">{{ rotulo }} ({{ n }})</a>
     {% endfor %}
   </nav>
 
