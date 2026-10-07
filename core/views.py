@@ -114,6 +114,52 @@ def consulta(request):
 
 
 @login_required
+def consulta_cnpj(request):
+    """Consulta dados de empresa por CNPJ (open.cnpja.com), normalizada e com cache."""
+    import json
+    import re
+    import urllib.request
+
+    from django.core.cache import cache
+
+    numero = re.sub(r"\D", "", request.GET.get("cnpj", ""))
+    if len(numero) != 14:
+        return JsonResponse({"erro": "CNPJ precisa ter 14 números."}, status=400)
+
+    chave = "cnpj:" + numero
+    dados = cache.get(chave)
+    if dados is None:
+        try:
+            req = urllib.request.Request(
+                f"https://open.cnpja.com/office/{numero}", headers={"User-Agent": "BahiaCar"}
+            )
+            with urllib.request.urlopen(req, timeout=12) as resp:  # noqa: S310
+                bruto = json.loads(resp.read().decode("utf-8"))
+        except Exception:
+            return JsonResponse(
+                {"erro": "Consulta de CNPJ indisponível agora. Tente de novo em instantes."},
+                status=502,
+            )
+        end = bruto.get("address") or {}
+        tel = (bruto.get("phones") or [{}])[0]
+        cidade_uf = end.get("city") or ""
+        if end.get("state"):
+            cidade_uf = f"{cidade_uf}/{end['state']}"
+        dados = {
+            "razao_social": (bruto.get("company") or {}).get("name", ""),
+            "nome_fantasia": bruto.get("alias") or "",
+            "situacao": (bruto.get("status") or {}).get("text", ""),
+            "atividade": (bruto.get("mainActivity") or {}).get("text", ""),
+            "endereco": ", ".join(
+                p for p in [end.get("street"), end.get("number"), end.get("district"), cidade_uf] if p
+            ),
+            "telefone": f"({tel.get('area')}) {tel.get('number')}" if tel.get("area") else "",
+        }
+        cache.set(chave, dados, 86400)
+    return JsonResponse({"dados": dados})
+
+
+@login_required
 def consulta_fipe(request):
     """Proxy da consulta FIPE (marcas, modelos, anos e preço), com cache."""
     from . import fipe

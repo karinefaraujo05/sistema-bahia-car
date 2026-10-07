@@ -154,3 +154,9 @@ def test_pagina_consulta_abre(client):
     Usuario.objects.create_user(username="k", password="x-123456")
     client.login(username="k", password="x-123456")
     assert client.get(reverse("consulta")).status_code == 200
+
+
+def test_cnpj_rejeita_numero_invalido(client):
+    Usuario.objects.create_user(username="k2", password="x-123456")
+    client.login(username="k2", password="x-123456")
+    assert client.get(reverse("cnpj") + "?cnpj=123").status_code == 400
