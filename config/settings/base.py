@@ -93,9 +93,15 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 
 # Banco de dados (PostgreSQL via DATABASE_URL)
+# CONN_MAX_AGE: reaproveita a mesma conexão por 10 min em vez de abrir uma nova
+# a cada clique (o banco é o Neon, externo — abrir conexão toda hora deixa lento).
+# CONN_HEALTH_CHECKS: antes de reusar, confere se a conexão ainda está viva
+# (o Neon gratuito "dorme"; sem isso, a conexão velha daria erro).
 DATABASES = {
     "default": env.db("DATABASE_URL"),
 }
+DATABASES["default"]["CONN_MAX_AGE"] = 600
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 DATABASES["default"]["ATOMIC_REQUESTS"] = False
 
 
@@ -117,7 +123,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Sessão longa no celular: o dono não precisa logar todo dia (90 dias).
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 90
-SESSION_SAVE_EVERY_REQUEST = True
+# Não regrava a sessão no banco a cada clique (90 dias já é tempo de sobra).
+# Isso tira uma escrita no banco de TODA página, deixando o sistema mais rápido.
+SESSION_SAVE_EVERY_REQUEST = False
 
 
 # Internacionalização (Brasil)
