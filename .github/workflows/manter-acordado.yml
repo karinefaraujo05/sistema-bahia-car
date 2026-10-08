@@ -1,0 +1,26 @@
+name: Manter o sistema acordado
+
+# Acessa o site de tempos em tempos pra o servidor do Render nao "dormir".
+# Assim, na hora de usar, o sistema abre rapido (sem a tela de espera).
+#
+# Observacoes:
+# - E de graca (usa os minutos gratuitos do GitHub Actions).
+# - O Render gratuito dorme depois de ~15 min parado; por isso o ping e a cada 10 min.
+# - So roda das 07h as 22h no horario da Bahia (10h-01h UTC), que e quando a loja usa.
+#   Fora disso deixa dormir, pra nao gastar as horas gratuitas do Render a toa.
+on:
+  schedule:
+    - cron: "*/10 10-23 * * *" # a cada 10 min, das 07h as 20h (Bahia)
+    - cron: "*/10 0-1 * * *"   # a cada 10 min, das 21h as 22h (Bahia)
+  workflow_dispatch: {} # permite rodar na mao pelo botao "Run workflow"
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Acordar o site
+        run: |
+          echo "Acessando o sistema para mante-lo acordado..."
+          curl -sS -o /dev/null -w "Resposta do servidor: %{http_code}\n" \
+            --max-time 60 --retry 3 --retry-delay 15 \
+            https://bahia-car.onrender.com/ || echo "Nao respondeu desta vez (vai tentar de novo no proximo ciclo)."
