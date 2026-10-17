@@ -4,8 +4,10 @@ name: Manter o sistema acordado
 # Assim, na hora de usar, o sistema abre rapido (sem a tela de espera).
 #
 # Observacoes:
-# - E de graca (usa os minutos gratuitos do GitHub Actions).
+# - E de graca (repositorio publico: GitHub Actions ilimitado).
 # - O Render gratuito dorme depois de ~15 min parado; por isso o ping e a cada 10 min.
+# - Cutuca /saude/, que faz um SELECT 1: acorda o APP e tambem o BANCO (Neon dorme
+#   a parte). Assim a primeira acao da loja nao espera o banco acordar.
 # - So roda das 07h as 22h no horario da Bahia (10h-01h UTC), que e quando a loja usa.
 #   Fora disso deixa dormir, pra nao gastar as horas gratuitas do Render a toa.
 on:
@@ -18,9 +20,9 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Acordar o site
+      - name: Acordar o site (e o banco)
         run: |
-          echo "Acessando o sistema para mante-lo acordado..."
+          echo "Cutucando /saude/ para manter app e banco acordados..."
           curl -sS -o /dev/null -w "Resposta do servidor: %{http_code}\n" \
             --max-time 60 --retry 3 --retry-delay 15 \
-            https://bahia-car.onrender.com/ || echo "Nao respondeu desta vez (vai tentar de novo no proximo ciclo)."
+            https://bahia-car.onrender.com/saude/ || echo "Nao respondeu desta vez (vai tentar de novo no proximo ciclo)."

@@ -1,0 +1,38 @@
+name: Backup diario do banco
+
+# Faz um dump do banco (Neon) e envia pro bucket de backup no R2, todo dia.
+# De graca: repositorio publico, GitHub Actions ilimitado.
+#
+# Pre-requisitos (uma vez so): cadastrar os Secrets do repositorio em
+#   Settings > Secrets and variables > Actions > New repository secret:
+#     DATABASE_URL           string de conexao do Neon (a mesma do Render)
+#     BACKUP_BUCKET          bahia-car-backups
+#     AWS_S3_ENDPOINT_URL    https://<account-id>.r2.cloudflarestorage.com
+#     AWS_ACCESS_KEY_ID      chave do token R2
+#     AWS_SECRET_ACCESS_KEY  segredo do token R2
+on:
+  schedule:
+    - cron: "30 6 * * *" # todo dia 03h30 (Bahia) = 06h30 UTC
+  workflow_dispatch: {} # permite rodar na mao pelo botao "Run workflow"
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar pg_dump (cliente do Postgres)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Rodar o backup (dump -> R2)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BACKUP_BUCKET: ${{ secrets.BACKUP_BUCKET }}
+          AWS_S3_ENDPOINT_URL: ${{ secrets.AWS_S3_ENDPOINT_URL }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: bash scripts/backup.sh

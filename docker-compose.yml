@@ -1,4 +1,13 @@
-# Postgres para desenvolvimento. Em produção o banco é gerenciado (ver Fase 8).
+# Sobe a stack COMPLETA local, igual à produção: app (gunicorn + settings.prod),
+# Postgres e MinIO (storage S3-compatível, no lugar do R2). Serve para validar a
+# imagem de produção na máquina antes de publicar no servidor.
+#
+#   docker compose up --build        # sobe tudo
+#   http://localhost:8000            # app
+#   http://localhost:9090            # endpoint S3 local (s3mock)
+#
+# Em produção NADA disto é usado: lá o banco e o storage são serviços externos
+# (Postgres em container no Dokploy + Cloudflare R2), com variáveis do painel.
 services:
   db:
     image: postgres:16
@@ -17,6 +26,40 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  # Storage S3-compatível local (s3mock), no lugar do Cloudflare R2.
+  s3:
+    image: adobe/s3mock:latest
+    container_name: bahiacar-s3
+    ports:
+      - "9090:9090"
+
+  # Cria o bucket de mídia no storage local e encerra (reusa a imagem do app).
+  criar-bucket:
+    image: bahiacar-local
+    build:
+      context: .
+    env_file: .env.docker
+    command: ["python", "scripts/criar-bucket-local.py"]
+    depends_on:
+      s3:
+        condition: service_started
+
+  web:
+    build:
+      context: .
+    image: bahiacar-local
+    container_name: bahiacar-web
+    env_file: .env.docker
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      s3:
+        condition: service_started
+      criar-bucket:
+        condition: service_completed_successfully
 
 volumes:
   pgdata:

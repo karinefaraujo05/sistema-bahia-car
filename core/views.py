@@ -4,7 +4,8 @@ import zipfile
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 from django.core.management import call_command
-from django.http import FileResponse, HttpResponseForbidden, JsonResponse
+from django.db import connection
+from django.http import FileResponse, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -17,6 +18,18 @@ from .busca import buscar as buscar_tudo
 from .frases import frase_do_dia
 
 MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
+
+
+def saude(request):
+    """Endpoint leve para o robô 'manter acordado'.
+
+    Faz um SELECT 1 para acordar também o banco (Neon dorme à parte do app) e
+    responde rápido, sem login e sem template. O ping bate aqui, não na raiz.
+    """
+    with connection.cursor() as cursor:
+        cursor.execute("SELECT 1")
+        cursor.fetchone()
+    return HttpResponse("ok", content_type="text/plain")
 
 
 def _vendas_por_mes(hoje):

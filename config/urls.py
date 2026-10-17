@@ -15,6 +15,7 @@ from core.views import (
     consulta_fipe,
     inicio,
     manifest,
+    saude,
     service_worker,
 )
 
@@ -34,6 +35,7 @@ urlpatterns = [
     path("backup/", baixar_backup, name="backup"),
     path("manifest.webmanifest", manifest, name="manifest"),
     path("sw.js", service_worker, name="service_worker"),
+    path("saude/", saude, name="saude"),
     path("", inicio, name="inicio"),
 ]
 

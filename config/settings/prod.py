@@ -16,12 +16,14 @@ hostname_render = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 if hostname_render:
     ALLOWED_HOSTS = [*ALLOWED_HOSTS, hostname_render]  # noqa: F405
 
-# Segurança (exige HTTPS)
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# Segurança (exige HTTPS).
+# Por padrão TUDO ligado. Só o docker-compose local (que roda sobre HTTP) desliga
+# via env, para conseguir validar a imagem de produção na máquina antes do deploy.
+SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)  # noqa: F405
+SESSION_COOKIE_SECURE = env.bool("SECURE_COOKIES", default=True)  # noqa: F405
+CSRF_COOKIE_SECURE = env.bool("SECURE_COOKIES", default=True)  # noqa: F405
 
-SECURE_HSTS_SECONDS = 60 * 60 * 24 * 365  # 1 ano
+SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=60 * 60 * 24 * 365)  # noqa: F405
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
@@ -57,7 +59,9 @@ STORAGES = {
             "querystring_auth": True,
             "querystring_expire": env.int("AWS_QUERYSTRING_EXPIRE", default=3600),  # noqa: F405
             "signature_version": "s3v4",
-            "addressing_style": "virtual",
+            # R2/B2/S3 usam "virtual"; o MinIO do docker-compose local usa "path".
+            "addressing_style": env("AWS_S3_ADDRESSING_STYLE", default="virtual"),  # noqa: F405
+
             "file_overwrite": False,
         },
     },

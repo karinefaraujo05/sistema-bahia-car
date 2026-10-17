@@ -33,5 +33,17 @@ RUN ARCH="$([ "$TARGETARCH" = "arm64" ] && echo arm64 || echo x64)" \
     && /usr/local/bin/tailwindcss -i static/css/input.css -o static/css/output.css --minify \
     && chmod +x start.sh
 
+# Coleta os estáticos JÁ no build (WhiteNoise), para não rodar no boot e atrasar
+# a primeira tela quando o Render "acorda". Os valores de ambiente abaixo são
+# fictícios e servem só para importar os settings de produção — o collectstatic
+# não acessa o banco nem o S3, só grava os estáticos dentro da imagem.
+RUN SECRET_KEY=build-only \
+    DATABASE_URL=postgres://u:p@localhost:5432/db \
+    AWS_STORAGE_BUCKET_NAME=x \
+    AWS_ACCESS_KEY_ID=x \
+    AWS_SECRET_ACCESS_KEY=x \
+    AWS_S3_ENDPOINT_URL=http://localhost \
+    python manage.py collectstatic --noinput --ignore=input.css
+
 EXPOSE 8000
 CMD ["./start.sh"]
