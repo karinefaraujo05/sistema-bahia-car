@@ -1,0 +1,19 @@
+{# Paginação simples (Anterior / Próxima). Espera page_obj e querystring (params sem 'page'). #}
+{% if page_obj.paginator.num_pages > 1 %}
+  <nav class="mt-4 flex items-center justify-between gap-2" aria-label="Paginação">
+    {% if page_obj.has_previous %}
+      <a href="?{{ querystring }}page={{ page_obj.previous_page_number }}" class="botao botao-secundario">Anterior</a>
+    {% else %}
+      <span class="botao botao-secundario botao-desativado">Anterior</span>
+    {% endif %}
+    <span class="text-sm text-tinta-suave">
+      Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+      <span class="hidden sm:inline">· {{ page_obj.paginator.count }} no total</span>
+    </span>
+    {% if page_obj.has_next %}
+      <a href="?{{ querystring }}page={{ page_obj.next_page_number }}" class="botao botao-secundario">Próxima</a>
+    {% else %}
+      <span class="botao botao-secundario botao-desativado">Próxima</span>
+    {% endif %}
+  </nav>
+{% endif %}

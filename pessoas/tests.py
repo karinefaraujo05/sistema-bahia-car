@@ -177,3 +177,21 @@ def test_veiculo_consignado_aponta_para_dono():
     )
     assert veiculo.proprietario == dono
     assert dono.veiculos.count() == 1
+
+
+# --- Item 6.5: paginação (50 por página) ---
+
+
+@pytest.mark.django_db
+def test_lista_de_pessoas_pagina_50_por_pagina(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    for i in range(55):
+        Pessoa.objetos.create(nome=f"Pessoa {i:03d}")
+    resp = client.get(reverse("pessoas:lista"))
+    page = resp.context["page_obj"]
+    assert page.paginator.count == 55
+    assert page.paginator.num_pages == 2
+    assert len(page.object_list) == 50
+    resp2 = client.get(reverse("pessoas:lista"), {"page": 2})
+    assert len(resp2.context["page_obj"].object_list) == 5

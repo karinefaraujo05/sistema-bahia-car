@@ -3,6 +3,7 @@ from datetime import date
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -693,9 +694,15 @@ def vendas(request):
         .prefetch_related("itens__veiculo")
     )
 
+    paginador = Paginator(negocios, 50)
+    page_obj = paginador.get_page(request.GET.get("page"))
+    params = request.GET.copy()
+    params.pop("page", None)
+    querystring = f"{params.urlencode()}&" if params.urlencode() else ""
+
     eh_admin = request.user.eh_administrador
     negocios_com_lucro = []
-    for n in negocios:
+    for n in page_obj:
         saiu = entrou = None
         for it in n.itens.all():
             if it.de_pessoa_id is None:
@@ -713,6 +720,8 @@ def vendas(request):
 
     contexto = {
         "linhas": negocios_com_lucro,
+        "page_obj": page_obj,
+        "querystring": querystring,
         "mes_ref": date(ano, mes, 1),
         "tipo": tipo,
         "tipos_contagem": [(v, r, tipos_do_mes.count(v)) for v, r in TipoNegocio.choices],
