@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from negocios.models import Consignacao, Negocio
+from pessoas.validators import so_digitos
 
 from .forms import ConfiguracaoLojaForm, DocumentoUploadForm
 from .geracao import (
@@ -150,6 +151,51 @@ def editar_contrato(request, pk):
         messages.success(request, "Contrato salvo.")
         return redirect("contratos:editar_contrato", pk=contrato.pk)
     return render(request, "contratos/editar.html", {"contrato": contrato})
+
+
+def _cliente_do_contrato(contrato):
+    """Pessoa principal (cliente) do contrato — do negócio ou da consignação."""
+    negocio = contrato.negocio
+    if not negocio:
+        return contrato.consignacao.proprietario if contrato.consignacao_id else None
+    papel = {"venda": "comprador", "compra": "vendedor", "troca": "permutante"}.get(negocio.tipo)
+    parte = negocio.partes.filter(papel=papel).first() if papel else None
+    if parte is None:
+        parte = negocio.partes.exclude(papel="anuente").first()
+    return parte.pessoa if parte else None
+
+
+def _voltar_do_contrato(contrato):
+    if contrato.negocio_id:
+        return redirect("negocios:detalhe", pk=contrato.negocio_id)
+    if contrato.consignacao_id:
+        return redirect("veiculos:detalhe", pk=contrato.consignacao.veiculo_id)
+    return redirect("inicio")
+
+
+@login_required
+@require_POST
+def enviar_whatsapp(request, pk):
+    """Gera e salva o PDF do contrato e abre o WhatsApp do cliente com uma mensagem pronta."""
+    contrato = get_object_or_404(Contrato.objetos, pk=pk)
+    cliente = _cliente_do_contrato(contrato)
+    telefone = so_digitos(cliente.telefone) if cliente and cliente.telefone else ""
+    if not telefone:
+        messages.error(request, "O cliente desse contrato não tem telefone cadastrado.")
+        return _voltar_do_contrato(contrato)
+
+    # Gera e salva o PDF: fica pronto como documento do negócio pra anexar no WhatsApp.
+    salvar_pdf_como_documento(contrato, usuario=request.user)
+
+    numero = telefone if telefone.startswith("55") else "55" + telefone
+    primeiro_nome = cliente.nome.split()[0] if cliente.nome else ""
+    loja = ConfiguracaoLoja.carregar()
+    mensagem = f"Olá {primeiro_nome}! Segue o contrato ({contrato.titulo.lower()})."
+    mensagem += " Qualquer dúvida, estou à disposição."
+    assinatura = loja.nome_fantasia or loja.razao_social
+    if assinatura:
+        mensagem += f" — {assinatura}"
+    return redirect(f"https://wa.me/{numero}?text={quote(mensagem)}")
 
 
 @login_required

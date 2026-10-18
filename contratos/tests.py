@@ -454,9 +454,12 @@ def test_gerar_termo_pela_tela(client, settings, tmp_path):
 # --- Item 3.2: PDF usa o corpo editado quando o usuário altera o texto ---
 
 
-def _contrato_venda():
+def _contrato_venda(telefone=""):
     loja_completa()
     comprador = pessoa_completa("João Silva", CPF_A)
+    if telefone:
+        comprador.telefone = telefone
+        comprador.save()
     carro = veiculo_completo("ABC1D23")
     negocio = Negocio.objetos.create(
         tipo=TipoNegocio.VENDA, status=StatusNegocio.RASCUNHO, numero_contrato=1
@@ -523,3 +526,27 @@ def test_editar_contrato_nao_marca_se_so_muda_observacoes(client):
     contrato.refresh_from_db()
     assert contrato.corpo_editado is False
     assert contrato.observacoes == "entrega com tanque cheio"
+
+
+# --- Item 3.3: botão "Mandar pro WhatsApp" ---
+
+
+def test_whatsapp_sem_telefone_avisa_e_nao_abre_wa(client):
+    Usuario.objects.create_user(username="karine", password="x-123456")
+    client.login(username="karine", password="x-123456")
+    contrato = _contrato_venda()  # comprador sem telefone
+    resp = client.post(reverse("contratos:enviar_whatsapp", args=[contrato.pk]))
+    assert resp.status_code == 302
+    assert "wa.me" not in resp["Location"]
+
+
+def test_whatsapp_gera_documento_e_redireciona(client, settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    Usuario.objects.create_user(username="karine", password="x-123456")
+    client.login(username="karine", password="x-123456")
+    contrato = _contrato_venda(telefone="71988887777")
+    resp = client.post(reverse("contratos:enviar_whatsapp", args=[contrato.pk]))
+    assert resp.status_code == 302
+    assert resp["Location"].startswith("https://wa.me/5571988887777?text=")
+    # o PDF ficou salvo como documento do negócio
+    assert Documento.objetos.filter(negocio=contrato.negocio, gerado_pelo_sistema=True).exists()

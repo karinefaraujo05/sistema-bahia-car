@@ -171,10 +171,19 @@
                     <svg class="h-5 w-5 shrink-0 text-acento-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>
                     <span class="truncate">{{ info.c.titulo }} <span class="text-tinta-suave">(v{{ info.c.versao }})</span></span>
                   </span>
-                  <a href="{% url 'contratos:editar_contrato' info.c.pk %}" class="inline-flex shrink-0 items-center gap-1.5 text-acento-700">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-                    Abrir / editar
-                  </a>
+                  <div class="flex shrink-0 items-center gap-3">
+                    <form method="post" action="{% url 'contratos:enviar_whatsapp' info.c.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" class="inline-flex items-center gap-1.5 text-verde" title="Gera o PDF e abre o WhatsApp do cliente">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m0 1.67c2.2 0 4.27.86 5.82 2.42a8.2 8.2 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.37c0-4.54 3.7-8.23 8.24-8.23m-3.67 4.4c-.17 0-.45.06-.69.31s-.91.89-.91 2.17.93 2.52 1.06 2.69c.13.17 1.84 2.82 4.47 3.95.62.27 1.11.43 1.49.55.63.2 1.2.17 1.65.1.5-.07 1.55-.63 1.77-1.24.22-.61.22-1.14.15-1.24-.06-.11-.24-.17-.5-.3s-1.55-.77-1.79-.85c-.24-.09-.42-.13-.59.13-.17.26-.68.85-.83 1.02-.15.17-.31.2-.57.07-.26-.13-1.1-.41-2.1-1.3a7.9 7.9 0 0 1-1.45-1.81c-.15-.26-.02-.4.11-.53.12-.12.26-.31.4-.46.13-.15.17-.26.26-.44.09-.17.04-.33-.02-.46-.06-.13-.57-1.42-.79-1.94-.2-.5-.4-.44-.56-.44z"/></svg>
+                        WhatsApp
+                      </button>
+                    </form>
+                    <a href="{% url 'contratos:editar_contrato' info.c.pk %}" class="inline-flex items-center gap-1.5 text-acento-700">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                      Abrir / editar
+                    </a>
+                  </div>
                 </div>
                 {% if info.mudancas %}
                   {% if info.mudancas.sem_mudanca %}

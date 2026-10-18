@@ -20,5 +20,6 @@ urlpatterns = [
     ),
     path("contratos/<int:pk>/editar/", views.editar_contrato, name="editar_contrato"),
     path("contratos/<int:pk>/pdf/", views.baixar_pdf, name="baixar_pdf"),
+    path("contratos/<int:pk>/whatsapp/", views.enviar_whatsapp, name="enviar_whatsapp"),
     path("contratos/<int:pk>/docx/", views.baixar_docx, name="baixar_docx"),
 ]
