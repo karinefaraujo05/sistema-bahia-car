@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from negocios.models import Negocio, StatusNegocio, TipoNegocio
-from negocios.services import repasses_pendentes
+from negocios.services import repasses_pendentes, resumo_de_vendas
 from veiculos.models import Situacao, StatusVeiculo, Veiculo
 
 from .agenda import lembretes
@@ -91,6 +91,10 @@ def inicio(request):
         data__month=hoje.month,
     ).count()
 
+    # Lucro do mês: número sensível, só o administrador vê (reusa resumo_de_vendas).
+    eh_admin = request.user.eh_administrador
+    lucro_do_mes = resumo_de_vendas(hoje.year, hoje.month)["lucro_bruto"] if eh_admin else None
+
     # Onboarding: aparece sozinho toda segunda-feira (uma vez por semana).
     # "?onboarding=1" força a abrir (pra rever quando quiser).
     iso = hoje.isocalendar()
@@ -106,6 +110,8 @@ def inicio(request):
         "valor_estoque": valor_estoque,
         "carros_terceiros": carros_terceiros,
         "vendas_no_mes": vendas_no_mes,
+        "eh_admin": eh_admin,
+        "lucro_do_mes": lucro_do_mes,
         "repasses_pendentes": repasses_pendentes().count(),
         "ultimos_negocios": Negocio.objetos.filter(status=StatusNegocio.CONCLUIDO)[:5],
         "grafico_vendas": _vendas_por_mes(hoje),

@@ -202,3 +202,22 @@ def test_painel_conta_carros_de_terceiros(client):
     _entrar_como_dono(client)
     resp = client.get(reverse("inicio"))
     assert resp.context["carros_terceiros"] == 2  # consignado + terceiro
+
+
+def test_painel_lucro_do_mes_escondido_do_vendedor(client):
+    # Item 2.3: lucro do mês é número sensível; vendedor não vê.
+    Usuario.objects.create_user(username="vend", password="x-123456")  # papel padrão: vendedor
+    client.login(username="vend", password="x-123456")
+    resp = client.get(reverse("inicio"))
+    assert resp.context["eh_admin"] is False
+    assert resp.context["lucro_do_mes"] is None
+    assert "lucro do mês" not in resp.content.decode().lower()
+
+
+def test_painel_lucro_do_mes_visivel_para_admin(client):
+    # Item 2.3: administrador vê o lucro do mês no painel.
+    _entrar_como_dono(client)
+    resp = client.get(reverse("inicio"))
+    assert resp.context["eh_admin"] is True
+    assert resp.context["lucro_do_mes"] is not None
+    assert "lucro do mês" in resp.content.decode().lower()

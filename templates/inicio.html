@@ -121,6 +121,18 @@
       </div>
     </div>
 
+    {% if eh_admin %}
+      <div class="indicador flex items-center gap-4">
+        <span class="indicador-icone bg-verde-fundo text-verde">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        </span>
+        <div>
+          <div class="text-2xl font-bold">{{ lucro_do_mes|reais }}</div>
+          <div class="text-sm text-tinta-suave">lucro do mês</div>
+        </div>
+      </div>
+    {% endif %}
+
     <div class="indicador flex items-center gap-4">
       <span class="indicador-icone bg-ambar-fundo text-ambar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
