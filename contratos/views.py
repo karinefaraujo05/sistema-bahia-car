@@ -202,11 +202,22 @@ def enviar_whatsapp(request, pk):
 def baixar_pdf(request, pk):
     contrato = get_object_or_404(Contrato.objetos, pk=pk)
     pdf = renderizar_pdf(contrato)
-    # O PDF gerado fica salvo como documento do negócio/consignação.
-    salvar_pdf_como_documento(contrato, usuario=request.user)
     resp = HttpResponse(pdf, content_type="application/pdf")
+    if request.GET.get("inline"):
+        # Visualização/impressão: mostra na aba, sem salvar uma cópia nova a cada vez.
+        resp["Content-Disposition"] = "inline"
+        return resp
+    # Download normal: o PDF gerado fica salvo como documento do negócio/consignação.
+    salvar_pdf_como_documento(contrato, usuario=request.user)
     resp["Content-Disposition"] = _disposicao_download(contrato, "pdf")
     return resp
+
+
+@login_required
+def imprimir_contrato(request, pk):
+    """Abre o PDF numa aba e dispara a impressão (window.print), para uso no computador."""
+    contrato = get_object_or_404(Contrato.objetos, pk=pk)
+    return render(request, "contratos/imprimir.html", {"contrato": contrato})
 
 
 @login_required

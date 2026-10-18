@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Imprimir contrato · Bahia Car</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #525659; }
+      iframe { border: 0; width: 100%; height: 100vh; display: block; }
+    </style>
+  </head>
+  <body>
+    {# O PDF é servido inline (mesma origem), então dá pra imprimir o conteúdo dele. #}
+    <iframe id="pdf" title="Contrato" src="{% url 'contratos:baixar_pdf' contrato.pk %}?inline=1"></iframe>
+    <script>
+      var quadro = document.getElementById("pdf");
+      quadro.addEventListener("load", function () {
+        try {
+          quadro.contentWindow.focus();
+          quadro.contentWindow.print();
+        } catch (e) {
+          // Se o navegador bloquear a impressão automática, o PDF já está aberto
+          // na aba — é só usar Ctrl+P (ou o botão de imprimir do visualizador).
+        }
+      });
+    </script>
+  </body>
+</html>

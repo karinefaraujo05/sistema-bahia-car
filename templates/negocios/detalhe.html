@@ -179,6 +179,10 @@
                         WhatsApp
                       </button>
                     </form>
+                    <a href="{% url 'contratos:imprimir_contrato' info.c.pk %}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-tinta-suave" title="Abre o PDF numa aba e manda imprimir (pro computador)">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+                      Imprimir
+                    </a>
                     <a href="{% url 'contratos:editar_contrato' info.c.pk %}" class="inline-flex items-center gap-1.5 text-acento-700">
                       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
                       Abrir / editar

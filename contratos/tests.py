@@ -550,3 +550,35 @@ def test_whatsapp_gera_documento_e_redireciona(client, settings, tmp_path):
     assert resp["Location"].startswith("https://wa.me/5571988887777?text=")
     # o PDF ficou salvo como documento do negócio
     assert Documento.objetos.filter(negocio=contrato.negocio, gerado_pelo_sistema=True).exists()
+
+
+# --- Item 3.4: botão Imprimir (PDF inline + window.print) ---
+
+
+def test_imprimir_contrato_abre_pagina_de_impressao(client):
+    Usuario.objects.create_user(username="karine", password="x-123456")
+    client.login(username="karine", password="x-123456")
+    contrato = _contrato_venda()
+    resp = client.get(reverse("contratos:imprimir_contrato", args=[contrato.pk]))
+    assert resp.status_code == 200
+    html = resp.content.decode()
+    assert "<iframe" in html
+    assert reverse("contratos:baixar_pdf", args=[contrato.pk]) + "?inline=1" in html
+
+
+def test_pdf_inline_mostra_sem_salvar_documento(client, settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    Usuario.objects.create_user(username="karine", password="x-123456")
+    client.login(username="karine", password="x-123456")
+    contrato = _contrato_venda()
+    # inline (impressão): mostra na aba e NÃO salva cópia
+    resp = client.get(reverse("contratos:baixar_pdf", args=[contrato.pk]) + "?inline=1")
+    assert resp.status_code == 200
+    assert resp["Content-Type"] == "application/pdf"
+    assert resp["Content-Disposition"] == "inline"
+    assert not Documento.objetos.filter(
+        negocio=contrato.negocio, gerado_pelo_sistema=True
+    ).exists()
+    # download normal: salva uma cópia como documento
+    client.get(reverse("contratos:baixar_pdf", args=[contrato.pk]))
+    assert Documento.objetos.filter(negocio=contrato.negocio, gerado_pelo_sistema=True).exists()
