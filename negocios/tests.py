@@ -813,3 +813,33 @@ def test_detalhe_troca_loja_paga_sem_sinal_negativo(client):
     assert "Loja paga" in html
     assert "5.000" in html
     assert "R$ -" not in html  # mostra o valor absoluto, sem negativo
+
+
+# --- Item 6.4: lucro_bruto reusa o prefetch (sem N+1) ---
+
+
+def test_lucro_bruto_reusa_prefetch_sem_query_extra(django_assert_num_queries):
+    for placa, compra in [("AAA1111", "30000"), ("BBB2222", "40000"), ("CCC3333", "25000")]:
+        car = veiculo(placa, valor_compra=Decimal(compra))
+        neg = Negocio.objetos.create(tipo=TipoNegocio.VENDA, status=StatusNegocio.CONCLUIDO)
+        item(neg, car, "50000")
+    negocios = list(
+        Negocio.objetos.filter(tipo=TipoNegocio.VENDA).prefetch_related("itens__veiculo")
+    )
+    # Com o prefetch, calcular o lucro de todos não gera query nova por negócio.
+    with django_assert_num_queries(0):
+        lucros = [services.lucro_bruto(n) for n in negocios]
+    assert sorted(lucros) == [Decimal("10000"), Decimal("20000"), Decimal("25000")]
+
+
+def test_lista_de_vendas_pagina_50_por_pagina(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    hoje = timezone.localdate()
+    for _ in range(51):
+        Negocio.objetos.create(tipo=TipoNegocio.VENDA, status=StatusNegocio.CONCLUIDO, data=hoje)
+    resp = client.get(reverse("negocios:vendas"))
+    page = resp.context["page_obj"]
+    assert page.paginator.count == 51
+    assert page.paginator.num_pages == 2
+    assert len(page.object_list) == 50

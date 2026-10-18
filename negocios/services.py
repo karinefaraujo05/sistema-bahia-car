@@ -361,7 +361,9 @@ def lucro_bruto(negocio):
     if negocio.modalidade == Modalidade.INTERMEDIACAO:
         return negocio.comissao_valor or Decimal("0")
 
-    itens = list(negocio.itens.select_related("veiculo"))
+    # itens.all() reusa o prefetch_related("itens__veiculo") da lista de vendas
+    # (evita 1 query nova por negócio). Em chamadas avulsas faz 1 query, sem problema.
+    itens = list(negocio.itens.all())
     if negocio.tipo == TipoNegocio.VENDA and itens:
         item = itens[0]
         if item.veiculo.valor_compra is None:
@@ -399,7 +401,7 @@ def resumo_de_vendas(ano, mes):
         tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA],
         data__year=ano,
         data__month=mes,
-    )
+    ).prefetch_related("itens__veiculo")  # lucro_bruto reusa esse prefetch (sem N+1)
     total = sum((n.valor_total or Decimal("0") for n in vendas), Decimal("0"))
     lucro = sum((lucro_bruto(n) or Decimal("0") for n in vendas), Decimal("0"))
     return {"total_vendido": total, "lucro_bruto": lucro, "quantidade": vendas.count()}
