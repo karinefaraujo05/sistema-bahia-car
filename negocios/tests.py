@@ -699,3 +699,22 @@ def test_forma_pagamento_pix_salva(client):
     assert resp.status_code == 302
     neg.refresh_from_db()
     assert neg.forma_pagamento == "pix"
+
+
+# --- Item 4.4: revisão numa tela só + Confirmar venda no rodapé ---
+
+
+def test_revisao_mostra_resumo_completo_e_confirmar(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    neg = rascunho(TipoNegocio.VENDA, forma_pagamento="pix")
+    joao = pessoa("João Silva")
+    ParteNegocio.objetos.create(negocio=neg, pessoa=joao, papel=PapelParte.COMPRADOR)
+    item(neg, veiculo("ABC1D23"), "30000", para=joao)
+    resp = client.get(reverse("negocios:revisao", args=[neg.pk]))
+    html = resp.content.decode()
+    assert resp.status_code == 200
+    assert "Confirmar venda" in html
+    assert "João Silva" in html
+    assert "30.000" in html  # valor formatado
+    assert "Pix" in html  # forma de pagamento

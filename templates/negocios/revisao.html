@@ -7,46 +7,79 @@
 {% block conteudo %}
   {% include "negocios/partials/cabecalho_passo.html" with titulo="Confirmar" %}
 
+  {# Resumo completo numa tela só. #}
   {% if negocio.tipo == 'troca' %}
-    <div class="mb-5 space-y-2 rounded-xl border border-borda bg-superficie shadow-sm p-4 text-lg">
-      <p>Você está <strong>trocando</strong> com
-        <strong>{% if parte %}{{ parte.pessoa.nome }}{% endif %}</strong>:</p>
-      <ul class="list-disc pl-5 text-base">
+    <div class="mb-4 space-y-3 rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+      <p class="text-lg">Troca com <strong>{% if parte %}{{ parte.pessoa.nome }}{% endif %}</strong>:</p>
+      <ul class="space-y-2">
         {% for item in itens %}
-          <li>
-            {% if item.sai_da_loja %}A loja entrega{% else %}O cliente entrega{% endif %}
-            o <strong>{{ item.veiculo.marca }} {{ item.veiculo.modelo }}</strong>
-            ({{ item.veiculo.placa_formatada }}) por {{ item.valor|reais }}.
+          <li class="flex items-start justify-between gap-3 border-b border-borda pb-2">
+            <span>
+              {% if item.sai_da_loja %}A loja entrega{% else %}O cliente entrega{% endif %}
+              o <strong>{{ item.veiculo.marca }} {{ item.veiculo.modelo }}</strong>
+              <span class="text-tinta-suave">({{ item.veiculo.placa_formatada }})</span>
+            </span>
+            <strong class="shrink-0">{{ item.valor|reais }}</strong>
           </li>
         {% endfor %}
       </ul>
-      <p class="text-base">
+      <p class="text-lg">
         {% if diferenca > 0 %}O cliente paga a diferença de <strong>{{ diferenca|reais }}</strong>.
         {% elif diferenca < 0 %}A loja paga a diferença de <strong>{{ diferenca|reais }}</strong>.
         {% else %}Sem diferença a pagar.{% endif %}
       </p>
     </div>
   {% else %}
-    <div class="mb-5 rounded-xl border border-borda bg-superficie shadow-sm p-4 text-lg">
-      {% if negocio.tipo == 'venda' %}Você está <strong>vendendo</strong>
-      {% else %}Você está <strong>comprando</strong>{% endif %}
+    <div class="mb-4 rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
       {% with item=itens.0 %}
-        {% if item %}
-          o <strong>{{ item.veiculo.marca }} {{ item.veiculo.modelo }}</strong>
-          {{ item.veiculo.cor|lower }} ({{ item.veiculo.placa_formatada }})
-          {% if negocio.tipo == 'venda' %}para{% else %}de{% endif %}
-          <strong>{% if parte %}{{ parte.pessoa.nome }}{% else %}—{% endif %}</strong>
-          por <strong>{{ item.valor|reais }}</strong>.
-        {% else %}faltam dados do carro.{% endif %}
+        <p class="mb-3 text-lg">
+          {% if negocio.tipo == 'venda' %}Você está <strong>vendendo</strong>{% else %}Você está <strong>comprando</strong>{% endif %}:
+        </p>
+        <dl class="space-y-2.5 text-lg">
+          <div class="flex justify-between gap-3">
+            <dt class="text-tinta-suave">Carro</dt>
+            <dd class="text-right font-medium">
+              {% if item %}{{ item.veiculo.marca }} {{ item.veiculo.modelo }} {{ item.veiculo.cor|lower }}<br>
+              <span class="text-sm text-tinta-suave">{{ item.veiculo.placa_formatada }}</span>{% else %}—{% endif %}
+            </dd>
+          </div>
+          <div class="flex justify-between gap-3 border-t border-borda pt-2.5">
+            <dt class="text-tinta-suave">Cliente</dt>
+            <dd class="text-right font-medium">{% if parte %}{{ parte.pessoa.nome }}{% else %}—{% endif %}</dd>
+          </div>
+          <div class="flex justify-between gap-3 border-t border-borda pt-2.5">
+            <dt class="text-tinta-suave">Valor</dt>
+            <dd class="text-right text-2xl font-bold">{% if item %}{{ item.valor|reais }}{% else %}—{% endif %}</dd>
+          </div>
+          {% if negocio.forma_pagamento %}
+            <div class="flex justify-between gap-3 border-t border-borda pt-2.5">
+              <dt class="text-tinta-suave">Pagamento</dt>
+              <dd class="text-right font-medium">{{ negocio.get_forma_pagamento_display }}</dd>
+            </div>
+          {% endif %}
+          <div class="flex justify-between gap-3 border-t border-borda pt-2.5">
+            <dt class="text-tinta-suave">Data</dt>
+            <dd class="text-right font-medium">{{ negocio.data|date:"d/m/Y" }}</dd>
+          </div>
+        </dl>
       {% endwith %}
     </div>
   {% endif %}
 
-  <form method="post">
-    {% csrf_token %}
-    <div class="flex flex-wrap gap-2">
-      <button type="submit" class="botao botao-primario">Confirmar</button>
-      <a href="{% url 'negocios:detalhe' negocio.pk %}" class="botao botao-secundario">Ver rascunho</a>
+  {# Espaço pra não ficar escondido atrás do rodapé fixo. #}
+  <div class="h-24"></div>
+
+  {# Rodapé fixo com o botão grande de confirmar. #}
+  <div class="fixed inset-x-0 bottom-0 z-30 border-t border-borda bg-superficie shadow-md"
+       style="padding-bottom: env(safe-area-inset-bottom);">
+    <div class="mx-auto flex max-w-3xl items-center gap-2 px-4 py-3">
+      <a href="{% url 'negocios:detalhe' negocio.pk %}" class="botao botao-secundario shrink-0">Ver rascunho</a>
+      <form method="post" class="min-w-0 flex-1">
+        {% csrf_token %}
+        <button type="submit" class="botao botao-primario w-full" style="min-height: 56px; font-size: 1.125rem;">
+          {% if negocio.tipo == 'venda' %}Confirmar venda{% elif negocio.tipo == 'compra' %}Confirmar compra{% else %}Confirmar troca{% endif %}
+        </button>
+      </form>
     </div>
-  </form>
+  </div>
 {% endblock %}
