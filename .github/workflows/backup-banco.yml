@@ -22,10 +22,17 @@ jobs:
       - name: Baixar o codigo
         uses: actions/checkout@v4
 
-      - name: Instalar pg_dump (cliente do Postgres)
+      - name: Instalar pg_dump 18 (o Neon roda Postgres 18; o cliente tem que ser >= servidor)
         run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc >/dev/null
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          sudo apt-get install -y postgresql-client-18
+          # Garante que o 'pg_dump' da PATH seja o 18 (e nao o 16 que ja vem no runner).
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
 
       - name: Rodar o backup (dump -> R2)
         env:
