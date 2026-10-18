@@ -69,9 +69,11 @@ def inicio(request):
         .exclude(situacao=Situacao.TERCEIRO)
         .count()
     )
+    # Conta VENDA e TROCA juntas: pro dono da loja, uma troca também é uma venda.
+    # Mesmo critério do gráfico de 6 meses (_vendas_por_mes), pra não divergir.
     vendas_no_mes = Negocio.objetos.filter(
         status=StatusNegocio.CONCLUIDO,
-        tipo=TipoNegocio.VENDA,
+        tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA],
         data__year=hoje.year,
         data__month=hoje.month,
     ).count()
