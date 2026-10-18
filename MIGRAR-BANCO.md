@@ -9,14 +9,14 @@ velho alguns dias** antes de apagar.
 
 ---
 
-## Passo 0 — me diga a região do Render (pra eu escolher a do banco igual)
-Em **dashboard.render.com → serviço `bahia-car` → Settings → Region**. Me fala o que
-está escrito (ex.: Oregon, Ohio, Virginia).
+## Passo 0 — ✅ região do Render confirmada: OREGON
+O site está em **Oregon** (AWS us-west-2). Então o banco novo vai na mesma: **US West (Oregon)**.
 
-## Passo 1 — criar o banco novo no Neon, na MESMA região
-Em **console.neon.tech**: crie um **projeto novo** e, na criação, escolha a **região
-dos EUA igual à do Render** (não dá pra mudar a região depois — por isso é projeto novo).
-Copie a **connection string** dele (começa com `postgres://...`).
+## Passo 1 — criar o banco novo no Neon, em US West (Oregon)
+Em **console.neon.tech**: crie um **projeto novo** e, na criação, escolha a região
+**AWS → US West (Oregon)** / `aws-us-west-2` (a MESMA do Render; não dá pra mudar a
+região depois — por isso é projeto novo). Copie a **connection string** dele
+(começa com `postgres://...`).
 
 ## Passo 2 — cadastrar o endereço do banco novo como "secret" no GitHub
 No GitHub do projeto: **Settings → Secrets and variables → Actions → New repository
