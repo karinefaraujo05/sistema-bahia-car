@@ -6,28 +6,46 @@
 {% block conteudo %}
   {% include "negocios/partials/cabecalho_passo.html" %}
 
-  {% if form.non_field_errors %}
+  {% if form.errors %}
     <div class="mb-4 aviso aviso-atencao">
-      {{ form.non_field_errors }}
+      {{ form.pessoa.errors }}{{ form.non_field_errors }}
     </div>
   {% endif %}
 
-  <form method="post" class="space-y-4">
-    {% csrf_token %}
-    {% include "negocios/partials/campo.html" with campo=form.pessoa %}
+  {# Form vazio: o cliente escolhido vem dos botões de sugestão (form="form-quem"). #}
+  <form id="form-quem" method="post">{% csrf_token %}</form>
 
-    <div class="flex flex-wrap gap-2 pt-2">
-      <button type="submit" class="botao botao-primario">Continuar</button>
-      <button type="submit" name="rascunho" value="1" class="botao botao-secundario">
-        Salvar rascunho
-      </button>
+  {% if parte %}
+    <div class="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-borda bg-superficie p-4 shadow-sm">
+      <span class="avatar">{{ parte.pessoa.nome|first|upper }}</span>
+      <div class="min-w-0 flex-1">
+        <p class="text-xs text-tinta-suave">Cliente escolhido</p>
+        <p class="truncate text-lg font-medium">{{ parte.pessoa.nome }}</p>
+      </div>
+      <button type="submit" form="form-quem" name="pessoa" value="{{ parte.pessoa.pk }}" class="botao botao-primario">Continuar</button>
     </div>
-  </form>
+    <p class="mb-2 text-sm text-tinta-suave">Ou troque o cliente buscando abaixo.</p>
+  {% endif %}
+
+  <label for="busca-pessoa" class="mb-1 block font-medium">Buscar cliente por nome ou telefone</label>
+  <input
+    type="search"
+    id="busca-pessoa"
+    name="q"
+    autocomplete="off"
+    {% if not parte %}autofocus{% endif %}
+    class="campo w-full text-lg"
+    placeholder="Ex.: João Silva ou 71 9..."
+    hx-get="{% url 'negocios:buscar_pessoa' negocio.pk %}"
+    hx-trigger="keyup changed delay:250ms, search"
+    hx-target="#sugestoes-pessoa"
+  />
+  <div id="sugestoes-pessoa" class="mt-3"></div>
 
   {# Quando a pessoa ainda não existe: cadastra e volta pra cá, já selecionada. #}
   <div class="mt-5 rounded-xl border border-borda bg-superficie p-4 shadow-sm">
     <p class="text-sm font-medium">Essa pessoa ainda não está cadastrada?</p>
-    <a href="{% url 'pessoas:novo' %}?next={{ request.path }}" class="botao botao-secundario mt-2">
+    <a href="{% url 'pessoas:novo' %}?next={% url 'negocios:passo_pessoa' negocio.pk %}" class="botao botao-secundario mt-2">
       <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
       Cadastrar nova pessoa
     </a>

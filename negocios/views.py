@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from core.busca import _pessoas as buscar_pessoas
 from core.tenancy import empresa_atual
 from veiculos.forms import VeiculoForm
 from veiculos.models import Situacao, StatusVeiculo, Veiculo
@@ -117,7 +118,26 @@ def passo_pessoa(request, pk):
     return render(
         request,
         "negocios/passo_pessoa.html",
-        {"negocio": negocio, "form": form, "titulo": titulos[negocio.tipo], "passo": 1},
+        {
+            "negocio": negocio,
+            "form": form,
+            "parte": parte,
+            "titulo": titulos[negocio.tipo],
+            "passo": 1,
+        },
+    )
+
+
+@login_required
+def buscar_pessoa(request, pk):
+    """Sugestões de cliente (nome ou telefone) enquanto digita, no passo 'quem'."""
+    negocio = _rascunho(pk)
+    termo = (request.GET.get("q") or "").strip()
+    pessoas = buscar_pessoas(termo)[:8] if termo else []
+    return render(
+        request,
+        "negocios/partials/sugestoes_pessoa.html",
+        {"negocio": negocio, "pessoas": pessoas, "termo": termo},
     )
 
 

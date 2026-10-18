@@ -10,6 +10,7 @@ urlpatterns = [
     path("negocios/novo/<str:tipo>/", views.iniciar, name="iniciar"),
     path("negocios/<int:pk>/", views.detalhe, name="detalhe"),
     path("negocios/<int:pk>/passo/quem/", views.passo_pessoa, name="passo_pessoa"),
+    path("negocios/<int:pk>/passo/quem/buscar/", views.buscar_pessoa, name="buscar_pessoa"),
     path("negocios/<int:pk>/passo/carro/", views.passo_carro, name="passo_carro"),
     path("negocios/<int:pk>/passo/pagamento/", views.passo_pagamento, name="passo_pagamento"),
     # Troca

@@ -626,3 +626,44 @@ def test_exportar_admin_gera_xlsx(client):
     resp = client.get(reverse("negocios:exportar_excel"))
     assert resp.status_code == 200
     assert resp.content[:2] == b"PK"  # xlsx é um zip
+
+
+# --- Item 4.2: busca de cliente por nome/telefone no passo "quem" ---
+
+
+def test_buscar_pessoa_sugere_por_nome_e_telefone(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    neg = rascunho(TipoNegocio.VENDA)
+    joao = Pessoa.objetos.create(nome="João Silva", telefone="71988887777")
+    url = reverse("negocios:buscar_pessoa", args=[neg.pk])
+    r1 = client.get(url, {"q": "joão"})
+    assert r1.status_code == 200
+    assert "João Silva" in r1.content.decode()
+    r2 = client.get(url, {"q": "98888"})  # trecho do telefone
+    html = r2.content.decode()
+    assert "João Silva" in html
+    assert f'name="pessoa" value="{joao.pk}"' in html  # a sugestão envia a pessoa
+
+
+def test_passo_pessoa_mostra_busca_htmx(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    neg = rascunho(TipoNegocio.VENDA)
+    resp = client.get(reverse("negocios:passo_pessoa", args=[neg.pk]))
+    html = resp.content.decode()
+    assert resp.status_code == 200
+    assert 'id="busca-pessoa"' in html
+    assert reverse("negocios:buscar_pessoa", args=[neg.pk]) in html
+
+
+def test_cliente_ja_cadastrado_continua_sem_recadastro(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    neg = rascunho(TipoNegocio.VENDA)
+    joao = Pessoa.objetos.create(nome="João")
+    resp = client.post(reverse("negocios:passo_pessoa", args=[neg.pk]), {"pessoa": joao.pk})
+    assert resp.status_code == 302
+    assert ParteNegocio.objetos.filter(
+        negocio=neg, pessoa=joao, papel=PapelParte.COMPRADOR
+    ).exists()
