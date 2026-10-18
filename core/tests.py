@@ -54,6 +54,68 @@ def test_busca_esconde_terceiro():
     assert carro not in buscar("TTT0000")["carros"]
 
 
+def _negocio_venda(placa, nome_cliente, modelo="Gol", cor="Prata"):
+    from negocios.models import (
+        ItemNegocio,
+        Negocio,
+        ParteNegocio,
+        PapelParte,
+        StatusNegocio,
+        TipoNegocio,
+    )
+
+    cliente = Pessoa.objetos.create(nome=nome_cliente)
+    carro = _carro(placa, modelo=modelo, cor=cor)
+    neg = Negocio.objetos.create(tipo=TipoNegocio.VENDA, status=StatusNegocio.CONCLUIDO)
+    ParteNegocio.objetos.create(negocio=neg, pessoa=cliente, papel=PapelParte.COMPRADOR)
+    ItemNegocio.objetos.create(negocio=neg, veiculo=carro, valor=30000)
+    return neg
+
+
+def test_busca_acha_negocio_por_cliente_placa_modelo():
+    # Item 3.1: achar contrato/negócio por nome do cliente, placa ou modelo.
+    neg = _negocio_venda("ABC1D23", "João Silva", modelo="Gol", cor="Prata")
+    assert neg in buscar("joão")["negocios"]
+    assert neg in buscar("ABC1D23")["negocios"]
+    assert neg in buscar("gol")["negocios"]
+
+
+def test_busca_negocio_descricao_amigavel():
+    # Item 3.1: resultado mostra "Venda do Gol prata pra João Silva".
+    _negocio_venda("ABC1D23", "João Silva", modelo="Gol", cor="Prata")
+    res = buscar("gol")["negocios"][0]
+    assert res.descricao_busca == "Venda do Gol prata pra João Silva"
+
+
+def test_busca_negocio_traz_contrato_mais_recente():
+    # Item 3.1: botão direto pro PDF usa a versão mais nova do contrato.
+    from contratos.models import Contrato, ModeloContrato
+
+    neg = _negocio_venda("ABC1D23", "João Silva")
+    Contrato.objetos.create(negocio=neg, modelo=ModeloContrato.B, titulo="Venda", corpo="x", versao=1)
+    c2 = Contrato.objetos.create(
+        negocio=neg, modelo=ModeloContrato.B, titulo="Venda", corpo="x", versao=2
+    )
+    res = buscar("gol")["negocios"][0]
+    assert res.contrato_recente.pk == c2.pk
+
+
+def test_view_busca_mostra_negocio_com_link_pdf(client):
+    # Item 3.1: a tela de busca renderiza a descrição e o botão pro PDF do contrato.
+    from contratos.models import Contrato, ModeloContrato
+
+    Usuario.objects.create_user(username="k9", password="x-123456")
+    client.login(username="k9", password="x-123456")
+    neg = _negocio_venda("ABC1D23", "João Silva", modelo="Gol", cor="Prata")
+    c = Contrato.objetos.create(
+        negocio=neg, modelo=ModeloContrato.B, titulo="Venda", corpo="x", versao=1
+    )
+    resp = client.get(reverse("buscar"), {"q": "gol"})
+    html = resp.content.decode()
+    assert "Venda do Gol prata pra João Silva" in html
+    assert reverse("contratos:baixar_pdf", args=[c.pk]) in html
+
+
 def test_busca_vazia_nao_quebra():
     resultado = buscar("")
     assert resultado["carros"] == []
