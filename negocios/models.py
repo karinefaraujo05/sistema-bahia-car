@@ -22,10 +22,11 @@ class StatusNegocio(models.TextChoices):
 
 
 class FormaPagamento(models.TextChoices):
-    A_VISTA = "a_vista", "À vista"
-    FINANCIADO = "financiado", "Financiado"
-    PARCELADO_LOJA = "parcelado_loja", "Parcelado na loja"
-    MISTO = "misto", "Misto"
+    DINHEIRO = "dinheiro", "Dinheiro"
+    PIX = "pix", "Pix"
+    CARTAO = "cartao", "Cartão"
+    FINANCIADO = "financiado", "Financiamento"
+    TROCA_DINHEIRO = "troca_dinheiro", "Troca + dinheiro"
 
 
 class PapelParte(models.TextChoices):

@@ -194,7 +194,7 @@ class Command(BaseCommand):
             negocio = Negocio.objetos.create(
                 tipo=TipoNegocio.VENDA, modalidade=Modalidade.PROPRIA,
                 status=StatusNegocio.RASCUNHO, data=_mes_atras(mes),
-                forma_pagamento="a_vista", detalhes_pagamento="via PIX, na entrega",
+                forma_pagamento="pix", detalhes_pagamento="via PIX, na entrega",
                 criado_por=self.admin,
             )
             ItemNegocio.objetos.create(

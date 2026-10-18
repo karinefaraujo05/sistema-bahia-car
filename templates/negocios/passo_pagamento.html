@@ -18,8 +18,21 @@
       </div>
     {% endif %}
 
-    <div class="grid gap-4 sm:grid-cols-2">
-      {% include "negocios/partials/campo.html" with campo=form.forma_pagamento %}
+    {# Forma de pagamento como botões grandes (não select). #}
+    <div>
+      <label class="mb-2 block font-medium">Forma de pagamento</label>
+      <input type="hidden" name="forma_pagamento" id="forma_pagamento" value="{{ form.forma_pagamento.value|default:'' }}" />
+      <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {% for valor, rotulo in form.forma_pagamento.field.choices %}
+          {% if valor %}
+            <button type="button" data-forma="{{ valor }}" onclick="escolherForma('{{ valor }}')" class="botao-forma">{{ rotulo }}</button>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% for erro in form.forma_pagamento.errors %}<p class="mt-1 text-sm text-ambar">{{ erro }}</p>{% endfor %}
+    </div>
+
+    <div>
       {% include "negocios/partials/campo.html" with campo=form.data %}
     </div>
     {% include "negocios/partials/campo.html" with campo=form.detalhes_pagamento %}
@@ -36,4 +49,15 @@
       <a href="{% url 'negocios:passo_carro' negocio.pk %}" class="botao botao-secundario">Voltar</a>
     </div>
   </form>
+
+  <script>
+    function escolherForma(v) {
+      document.getElementById("forma_pagamento").value = v;
+      document.querySelectorAll("[data-forma]").forEach(function (b) {
+        b.classList.toggle("botao-forma-ativo", b.getAttribute("data-forma") === v);
+      });
+    }
+    // Destaca o que já estava escolhido (ao voltar pra editar).
+    escolherForma(document.getElementById("forma_pagamento").value);
+  </script>
 {% endblock %}

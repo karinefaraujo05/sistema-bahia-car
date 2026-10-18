@@ -667,3 +667,35 @@ def test_cliente_ja_cadastrado_continua_sem_recadastro(client):
     assert ParteNegocio.objetos.filter(
         negocio=neg, pessoa=joao, papel=PapelParte.COMPRADOR
     ).exists()
+
+
+# --- Item 4.3: forma de pagamento como botões grandes ---
+
+
+def test_passo_pagamento_mostra_botoes_de_forma(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    neg = rascunho(TipoNegocio.VENDA)
+    item(neg, veiculo("ABC1D23"), "30000")
+    resp = client.get(reverse("negocios:passo_pagamento", args=[neg.pk]))
+    html = resp.content.decode()
+    assert resp.status_code == 200
+    assert "botao-forma" in html
+    for rotulo in ["Dinheiro", "Pix", "Cartão", "Financiamento", "Troca + dinheiro"]:
+        assert rotulo in html
+    assert 'name="forma_pagamento"' in html
+    assert '<select name="forma_pagamento"' not in html  # não é mais select
+
+
+def test_forma_pagamento_pix_salva(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    neg = rascunho(TipoNegocio.VENDA)
+    item(neg, veiculo("ABC1D23"), "30000")
+    resp = client.post(
+        reverse("negocios:passo_pagamento", args=[neg.pk]),
+        {"valor": "30000", "forma_pagamento": "pix", "data": "2026-03-12"},
+    )
+    assert resp.status_code == 302
+    neg.refresh_from_db()
+    assert neg.forma_pagamento == "pix"
