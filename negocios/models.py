@@ -108,6 +108,11 @@ class Negocio(ModeloBase):
     valor_total = models.DecimalField(
         "valor total", max_digits=10, decimal_places=2, null=True, blank=True
     )
+    # Diferença em dinheiro da troca (positivo: o cliente paga; negativo: a loja paga).
+    # Preenchido no passo "valores" da troca. Null em compras/vendas e trocas antigas.
+    diferenca = models.DecimalField(
+        "diferença da troca", max_digits=10, decimal_places=2, null=True, blank=True
+    )
     forma_pagamento = models.CharField(
         "forma de pagamento", max_length=16, choices=FormaPagamento.choices, blank=True
     )

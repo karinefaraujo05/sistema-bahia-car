@@ -394,6 +394,8 @@ def troca_valores(request, pk):
             entrada.valor = d["valor_cliente"]
             entrada.km_entrega = d.get("km_cliente")
             entrada.save()
+            # Diferença explícita: positivo = cliente paga, negativo = loja paga.
+            negocio.diferenca = d["valor_loja"] - d["valor_cliente"]
             _salvar_pagamento_negocio(negocio, d, request.user)
             if "rascunho" in request.POST:
                 return redirect("negocios:detalhe", pk=negocio.pk)
@@ -447,6 +449,9 @@ def revisao(request, pk):
             "itens": list(negocio.itens.select_related("veiculo", "de_pessoa", "para_pessoa")),
             "parte": _parte_principal(negocio),
             "diferenca": diferenca_troca(negocio) if negocio.tipo == TipoNegocio.TROCA else None,
+            "diferenca_abs": abs(diferenca_troca(negocio) or 0)
+            if negocio.tipo == TipoNegocio.TROCA
+            else None,
             "passo": 5 if negocio.tipo == TipoNegocio.TROCA else 4,
         },
     )
@@ -485,6 +490,9 @@ def detalhe(request, pk):
             "itens": negocio.itens.select_related("veiculo", "de_pessoa", "para_pessoa"),
             "partes": negocio.partes.select_related("pessoa"),
             "diferenca": diferenca_troca(negocio) if negocio.tipo == TipoNegocio.TROCA else None,
+            "diferenca_abs": abs(diferenca_troca(negocio) or 0)
+            if negocio.tipo == TipoNegocio.TROCA
+            else None,
             "documentos": negocio.documentos.all(),
             "doc_form": DocumentoUploadForm(),
             "contratos_info": contratos_info,

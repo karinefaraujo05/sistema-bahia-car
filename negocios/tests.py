@@ -748,3 +748,68 @@ def test_passo_carro_escolher_card_avanca_pro_pagamento(client):
     assert resp.status_code == 302
     assert resp["Location"].endswith("/pagamento/")
     assert ItemNegocio.objetos.filter(negocio=neg, veiculo=car).exists()
+
+
+# --- Bloco 5: campo diferenca na troca ---
+
+
+def test_troca_salva_diferenca_no_passo_valores(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    cli = pessoa("Cliente Troca")
+    neg = rascunho(TipoNegocio.TROCA)
+    ParteNegocio.objetos.create(negocio=neg, pessoa=cli, papel=PapelParte.PERMUTANTE)
+    item(neg, veiculo("AAA1111", situacao=Situacao.PROPRIO), "0", para=cli)  # sai da loja
+    item(neg, veiculo("BBB2222", situacao=Situacao.TERCEIRO), "0", de=cli)  # entra na loja
+    resp = client.post(
+        reverse("negocios:troca_valores", args=[neg.pk]),
+        {"valor_loja": "40000", "valor_cliente": "25000", "data": "2026-03-12"},
+    )
+    assert resp.status_code == 302
+    neg.refresh_from_db()
+    assert neg.diferenca == Decimal("15000")  # cliente paga 15000
+
+
+def test_diferenca_troca_prefere_campo_salvo():
+    cli = pessoa("C")
+    neg = rascunho(TipoNegocio.TROCA, diferenca=Decimal("7000"))
+    item(neg, veiculo("AAA1111"), "40000", para=cli)
+    item(neg, veiculo("BBB2222"), "25000", de=cli)
+    # mesmo com itens somando 15000, o campo salvo (7000) manda
+    assert services.diferenca_troca(neg) == Decimal("7000")
+
+
+def test_diferenca_troca_calcula_quando_sem_campo():
+    cli = pessoa("C")
+    neg = rascunho(TipoNegocio.TROCA)  # diferenca = None
+    item(neg, veiculo("AAA1111"), "40000", para=cli)
+    item(neg, veiculo("BBB2222"), "25000", de=cli)
+    assert services.diferenca_troca(neg) == Decimal("15000")
+
+
+def test_detalhe_troca_mostra_diferenca_mesmo_com_forma_pagamento(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    cli = pessoa("Cliente Troca")
+    neg = rascunho(TipoNegocio.TROCA, diferenca=Decimal("15000"), forma_pagamento="pix")
+    ParteNegocio.objetos.create(negocio=neg, pessoa=cli, papel=PapelParte.PERMUTANTE)
+    item(neg, veiculo("AAA1111"), "40000", para=cli)
+    item(neg, veiculo("BBB2222"), "25000", de=cli)
+    html = client.get(reverse("negocios:detalhe", args=[neg.pk])).content.decode()
+    assert "Diferença" in html
+    assert "Cliente paga" in html
+    assert "15.000" in html
+
+
+def test_detalhe_troca_loja_paga_sem_sinal_negativo(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    cli = pessoa("Cliente Troca")
+    neg = rascunho(TipoNegocio.TROCA, diferenca=Decimal("-5000"))
+    ParteNegocio.objetos.create(negocio=neg, pessoa=cli, papel=PapelParte.PERMUTANTE)
+    item(neg, veiculo("AAA1111"), "20000", para=cli)
+    item(neg, veiculo("BBB2222"), "25000", de=cli)
+    html = client.get(reverse("negocios:detalhe", args=[neg.pk])).content.decode()
+    assert "Loja paga" in html
+    assert "5.000" in html
+    assert "R$ -" not in html  # mostra o valor absoluto, sem negativo

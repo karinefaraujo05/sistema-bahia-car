@@ -56,10 +56,15 @@
       <div class="secao-label">Valor total</div>
       <div class="mt-2 text-2xl font-bold text-acento-700">{{ negocio.valor_total|reais }}</div>
       <div class="mt-1 text-xs text-tinta-suave">
-        {% if negocio.forma_pagamento %}{{ negocio.get_forma_pagamento_display }}
-        {% elif diferenca > 0 %}Cliente paga {{ diferenca|reais }}
-        {% elif diferenca < 0 %}Loja paga {{ diferenca|reais }}{% endif %}
+        {% if negocio.forma_pagamento %}{{ negocio.get_forma_pagamento_display }}{% endif %}
       </div>
+      {% if negocio.tipo == 'troca' %}
+        <div class="mt-2 border-t border-borda pt-2 text-sm">
+          {% if diferenca > 0 %}<span class="text-tinta-suave">Diferença:</span> <b class="text-tinta">Cliente paga {{ diferenca_abs|reais }}</b>
+          {% elif diferenca < 0 %}<span class="text-tinta-suave">Diferença:</span> <b class="text-tinta">Loja paga {{ diferenca_abs|reais }}</b>
+          {% else %}<span class="text-tinta-suave">Sem diferença a pagar.</span>{% endif %}
+        </div>
+      {% endif %}
     </div>
 
     <div class="rounded-2xl border border-borda bg-superficie p-4 shadow-sm">

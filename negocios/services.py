@@ -56,7 +56,13 @@ def calcular_valor_total(negocio, itens):
 
 
 def diferenca_troca(negocio):
-    """Positivo: o cliente paga a diferença. Negativo: a loja paga."""
+    """Positivo: o cliente paga a diferença. Negativo: a loja paga.
+
+    Prefere o campo salvo (preenchido no passo 'valores'); se não houver (trocas
+    antigas, antes do campo), calcula pela soma dos itens.
+    """
+    if negocio.diferenca is not None:
+        return negocio.diferenca
     itens = list(negocio.itens.all())
     saida = sum((i.valor for i in itens if i.sai_da_loja), Decimal("0"))
     entrada = sum((i.valor for i in itens if i.entra_na_loja), Decimal("0"))
