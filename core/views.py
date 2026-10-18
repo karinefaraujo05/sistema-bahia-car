@@ -14,14 +14,13 @@ from negocios.models import Negocio, StatusNegocio, TipoNegocio
 from negocios.services import repasses_pendentes, resumo_de_vendas
 from veiculos.models import Situacao, StatusVeiculo, Veiculo
 
-from .agenda import lembretes
+from .agenda import DIAS_CARRO_PARADO, lembretes
 from .busca import buscar as buscar_tudo
 from .frases import frase_do_dia
 
 MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 
-# No painel, destacamos carros parados há mais de 60 dias (a agenda usa 90 dias).
-DIAS_PARADO_PAINEL = 60
+# Painel e agenda usam o MESMO limite de "carro parado" (DIAS_CARRO_PARADO, em core.agenda).
 
 
 def _carros_parados(dias_minimo):
@@ -84,12 +83,12 @@ def inicio(request):
         .exclude(situacao=Situacao.TERCEIRO)
         .count()
     )
-    # Dinheiro parado no estoque: só os carros da própria loja (PROPRIO), que são os
-    # que a loja comprou. Usa valor_compra (o que a loja pagou). Sum ignora os vazios.
+    # Valor em estoque: quanto a loja receberia vendendo os carros próprios (PROPRIO)
+    # pelo preço anunciado. Usa valor_anunciado. Sum ignora os vazios.
     valor_estoque = Veiculo.objetos.filter(
         status=StatusVeiculo.EM_ESTOQUE,
         situacao=Situacao.PROPRIO,
-    ).aggregate(total=Sum("valor_compra"))["total"]
+    ).aggregate(total=Sum("valor_anunciado"))["total"]
     # Carros que estão na loja mas não são dela (consignados ou de terceiros).
     carros_terceiros = (
         Veiculo.objetos.filter(status=StatusVeiculo.EM_ESTOQUE)
@@ -109,8 +108,8 @@ def inicio(request):
     eh_admin = request.user.eh_administrador
     lucro_do_mes = resumo_de_vendas(hoje.year, hoje.month)["lucro_bruto"] if eh_admin else None
 
-    # Carros parados há mais de 60 dias: card com os 3 mais antigos.
-    parados = _carros_parados(DIAS_PARADO_PAINEL)
+    # Carros parados: card com os 3 mais antigos (mesmo limite da agenda).
+    parados = _carros_parados(DIAS_CARRO_PARADO)
 
     # Onboarding: aparece sozinho toda segunda-feira (uma vez por semana).
     # "?onboarding=1" força a abrir (pra rever quando quiser).
@@ -131,7 +130,7 @@ def inicio(request):
         "lucro_do_mes": lucro_do_mes,
         "carros_parados": parados[:3],
         "total_parados": len(parados),
-        "dias_parado_painel": DIAS_PARADO_PAINEL,
+        "dias_parado_painel": DIAS_CARRO_PARADO,
         "repasses_pendentes": repasses_pendentes().count(),
         "ultimos_negocios": Negocio.objetos.filter(status=StatusNegocio.CONCLUIDO)[:5],
         "grafico_vendas": _vendas_por_mes(hoje),

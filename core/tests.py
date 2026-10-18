@@ -245,11 +245,11 @@ def test_painel_vendas_no_mes_conta_venda_e_troca(client):
 
 
 def test_painel_valor_estoque_soma_so_proprios_em_estoque(client):
-    # Item 2.2: valor em estoque soma valor_compra só dos carros PRÓPRIOS em estoque.
-    _carro("AAA1A11", situacao=Situacao.PROPRIO, valor_compra=30000)
-    _carro("BBB2B22", situacao=Situacao.PROPRIO, valor_compra=20000)
-    _carro("CCC3C33", situacao=Situacao.CONSIGNADO, valor_compra=50000)  # não é da loja
-    _carro("DDD4D44", situacao=Situacao.PROPRIO, valor_compra=99000,
+    # Item 2.2: valor em estoque soma valor_anunciado só dos carros PRÓPRIOS em estoque.
+    _carro("AAA1A11", situacao=Situacao.PROPRIO, valor_anunciado=30000)
+    _carro("BBB2B22", situacao=Situacao.PROPRIO, valor_anunciado=20000)
+    _carro("CCC3C33", situacao=Situacao.CONSIGNADO, valor_anunciado=50000)  # não é da loja
+    _carro("DDD4D44", situacao=Situacao.PROPRIO, valor_anunciado=99000,
            status=StatusVeiculo.VENDIDO)  # já saiu do estoque
     _entrar_como_dono(client)
     resp = client.get(reverse("inicio"))
@@ -297,22 +297,22 @@ def _carro_parado(placa, dias):
 
 
 def test_painel_carros_parados_mostra_3_mais_antigos(client):
-    # Item 2.4: card lista os 3 carros parados há mais de 60 dias, do mais antigo pro menos.
-    _carro_parado("AAA1111", 70)
-    _carro_parado("BBB2222", 120)
-    _carro_parado("CCC3333", 90)
-    _carro_parado("DDD4444", 65)
+    # Item 2.4: card lista os 3 carros parados há mais de 90 dias, do mais antigo pro menos.
+    _carro_parado("AAA1111", 100)
+    _carro_parado("BBB2222", 150)
+    _carro_parado("CCC3333", 120)
+    _carro_parado("DDD4444", 95)
     _carro("EEE5555")  # recém-chegado: não está parado
     _entrar_como_dono(client)
     resp = client.get(reverse("inicio"))
     assert resp.context["total_parados"] == 4
     placas = [v.placa for v in resp.context["carros_parados"]]
-    assert placas == ["BBB2222", "CCC3333", "AAA1111"]  # 120, 90, 70 dias
+    assert placas == ["BBB2222", "CCC3333", "AAA1111"]  # 150, 120, 100 dias
 
 
-def test_painel_carros_parados_ignora_menos_de_60_dias(client):
-    # Carro com 60 dias exatos não entra (regra é "mais de 60").
-    _carro_parado("FFF6666", 60)
+def test_painel_carros_parados_ignora_menos_de_90_dias(client):
+    # Carro com 90 dias exatos não entra (regra é "mais de 90", igual à agenda).
+    _carro_parado("FFF6666", 90)
     _entrar_como_dono(client)
     resp = client.get(reverse("inicio"))
     assert resp.context["total_parados"] == 0
