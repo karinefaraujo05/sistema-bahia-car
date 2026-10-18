@@ -221,3 +221,36 @@ def test_painel_lucro_do_mes_visivel_para_admin(client):
     assert resp.context["eh_admin"] is True
     assert resp.context["lucro_do_mes"] is not None
     assert "lucro do mês" in resp.content.decode().lower()
+
+
+def _carro_parado(placa, dias):
+    # criado_em é auto_now_add; update() escreve o valor direto (não dispara auto_now).
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    v = _carro(placa)
+    Veiculo.objetos.filter(pk=v.pk).update(criado_em=timezone.now() - timedelta(days=dias))
+    return v
+
+
+def test_painel_carros_parados_mostra_3_mais_antigos(client):
+    # Item 2.4: card lista os 3 carros parados há mais de 60 dias, do mais antigo pro menos.
+    _carro_parado("AAA1111", 70)
+    _carro_parado("BBB2222", 120)
+    _carro_parado("CCC3333", 90)
+    _carro_parado("DDD4444", 65)
+    _carro("EEE5555")  # recém-chegado: não está parado
+    _entrar_como_dono(client)
+    resp = client.get(reverse("inicio"))
+    assert resp.context["total_parados"] == 4
+    placas = [v.placa for v in resp.context["carros_parados"]]
+    assert placas == ["BBB2222", "CCC3333", "AAA1111"]  # 120, 90, 70 dias
+
+
+def test_painel_carros_parados_ignora_menos_de_60_dias(client):
+    # Carro com 60 dias exatos não entra (regra é "mais de 60").
+    _carro_parado("FFF6666", 60)
+    _entrar_como_dono(client)
+    resp = client.get(reverse("inicio"))
+    assert resp.context["total_parados"] == 0

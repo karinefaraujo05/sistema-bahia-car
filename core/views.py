@@ -20,6 +20,20 @@ from .frases import frase_do_dia
 
 MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 
+# No painel, destacamos carros parados há mais de 60 dias (a agenda usa 90 dias).
+DIAS_PARADO_PAINEL = 60
+
+
+def _carros_parados(dias_minimo):
+    """Carros próprios em estoque parados há mais de `dias_minimo`, do mais antigo
+    pro mais novo. dias_na_loja é property (vem de criado_em), então filtra em Python."""
+    proprios = Veiculo.objetos.filter(status=StatusVeiculo.EM_ESTOQUE).exclude(
+        situacao=Situacao.TERCEIRO
+    )
+    parados = [v for v in proprios if v.dias_na_loja > dias_minimo]
+    parados.sort(key=lambda v: v.dias_na_loja, reverse=True)
+    return parados
+
 
 def saude(request):
     """Endpoint leve para o robô 'manter acordado'.
@@ -95,6 +109,9 @@ def inicio(request):
     eh_admin = request.user.eh_administrador
     lucro_do_mes = resumo_de_vendas(hoje.year, hoje.month)["lucro_bruto"] if eh_admin else None
 
+    # Carros parados há mais de 60 dias: card com os 3 mais antigos.
+    parados = _carros_parados(DIAS_PARADO_PAINEL)
+
     # Onboarding: aparece sozinho toda segunda-feira (uma vez por semana).
     # "?onboarding=1" força a abrir (pra rever quando quiser).
     iso = hoje.isocalendar()
@@ -112,6 +129,9 @@ def inicio(request):
         "vendas_no_mes": vendas_no_mes,
         "eh_admin": eh_admin,
         "lucro_do_mes": lucro_do_mes,
+        "carros_parados": parados[:3],
+        "total_parados": len(parados),
+        "dias_parado_painel": DIAS_PARADO_PAINEL,
         "repasses_pendentes": repasses_pendentes().count(),
         "ultimos_negocios": Negocio.objetos.filter(status=StatusNegocio.CONCLUIDO)[:5],
         "grafico_vendas": _vendas_por_mes(hoje),
