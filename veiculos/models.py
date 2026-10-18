@@ -144,7 +144,13 @@ class Veiculo(ModeloBase):
 
     @property
     def foto_capa(self):
-        return self.fotos.filter(capa=True).first() or self.fotos.first()
+        # Itera sobre as fotos já carregadas (prefetch_related("fotos")) em vez de
+        # fazer .filter(capa=True), que criaria queries novas por carro (N+1).
+        fotos = list(self.fotos.all())
+        for foto in fotos:
+            if foto.capa:
+                return foto
+        return fotos[0] if fotos else None
 
     @property
     def dias_na_loja(self):

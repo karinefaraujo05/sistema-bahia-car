@@ -236,3 +236,21 @@ def test_tela_de_detalhe_abre(client, settings, tmp_path):
     resp = client.get(reverse("veiculos:detalhe", args=[veiculo.pk]))
     assert resp.status_code == 200
     assert "Gol" in resp.content.decode()
+
+
+# --- Item 6.1: foto_capa usa o prefetch (sem N+1) ---
+
+
+@pytest.mark.django_db
+def test_foto_capa_usa_prefetch_sem_query_extra(settings, tmp_path, django_assert_num_queries):
+    settings.MEDIA_ROOT = str(tmp_path)
+    for placa in ("AAA1111", "BBB2222", "CCC3333"):
+        v = criar_veiculo(placa=placa)
+        services.adicionar_foto(v, imagem_em_memoria("1.jpg"))
+        services.adicionar_foto(v, imagem_em_memoria("2.jpg"))
+    carros = list(Veiculo.objetos.prefetch_related("fotos"))
+    # Com o prefetch, acessar foto_capa de todos os carros não gera query nova.
+    with django_assert_num_queries(0):
+        capas = [c.foto_capa for c in carros]
+    assert len(capas) == 3
+    assert all(cap is not None and cap.capa for cap in capas)
