@@ -5,6 +5,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 
 from negocios.models import Consignacao, Negocio
@@ -134,7 +136,14 @@ def gerar_termo(request, negocio_pk):
 @login_required
 def editar_contrato(request, pk):
     contrato = get_object_or_404(Contrato.objetos, pk=pk)
+    eh_admin = request.user.eh_administrador
+    # Contrato assinado trava a edição; só o administrador pode mexer/destravar.
+    travado = contrato.assinado and not eh_admin
     if request.method == "POST":
+        if travado:
+            messages.error(request, "Contrato assinado. Só o administrador pode alterar.")
+            return redirect("contratos:editar_contrato", pk=contrato.pk)
+
         novo_corpo = request.POST.get("corpo", contrato.corpo)
         # Se o usuário mudou o texto, o PDF passa a sair desse texto (ver renderizar_pdf).
         if novo_corpo.strip() != (contrato.corpo or "").strip():
@@ -146,11 +155,27 @@ def editar_contrato(request, pk):
         except (TypeError, ValueError):
             n = contrato.num_testemunhas
         contrato.num_testemunhas = n if n in (0, 1, 2) else 2
+
+        # Assinatura: marcar trava o contrato. Desmarcar (destravar) só o admin pode.
+        quer_assinado = bool(request.POST.get("assinado"))
+        if contrato.assinado and not quer_assinado and not eh_admin:
+            quer_assinado = True  # ignora tentativa de destravar de quem não é admin
+        contrato.assinado = quer_assinado
+        if quer_assinado:
+            data = parse_date(request.POST.get("data_assinatura") or "")
+            contrato.data_assinatura = data or contrato.data_assinatura or timezone.localdate()
+        else:
+            contrato.data_assinatura = None
+
         contrato.atualizado_por = request.user
         contrato.save()
         messages.success(request, "Contrato salvo.")
         return redirect("contratos:editar_contrato", pk=contrato.pk)
-    return render(request, "contratos/editar.html", {"contrato": contrato})
+    return render(
+        request,
+        "contratos/editar.html",
+        {"contrato": contrato, "travado": travado, "eh_admin": eh_admin},
+    )
 
 
 def _cliente_do_contrato(contrato):

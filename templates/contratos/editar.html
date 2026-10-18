@@ -27,6 +27,13 @@
     </div>
   {% endif %}
 
+  {% if travado %}
+    <div class="aviso aviso-atencao mb-5">
+      <p class="font-medium">Contrato assinado — travado para edição.</p>
+      <p class="text-sm">Só o administrador pode alterar ou destravar. Você ainda consegue baixar o PDF e o Word.</p>
+    </div>
+  {% endif %}
+
   <form method="post" class="space-y-5">
     {% csrf_token %}
 
@@ -35,6 +42,9 @@
       <div>
         <label class="mb-2 block text-sm font-medium">Testemunhas no contrato</label>
         <input type="hidden" name="num_testemunhas" id="num_testemunhas" value="{{ contrato.num_testemunhas }}" />
+        {% if travado %}
+          <p class="text-sm text-tinta-suave">{{ contrato.num_testemunhas }} testemunha{{ contrato.num_testemunhas|pluralize }} no contrato.</p>
+        {% else %}
         <div class="flex flex-wrap gap-2">
           <button type="button" data-test-opt="0" onclick="escolherTest(0)" class="botao-regra">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
@@ -50,24 +60,42 @@
           </button>
         </div>
         <p class="mt-1.5 text-xs text-tinta-suave">As linhas de testemunha saem em branco no PDF, pra assinar à mão.</p>
+        {% endif %}
       </div>
 
       {# Observações #}
       <div>
         <label for="observacoes" class="mb-1 block text-sm font-medium">Observações (aparecem no contrato)</label>
-        <textarea id="observacoes" name="observacoes" rows="3" class="campo w-full" placeholder="Ex.: veículo vendido com pneus novos; a segunda chave será entregue em 7 dias.">{{ contrato.observacoes }}</textarea>
+        <textarea id="observacoes" name="observacoes" rows="3" class="campo w-full" placeholder="Ex.: veículo vendido com pneus novos; a segunda chave será entregue em 7 dias."{% if travado %} readonly{% endif %}>{{ contrato.observacoes }}</textarea>
       </div>
 
       {# Texto completo: mexer aqui faz o PDF sair deste texto. #}
       <details class="text-sm"{% if contrato.corpo_editado %} open{% endif %}>
         <summary class="cursor-pointer font-medium text-tinta-suave">Texto completo do contrato (avançado — mexer aqui muda o PDF)</summary>
-        <textarea name="corpo" rows="16" class="campo mt-2 w-full font-mono text-sm">{{ contrato.corpo }}</textarea>
+        <textarea name="corpo" rows="16" class="campo mt-2 w-full font-mono text-sm"{% if travado %} readonly{% endif %}>{{ contrato.corpo }}</textarea>
         <p class="mt-1 text-xs text-tinta-suave">Enquanto você não mexer, o PDF sai no modelo pronto (montado dos dados). Se editar este texto e salvar, o PDF e o Word passam a sair exatamente com o que está aqui.</p>
       </details>
+
+      {# Assinatura: marcar trava o contrato pra edição (só admin destrava). #}
+      <div class="border-t border-borda pt-4">
+        <label class="flex items-center gap-2.5{% if travado %} opacity-70{% endif %}">
+          <input type="checkbox" name="assinado" value="1" class="h-5 w-5"{% if contrato.assinado %} checked{% endif %}{% if travado %} disabled{% endif %} />
+          <span class="font-medium">Contrato assinado</span>
+        </label>
+        <div class="mt-2 flex items-center gap-2">
+          <label for="data_assinatura" class="text-sm text-tinta-suave">Data da assinatura:</label>
+          <input type="date" name="data_assinatura" id="data_assinatura" value="{{ contrato.data_assinatura|date:'Y-m-d' }}" class="campo-inline"{% if travado %} disabled{% endif %} />
+        </div>
+        {% if travado %}
+          <p class="mt-2 text-sm text-ambar">Assinado{% if contrato.data_assinatura %} em {{ contrato.data_assinatura|date:'d/m/Y' }}{% endif %}. Só o administrador pode destravar e alterar.</p>
+        {% else %}
+          <p class="mt-1.5 text-xs text-tinta-suave">Depois de marcar como assinado e salvar, o texto trava. Só o administrador pode destravar.</p>
+        {% endif %}
+      </div>
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
-      <button type="submit" class="botao botao-primario">Salvar</button>
+      {% if not travado %}<button type="submit" class="botao botao-primario">Salvar</button>{% endif %}
       <a id="baixar-pdf" href="{% url 'contratos:baixar_pdf' contrato.pk %}" class="botao botao-secundario">
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
         Baixar PDF

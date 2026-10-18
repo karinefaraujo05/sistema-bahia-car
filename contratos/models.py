@@ -205,6 +205,9 @@ class Contrato(ModeloBase):
     corpo_editado = models.BooleanField("texto editado à mão", default=False)
     observacoes = models.TextField("observações", blank=True)
     num_testemunhas = models.PositiveSmallIntegerField("nº de testemunhas", default=2)
+    # Assinatura física: quando marcado, o texto trava pra edição (só admin destrava).
+    assinado = models.BooleanField("assinado", default=False)
+    data_assinatura = models.DateField("data da assinatura", null=True, blank=True)
 
     class Meta(ModeloBase.Meta):
         verbose_name = "contrato"

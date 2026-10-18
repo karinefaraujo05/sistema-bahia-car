@@ -582,3 +582,74 @@ def test_pdf_inline_mostra_sem_salvar_documento(client, settings, tmp_path):
     # download normal: salva uma cópia como documento
     client.get(reverse("contratos:baixar_pdf", args=[contrato.pk]))
     assert Documento.objetos.filter(negocio=contrato.negocio, gerado_pelo_sistema=True).exists()
+
+
+# --- Item 3.5: campo "assinado" trava a edição (só admin destrava) ---
+
+
+def test_vendedor_marca_assinado_e_contrato_trava(client):
+    from contratos.models import Contrato
+
+    Usuario.objects.create_user(username="vend", password="x-123456")  # papel padrão: vendedor
+    client.login(username="vend", password="x-123456")
+    contrato = _contrato_venda()
+    # marca como assinado com data
+    resp = client.post(
+        reverse("contratos:editar_contrato", args=[contrato.pk]),
+        {
+            "corpo": contrato.corpo,
+            "observacoes": "",
+            "num_testemunhas": 2,
+            "assinado": "1",
+            "data_assinatura": "2026-03-12",
+        },
+    )
+    assert resp.status_code == 302
+    contrato.refresh_from_db()
+    assert contrato.assinado is True
+    assert str(contrato.data_assinatura) == "2026-03-12"
+
+    # agora está travado: vendedor tentando editar o corpo não muda nada
+    client.post(
+        reverse("contratos:editar_contrato", args=[contrato.pk]),
+        {"corpo": contrato.corpo + "\nMUDANCA PROIBIDA", "observacoes": "x", "num_testemunhas": 0},
+    )
+    c = Contrato.objetos.get(pk=contrato.pk)
+    assert "MUDANCA PROIBIDA" not in c.corpo
+    assert c.assinado is True  # vendedor não consegue destravar
+
+
+def test_admin_destrava_contrato_assinado(client):
+    from datetime import date
+
+    contrato = _contrato_venda()
+    contrato.assinado = True
+    contrato.data_assinatura = date(2026, 3, 12)
+    contrato.save()
+
+    Usuario.objects.create_superuser(username="chefe", password="x-123456")
+    client.login(username="chefe", password="x-123456")
+    resp = client.post(
+        reverse("contratos:editar_contrato", args=[contrato.pk]),
+        {"corpo": contrato.corpo, "observacoes": "", "num_testemunhas": 2},  # sem 'assinado'
+    )
+    assert resp.status_code == 302
+    contrato.refresh_from_db()
+    assert contrato.assinado is False
+    assert contrato.data_assinatura is None
+
+
+def test_editar_contrato_renderiza_normal_e_travado(client):
+    # Garante que a tela de edição abre nos dois estados (template válido).
+    Usuario.objects.create_user(username="vend", password="x-123456")
+    client.login(username="vend", password="x-123456")
+    contrato = _contrato_venda()
+    r1 = client.get(reverse("contratos:editar_contrato", args=[contrato.pk]))
+    assert r1.status_code == 200
+    assert "Contrato assinado" in r1.content.decode()  # bloco de assinatura presente
+
+    contrato.assinado = True
+    contrato.save()
+    r2 = client.get(reverse("contratos:editar_contrato", args=[contrato.pk]))
+    assert r2.status_code == 200
+    assert "travado para edição" in r2.content.decode()
