@@ -718,3 +718,33 @@ def test_revisao_mostra_resumo_completo_e_confirmar(client):
     assert "João Silva" in html
     assert "30.000" in html  # valor formatado
     assert "Pix" in html  # forma de pagamento
+
+
+# --- Item 4.6 (extra, pra bater a meta <10): passo do carro como cards clicaveis ---
+
+
+def test_passo_carro_estoque_mostra_cards_clicaveis(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    neg = rascunho(TipoNegocio.VENDA)
+    car = veiculo(
+        "ABC1D23", situacao=Situacao.PROPRIO, status=StatusVeiculo.EM_ESTOQUE, valor_anunciado=45000
+    )
+    resp = client.get(reverse("negocios:passo_carro", args=[neg.pk]))
+    html = resp.content.decode()
+    assert resp.status_code == 200
+    assert f'name="veiculo" value="{car.pk}"' in html  # card envia o carro
+    assert '<select name="veiculo"' not in html  # não é mais select
+
+
+def test_passo_carro_escolher_card_avanca_pro_pagamento(client):
+    Usuario.objects.create_user(username="k", password="x-123456")
+    client.login(username="k", password="x-123456")
+    neg = rascunho(TipoNegocio.VENDA)
+    joao = pessoa("João")
+    ParteNegocio.objetos.create(negocio=neg, pessoa=joao, papel=PapelParte.COMPRADOR)
+    car = veiculo("ABC1D23", situacao=Situacao.PROPRIO, status=StatusVeiculo.EM_ESTOQUE)
+    resp = client.post(reverse("negocios:passo_carro", args=[neg.pk]), {"veiculo": car.pk})
+    assert resp.status_code == 302
+    assert resp["Location"].endswith("/pagamento/")
+    assert ItemNegocio.objetos.filter(negocio=neg, veiculo=car).exists()

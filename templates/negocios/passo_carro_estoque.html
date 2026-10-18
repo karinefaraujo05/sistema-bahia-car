@@ -1,27 +1,50 @@
 {% extends "base.html" %}
 {% block largura %}max-w-3xl{% endblock %}
+{% load formato %}
 
 {% block titulo %}{{ titulo }} · Bahia Car{% endblock %}
 
 {% block conteudo %}
   {% include "negocios/partials/cabecalho_passo.html" %}
 
-  {% if form.veiculo.field.queryset.exists %}
-    <form method="post" class="space-y-4">
-      {% csrf_token %}
-      {% include "negocios/partials/campo.html" with campo=form.veiculo %}
-      <div class="flex flex-wrap gap-2 pt-2">
-        <button type="submit" class="botao botao-primario">Continuar</button>
-        <button type="submit" name="rascunho" value="1" class="botao botao-secundario">
-          Salvar rascunho
-        </button>
+  {% if form.errors %}
+    <div class="mb-4 aviso aviso-atencao">{{ form.veiculo.errors }}{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  {% with carros=form.veiculo.field.queryset %}
+    {% if carros %}
+      {# Form vazio: o carro escolhido vem do botão do card (form="form-carro"). #}
+      <form id="form-carro" method="post">{% csrf_token %}</form>
+
+      <p class="mb-3 text-tinta-suave">Toque no carro que você vendeu.</p>
+      <ul class="space-y-2">
+        {% for c in carros %}
+          <li>
+            <button type="submit" form="form-carro" name="veiculo" value="{{ c.pk }}"
+                    class="flex w-full items-center gap-3 rounded-xl border border-borda bg-superficie p-3 text-left shadow-sm transition hover:border-acento-300 hover:bg-acento-50">
+              <span class="h-14 w-20 shrink-0 overflow-hidden rounded bg-cinza-fundo">
+                {% if c.foto_capa %}
+                  <img src="{% if c.foto_capa.miniatura %}{{ c.foto_capa.miniatura.url }}{% else %}{{ c.foto_capa.imagem.url }}{% endif %}" alt="" class="h-full w-full object-cover" />
+                {% endif %}
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-lg font-medium">{{ c.marca }} {{ c.modelo }}</span>
+                <span class="block text-sm text-tinta-suave">{{ c.placa_formatada }}{% if c.valor_anunciado %} · {{ c.valor_anunciado|reais }}{% endif %}</span>
+              </span>
+              <svg class="h-5 w-5 shrink-0 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <div class="mt-4">
         <a href="{% url 'negocios:passo_pessoa' negocio.pk %}" class="botao botao-secundario">Voltar</a>
       </div>
-    </form>
-  {% else %}
-    <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-6 text-tinta-suave">
-      Não há carros disponíveis para venda no estoque.
-      <a href="{% url 'veiculos:novo' %}" class="text-acento-700">Cadastrar um carro</a>.
-    </p>
-  {% endif %}
+    {% else %}
+      <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-6 text-tinta-suave">
+        Não há carros disponíveis para venda no estoque.
+        <a href="{% url 'veiculos:novo' %}" class="text-acento-700">Cadastrar um carro</a>.
+      </p>
+    {% endif %}
+  {% endwith %}
 {% endblock %}
