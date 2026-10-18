@@ -237,8 +237,9 @@ def nome_arquivo_contrato(contrato):
 def renderizar_pdf(contrato):
     from weasyprint import HTML  # importado aqui porque depende das libs de sistema
 
-    # Todos os contratos usam o layout bonito (MARA), montado a partir dos dados.
-    if contrato.negocio_id or contrato.consignacao_id:
+    # Se o usuário editou o texto à mão, o PDF sai desse texto (corpo). Caso contrário,
+    # usa o layout bonito (MARA) montado a partir dos dados do negócio/consignação.
+    if (contrato.negocio_id or contrato.consignacao_id) and not contrato.corpo_editado:
         from .mara import contexto_mara
 
         template = (

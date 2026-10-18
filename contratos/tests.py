@@ -449,3 +449,77 @@ def test_gerar_termo_pela_tela(client, settings, tmp_path):
     resp = client.post(reverse("contratos:gerar_termo", args=[negocio.pk]))
     assert resp.status_code == 302
     assert Documento.objetos.filter(negocio=negocio, tipo="termo_vistoria").exists()
+
+
+# --- Item 3.2: PDF usa o corpo editado quando o usuário altera o texto ---
+
+
+def _contrato_venda():
+    loja_completa()
+    comprador = pessoa_completa("João Silva", CPF_A)
+    carro = veiculo_completo("ABC1D23")
+    negocio = Negocio.objetos.create(
+        tipo=TipoNegocio.VENDA, status=StatusNegocio.RASCUNHO, numero_contrato=1
+    )
+    ParteNegocio.objetos.create(negocio=negocio, pessoa=comprador, papel=PapelParte.COMPRADOR)
+    ItemNegocio.objetos.create(
+        negocio=negocio, veiculo=carro, para_pessoa=comprador, valor=Decimal("32000"), km_entrega=50000
+    )
+    return gerar_contrato(negocio)
+
+
+def test_pdf_usa_mara_por_padrao_e_corpo_quando_editado(monkeypatch):
+    import contratos.geracao as g
+
+    contrato = _contrato_venda()
+    usados = []
+
+    def fake_render(template, context=None, *a, **k):
+        usados.append(template)
+        return "<html><body>x</body></html>"
+
+    monkeypatch.setattr(g, "render_to_string", fake_render)
+
+    assert contrato.corpo_editado is False
+    g.renderizar_pdf(contrato)
+    assert usados[-1] == "contratos/mara/contrato.html"  # layout bonito dos dados
+
+    contrato.corpo_editado = True
+    g.renderizar_pdf(contrato)
+    assert usados[-1] == "contratos/pdf_base.html"  # passa a usar o texto editado
+
+
+def test_editar_contrato_marca_corpo_editado_ao_mudar_texto(client):
+    Usuario.objects.create_user(username="karine", password="x-123456")
+    client.login(username="karine", password="x-123456")
+    contrato = _contrato_venda()
+    assert contrato.corpo_editado is False
+    resp = client.post(
+        reverse("contratos:editar_contrato", args=[contrato.pk]),
+        {
+            "corpo": contrato.corpo + "\nCLAUSULA EXTRA ESCRITA A MAO",
+            "observacoes": "",
+            "num_testemunhas": contrato.num_testemunhas,
+        },
+    )
+    assert resp.status_code == 302
+    contrato.refresh_from_db()
+    assert contrato.corpo_editado is True
+
+
+def test_editar_contrato_nao_marca_se_so_muda_observacoes(client):
+    Usuario.objects.create_user(username="karine", password="x-123456")
+    client.login(username="karine", password="x-123456")
+    contrato = _contrato_venda()
+    resp = client.post(
+        reverse("contratos:editar_contrato", args=[contrato.pk]),
+        {
+            "corpo": contrato.corpo,  # texto inalterado
+            "observacoes": "entrega com tanque cheio",
+            "num_testemunhas": contrato.num_testemunhas,
+        },
+    )
+    assert resp.status_code == 302
+    contrato.refresh_from_db()
+    assert contrato.corpo_editado is False
+    assert contrato.observacoes == "entrega com tanque cheio"

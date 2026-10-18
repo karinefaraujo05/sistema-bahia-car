@@ -200,6 +200,9 @@ class Contrato(ModeloBase):
     titulo = models.CharField("título", max_length=200)
     versao = models.PositiveSmallIntegerField("versão", default=1)
     corpo = models.TextField("texto do contrato")
+    # Quando o usuário edita o texto à mão, o PDF passa a sair desse texto (em vez do
+    # layout bonito montado dos dados). Enquanto for False, o PDF usa o layout "MARA".
+    corpo_editado = models.BooleanField("texto editado à mão", default=False)
     observacoes = models.TextField("observações", blank=True)
     num_testemunhas = models.PositiveSmallIntegerField("nº de testemunhas", default=2)
 

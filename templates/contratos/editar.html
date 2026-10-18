@@ -12,7 +12,20 @@
   </div>
 
   <h1 class="mb-1 text-2xl">{{ contrato.nome_amigavel }}</h1>
-  <p class="mb-5 text-tinta-suave">{{ contrato.titulo|capfirst }} · versão {{ contrato.versao }} · o PDF é montado automaticamente dos dados.</p>
+  <p class="mb-3 text-tinta-suave">{{ contrato.titulo|capfirst }} · versão {{ contrato.versao }}</p>
+
+  {# Aviso claro sobre o que entra no PDF (muda conforme o texto foi editado ou não). #}
+  {% if contrato.corpo_editado %}
+    <div class="aviso aviso-atencao mb-5">
+      <p class="font-medium">O PDF está saindo com o seu texto editado.</p>
+      <p class="text-sm">Você alterou o texto completo do contrato, então o PDF usa exatamente o que está escrito lá embaixo — não mais o modelo pronto.</p>
+    </div>
+  {% else %}
+    <div class="aviso aviso-info mb-5">
+      <p class="font-medium">O PDF sai no modelo pronto, montado dos dados.</p>
+      <p class="text-sm">Se você mudar o <b>texto completo do contrato</b> (lá embaixo) e salvar, o PDF passa a sair exatamente com o seu texto.</p>
+    </div>
+  {% endif %}
 
   <form method="post" class="space-y-5">
     {% csrf_token %}
@@ -45,11 +58,11 @@
         <textarea id="observacoes" name="observacoes" rows="3" class="campo w-full" placeholder="Ex.: veículo vendido com pneus novos; a segunda chave será entregue em 7 dias.">{{ contrato.observacoes }}</textarea>
       </div>
 
-      {# Texto completo: só para o Word. #}
-      <details class="text-sm">
-        <summary class="cursor-pointer font-medium text-tinta-suave">Texto completo do contrato (avançado — usado só no Word)</summary>
+      {# Texto completo: mexer aqui faz o PDF sair deste texto. #}
+      <details class="text-sm"{% if contrato.corpo_editado %} open{% endif %}>
+        <summary class="cursor-pointer font-medium text-tinta-suave">Texto completo do contrato (avançado — mexer aqui muda o PDF)</summary>
         <textarea name="corpo" rows="16" class="campo mt-2 w-full font-mono text-sm">{{ contrato.corpo }}</textarea>
-        <p class="mt-1 text-xs text-tinta-suave">O PDF é sempre montado automaticamente dos dados. Este texto só é usado quando você clica em "Baixar Word".</p>
+        <p class="mt-1 text-xs text-tinta-suave">Enquanto você não mexer, o PDF sai no modelo pronto (montado dos dados). Se editar este texto e salvar, o PDF e o Word passam a sair exatamente com o que está aqui.</p>
       </details>
     </div>
 

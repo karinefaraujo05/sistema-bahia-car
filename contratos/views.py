@@ -134,7 +134,11 @@ def gerar_termo(request, negocio_pk):
 def editar_contrato(request, pk):
     contrato = get_object_or_404(Contrato.objetos, pk=pk)
     if request.method == "POST":
-        contrato.corpo = request.POST.get("corpo", contrato.corpo)
+        novo_corpo = request.POST.get("corpo", contrato.corpo)
+        # Se o usuário mudou o texto, o PDF passa a sair desse texto (ver renderizar_pdf).
+        if novo_corpo.strip() != (contrato.corpo or "").strip():
+            contrato.corpo_editado = True
+        contrato.corpo = novo_corpo
         contrato.observacoes = request.POST.get("observacoes", "").strip()
         try:
             n = int(request.POST.get("num_testemunhas", contrato.num_testemunhas))
