@@ -97,12 +97,12 @@ class Consignacao(ModeloBase):
 
 
 class Negocio(ModeloBase):
-    tipo = models.CharField("tipo", max_length=10, choices=TipoNegocio.choices)
+    tipo = models.CharField("tipo", max_length=10, choices=TipoNegocio.choices, db_index=True)
     modalidade = models.CharField(
         "modalidade", max_length=14, choices=Modalidade.choices, default=Modalidade.PROPRIA
     )
     numero_contrato = models.PositiveIntegerField("número do contrato", null=True, blank=True)
-    data = models.DateField("data", default=timezone.localdate)
+    data = models.DateField("data", default=timezone.localdate, db_index=True)
     data_hora_entrega = models.DateTimeField("data e hora da entrega", null=True, blank=True)
     local_entrega = models.CharField("local da entrega", max_length=200, blank=True)
     valor_total = models.DecimalField(
@@ -146,7 +146,8 @@ class Negocio(ModeloBase):
     )
     observacoes = models.TextField("observações", blank=True)
     status = models.CharField(
-        "status", max_length=10, choices=StatusNegocio.choices, default=StatusNegocio.CONCLUIDO
+        "status", max_length=10, choices=StatusNegocio.choices, default=StatusNegocio.CONCLUIDO,
+        db_index=True,
     )
 
     class Meta(ModeloBase.Meta):

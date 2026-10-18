@@ -65,7 +65,8 @@ class Veiculo(ModeloBase):
     renavam = models.CharField("renavam", max_length=11, blank=True, validators=[validar_renavam])
 
     situacao = models.CharField(
-        "situação", max_length=12, choices=Situacao.choices, default=Situacao.PROPRIO
+        "situação", max_length=12, choices=Situacao.choices, default=Situacao.PROPRIO,
+        db_index=True,
     )
     # Dono do carro quando é consignado ou de terceiro (vazio quando é da loja).
     # A obrigatoriedade (consignado/terceiro exigem dono) é aplicada na Fase 4.
@@ -108,7 +109,8 @@ class Veiculo(ModeloBase):
         "valor anunciado", max_digits=10, decimal_places=2, null=True, blank=True
     )
     status = models.CharField(
-        "status", max_length=12, choices=StatusVeiculo.choices, default=StatusVeiculo.EM_ESTOQUE
+        "status", max_length=12, choices=StatusVeiculo.choices, default=StatusVeiculo.EM_ESTOQUE,
+        db_index=True,
     )
     observacoes = models.TextField("observações", blank=True)
 
