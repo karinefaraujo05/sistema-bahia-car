@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.db import connection
+from django.db.models import Sum
 from django.http import FileResponse, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -69,6 +70,18 @@ def inicio(request):
         .exclude(situacao=Situacao.TERCEIRO)
         .count()
     )
+    # Dinheiro parado no estoque: só os carros da própria loja (PROPRIO), que são os
+    # que a loja comprou. Usa valor_compra (o que a loja pagou). Sum ignora os vazios.
+    valor_estoque = Veiculo.objetos.filter(
+        status=StatusVeiculo.EM_ESTOQUE,
+        situacao=Situacao.PROPRIO,
+    ).aggregate(total=Sum("valor_compra"))["total"]
+    # Carros que estão na loja mas não são dela (consignados ou de terceiros).
+    carros_terceiros = (
+        Veiculo.objetos.filter(status=StatusVeiculo.EM_ESTOQUE)
+        .filter(situacao__in=[Situacao.CONSIGNADO, Situacao.TERCEIRO])
+        .count()
+    )
     # Conta VENDA e TROCA juntas: pro dono da loja, uma troca também é uma venda.
     # Mesmo critério do gráfico de 6 meses (_vendas_por_mes), pra não divergir.
     vendas_no_mes = Negocio.objetos.filter(
@@ -90,6 +103,8 @@ def inicio(request):
     pendencias = lembretes(hoje)
     contexto = {
         "carros_na_loja": na_loja,
+        "valor_estoque": valor_estoque,
+        "carros_terceiros": carros_terceiros,
         "vendas_no_mes": vendas_no_mes,
         "repasses_pendentes": repasses_pendentes().count(),
         "ultimos_negocios": Negocio.objetos.filter(status=StatusNegocio.CONCLUIDO)[:5],

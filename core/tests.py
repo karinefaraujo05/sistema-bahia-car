@@ -7,7 +7,7 @@ from django.urls import reverse
 from contas.models import Usuario
 from core.busca import buscar
 from pessoas.models import Pessoa
-from veiculos.models import Situacao, Veiculo
+from veiculos.models import Situacao, StatusVeiculo, Veiculo
 
 pytestmark = pytest.mark.django_db
 
@@ -160,3 +160,45 @@ def test_cnpj_rejeita_numero_invalido(client):
     Usuario.objects.create_user(username="k2", password="x-123456")
     client.login(username="k2", password="x-123456")
     assert client.get(reverse("cnpj") + "?cnpj=123").status_code == 400
+
+
+# --- Painel inicial (indicadores) ---
+
+
+def _entrar_como_dono(client):
+    Usuario.objects.create_superuser(username="dono", password="x-123456")
+    client.login(username="dono", password="x-123456")
+
+
+def test_painel_vendas_no_mes_conta_venda_e_troca(client):
+    # Item 2.1: o número de "vendas no mês" conta VENDA e TROCA (igual ao gráfico).
+    from negocios.models import Negocio, StatusNegocio, TipoNegocio
+
+    Negocio.objetos.create(tipo=TipoNegocio.VENDA, status=StatusNegocio.CONCLUIDO)
+    Negocio.objetos.create(tipo=TipoNegocio.TROCA, status=StatusNegocio.CONCLUIDO)
+    Negocio.objetos.create(tipo=TipoNegocio.COMPRA, status=StatusNegocio.CONCLUIDO)
+    _entrar_como_dono(client)
+    resp = client.get(reverse("inicio"))
+    assert resp.context["vendas_no_mes"] == 2  # venda + troca; compra não entra
+
+
+def test_painel_valor_estoque_soma_so_proprios_em_estoque(client):
+    # Item 2.2: valor em estoque soma valor_compra só dos carros PRÓPRIOS em estoque.
+    _carro("AAA1A11", situacao=Situacao.PROPRIO, valor_compra=30000)
+    _carro("BBB2B22", situacao=Situacao.PROPRIO, valor_compra=20000)
+    _carro("CCC3C33", situacao=Situacao.CONSIGNADO, valor_compra=50000)  # não é da loja
+    _carro("DDD4D44", situacao=Situacao.PROPRIO, valor_compra=99000,
+           status=StatusVeiculo.VENDIDO)  # já saiu do estoque
+    _entrar_como_dono(client)
+    resp = client.get(reverse("inicio"))
+    assert resp.context["valor_estoque"] == 50000  # 30000 + 20000
+
+
+def test_painel_conta_carros_de_terceiros(client):
+    # Item 2.2: consignados e de terceiros contam como "carros de terceiros na loja".
+    _carro("EEE5E55", situacao=Situacao.PROPRIO)
+    _carro("FFF6F66", situacao=Situacao.CONSIGNADO)
+    _carro("GGG7G77", situacao=Situacao.TERCEIRO)
+    _entrar_como_dono(client)
+    resp = client.get(reverse("inicio"))
+    assert resp.context["carros_terceiros"] == 2  # consignado + terceiro
