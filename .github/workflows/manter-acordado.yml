@@ -8,12 +8,14 @@ name: Manter o sistema acordado
 # - O Render gratuito dorme depois de ~15 min parado; por isso o ping e a cada 10 min.
 # - Cutuca /saude/, que faz um SELECT 1: acorda o APP e tambem o BANCO (Neon dorme
 #   a parte). Assim a primeira acao da loja nao espera o banco acordar.
-# - So roda das 07h as 22h no horario da Bahia (10h-01h UTC), que e quando a loja usa.
-#   Fora disso deixa dormir, pra nao gastar as horas gratuitas do Render a toa.
+# - Roda das 06h30 as 22h no horario da Bahia (UTC-3), que e quando a loja usa.
+#   Comeca 06h30 pra o sistema ja estar quente na abertura (absorve o "acordar"
+#   lento e os eventuais atrasos do agendador do GitHub). Fora disso deixa dormir.
 on:
   schedule:
-    - cron: "*/10 10-23 * * *" # a cada 10 min, das 07h as 20h (Bahia)
-    - cron: "*/10 0-1 * * *"   # a cada 10 min, das 21h as 22h (Bahia)
+    - cron: "30,40,50 9 * * *" # 06h30, 06h40, 06h50 (Bahia) - aquece antes de abrir
+    - cron: "*/10 10-23 * * *" # a cada 10 min, das 07h as 20h59 (Bahia)
+    - cron: "*/10 0-1 * * *"   # a cada 10 min, das 21h as 22h59 (Bahia)
   workflow_dispatch: {} # permite rodar na mao pelo botao "Run workflow"
 
 jobs:
