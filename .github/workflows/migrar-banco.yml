@@ -1,0 +1,74 @@
+name: Migrar banco (uma vez)
+
+# Copia TODOS os dados do banco atual para um banco NOVO e VAZIO (tipicamente
+# numa regiao mais perto do site, pra acabar com a lentidao das paginas).
+#
+# So roda no clique manual, com a loja FECHADA (pra nao perder registros feitos
+# durante a copia). Depois de rodar, troque o DATABASE_URL no Render pelo novo.
+#
+# Secrets necessarios (Settings > Secrets and variables > Actions):
+#   DATABASE_URL        banco ATUAL (origem) -- ja existe
+#   NOVO_DATABASE_URL   banco NOVO e vazio (destino) -- voce cadastra antes de rodar
+on:
+  workflow_dispatch:
+    inputs:
+      confirmar:
+        description: 'Digite MIGRAR para confirmar (a loja deve estar FECHADA)'
+        required: true
+        default: ''
+
+jobs:
+  migrar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Conferir a confirmacao
+        run: |
+          if [ "${{ github.event.inputs.confirmar }}" != "MIGRAR" ]; then
+            echo "Confirmacao invalida. Rode de novo e digite MIGRAR."; exit 1
+          fi
+
+      - name: Instalar Postgres client 18 (Neon roda Postgres 18)
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc >/dev/null
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-18
+          echo "/usr/lib/postgresql/18/bin" >> "$GITHUB_PATH"
+
+      - name: Conferir que o banco de destino esta vazio
+        env:
+          NOVO: ${{ secrets.NOVO_DATABASE_URL }}
+        run: |
+          : "${NOVO:?Cadastre o secret NOVO_DATABASE_URL antes de rodar}"
+          tabelas=$(psql "$NOVO" -tAc "select count(*) from information_schema.tables where table_schema='public'")
+          echo "Tabelas no destino (public): $tabelas"
+          if [ "$tabelas" != "0" ]; then
+            echo "O destino NAO esta vazio. Crie um banco NOVO e vazio e tente de novo."; exit 1
+          fi
+
+      - name: Copiar os dados (dump da origem -> restore no destino)
+        env:
+          ORIGEM: ${{ secrets.DATABASE_URL }}
+          NOVO: ${{ secrets.NOVO_DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          : "${ORIGEM:?Secret DATABASE_URL ausente}"
+          echo "1/2 - Fazendo o dump da origem..."
+          pg_dump "$ORIGEM" --no-owner --no-privileges > dump.sql
+          echo "Tamanho do dump: $(du -h dump.sql | cut -f1)"
+          echo "2/2 - Restaurando no destino..."
+          psql "$NOVO" -v ON_ERROR_STOP=1 -q < dump.sql
+          echo "Copia concluida."
+
+      - name: Conferir as contagens no banco NOVO
+        env:
+          NOVO: ${{ secrets.NOVO_DATABASE_URL }}
+        run: |
+          echo "Confira se estes numeros batem com o que o sistema mostra:"
+          psql "$NOVO" -c "select 'veiculos' tabela, count(*) from veiculos_veiculo \
+            union all select 'pessoas', count(*) from pessoas_pessoa \
+            union all select 'negocios', count(*) from negocios_negocio \
+            union all select 'contratos', count(*) from contratos_contrato;"
