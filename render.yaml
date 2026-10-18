@@ -4,7 +4,7 @@ services:
   - type: web
     name: bahia-car
     runtime: docker
-    plan: free
+    plan: starter
     dockerfilePath: ./Dockerfile
     envVars:
       - key: DJANGO_SETTINGS_MODULE
