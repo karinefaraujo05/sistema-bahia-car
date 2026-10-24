@@ -16,7 +16,6 @@ from veiculos.models import Situacao, StatusVeiculo, Veiculo
 
 from .agenda import DIAS_CARRO_PARADO, lembretes
 from .busca import buscar as buscar_tudo
-from .frases import frase_do_dia
 
 MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 
@@ -137,7 +136,6 @@ def inicio(request):
         "alertas": pendencias[:4],
         "mais_alertas": max(len(pendencias) - 4, 0),
         "mostrar_onboarding": mostrar_onboarding,
-        "frase_do_dia": frase_do_dia(hoje),
     }
     return render(request, "inicio.html", contexto)
 

@@ -9,17 +9,6 @@
     <p class="text-tinta-suave">Resumo da loja e atalhos do dia a dia.</p>
   </div>
 
-  {# Mensagem motivacional do dia (muda a cada dia). #}
-  <div class="mb-6 flex items-start gap-3 rounded-2xl border border-acento-200 bg-acento-50 p-4">
-    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-acento-600 text-white">
-      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-    </span>
-    <div>
-      <p class="text-xs font-semibold uppercase tracking-wide text-acento-700">Mensagem do dia</p>
-      <p class="font-medium text-tinta">{{ frase_do_dia }}</p>
-    </div>
-  </div>
-
   {# Avisos acionáveis: só aparece quando há algo pra resolver. Cada um leva pro lugar certo. #}
   {% if alertas %}
     <section class="mb-6" aria-label="Precisa de atenção">
@@ -86,8 +75,18 @@
       <span class="leading-snug">Peguei um carro pra vender</span>    </a>
   </nav>
 
-  {# Indicadores. #}
-  <section class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Resumo">
+  {# Indicadores. O olhinho esconde/mostra os valores sensíveis (privacidade com cliente ao lado). #}
+  <section class="mb-6" aria-label="Resumo">
+    <div class="mb-3 flex items-center justify-between">
+      <h2 class="text-lg">Resumo da loja</h2>
+      <button type="button" id="toggle-sigilo" onclick="toggleSigilo()" aria-pressed="false"
+              class="inline-flex items-center gap-1.5 rounded-lg border border-borda px-3 py-1.5 text-sm font-medium text-tinta-suave hover:bg-acento-50">
+        <svg id="eye-open" class="hidden h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg id="eye-off" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 4.2A9.12 9.12 0 0 1 12 4c7 0 10 7 10 7a13.4 13.4 0 0 1-1.67 2.68"/><path d="M6.6 6.6A13.3 13.3 0 0 0 2 11s3 7 10 7a9 9 0 0 0 4.4-1.1"/><path d="m2 2 20 20"/></svg>
+        <span id="sigilo-label">Mostrar valores</span>
+      </button>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     <div class="indicador flex items-center gap-4">
       <span class="indicador-icone bg-acento-50 text-acento-700">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
@@ -106,7 +105,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><circle cx="12" cy="12" r="9"/></svg>
       </span>
       <div>
-        <div class="text-[2rem] leading-tight font-bold lg:text-2xl">{{ valor_estoque|reais }}</div>
+        <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ valor_estoque|reais }}">••••</div>
         <div class="text-lg text-tinta-suave">valor em estoque</div>
       </div>
     </div>
@@ -116,7 +115,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       </span>
       <div>
-        <div class="text-[2rem] leading-tight font-bold lg:text-2xl">{{ vendas_no_mes }}</div>
+        <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ vendas_no_mes }}">••••</div>
         <div class="text-lg text-tinta-suave">vendas no mês</div>
       </div>
     </div>
@@ -127,7 +126,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
         </span>
         <div>
-          <div class="text-[2rem] leading-tight font-bold lg:text-2xl">{{ lucro_do_mes|reais }}</div>
+          <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ lucro_do_mes|reais }}">••••</div>
           <div class="text-lg text-tinta-suave">lucro do mês</div>
         </div>
       </div>
@@ -138,9 +137,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
       </span>
       <div>
-        <div class="text-[2rem] leading-tight font-bold lg:text-2xl">{{ repasses_pendentes }}</div>
+        <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ repasses_pendentes }}">••••</div>
         <div class="text-lg text-tinta-suave">repasses a pagar</div>
       </div>
+    </div>
     </div>
   </section>
 
@@ -187,7 +187,7 @@
       <div class="flex h-44 items-end gap-3 sm:gap-6">
         {% for m in grafico_vendas %}
           <div class="flex h-full flex-1 flex-col items-center">
-            <span class="mb-2 text-sm font-bold {% if m.valor %}text-tinta{% else %}text-cinza{% endif %}">{{ m.valor }}</span>
+            <span class="mb-2 text-sm font-bold valor-sensivel {% if m.valor %}text-tinta{% else %}text-cinza{% endif %}" data-real="{{ m.valor }}">••••</span>
             {# Trilha de fundo: cada mês ocupa a mesma coluna, mesmo quando zerado. #}
             <div class="relative flex w-full flex-1 items-end rounded-md bg-acento-50">
               <div
@@ -294,4 +294,35 @@
       });
     </script>
   {% endif %}
+
+  {# Olhinho: esconde/mostra valores sensíveis. Começa ESCONDIDO (cliente ao lado) e lembra a escolha. #}
+  <script>
+    (function () {
+      var CHAVE = "bahiacar_valores_ocultos";
+      function estaOculto() {
+        // Padrão: oculto. Só mostra se o usuário escolheu explicitamente (valor "0").
+        return localStorage.getItem(CHAVE) !== "0";
+      }
+      function aplicar() {
+        var oculto = estaOculto();
+        document.querySelectorAll(".valor-sensivel").forEach(function (el) {
+          if (el.dataset.real === undefined) el.dataset.real = el.textContent;
+          el.textContent = oculto ? "••••" : el.dataset.real;
+        });
+        var btn = document.getElementById("toggle-sigilo");
+        if (btn) btn.setAttribute("aria-pressed", String(!oculto));
+        var lbl = document.getElementById("sigilo-label");
+        if (lbl) lbl.textContent = oculto ? "Mostrar valores" : "Ocultar valores";
+        var olhoAberto = document.getElementById("eye-open");
+        var olhoFechado = document.getElementById("eye-off");
+        if (olhoAberto) olhoAberto.classList.toggle("hidden", oculto);
+        if (olhoFechado) olhoFechado.classList.toggle("hidden", !oculto);
+      }
+      window.toggleSigilo = function () {
+        localStorage.setItem(CHAVE, estaOculto() ? "0" : "1");
+        aplicar();
+      };
+      aplicar();
+    })();
+  </script>
 {% endblock %}
