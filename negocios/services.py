@@ -395,13 +395,17 @@ def lucro_do_veiculo(veiculo):
 
 
 def resumo_de_vendas(ano, mes):
-    """Total vendido e lucro bruto das vendas e trocas concluídas no mês."""
-    vendas = Negocio.objetos.filter(
+    """Vendido e lucro bruto (só venda/troca) e total de negócios do mês (inclui compra)."""
+    do_mes = Negocio.objetos.filter(
         status=StatusNegocio.CONCLUIDO,
-        tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA],
         data__year=ano,
         data__month=mes,
+    )
+    # "Vendido" e "lucro" só fazem sentido para o que SAI da loja (venda/troca).
+    vendas = do_mes.filter(
+        tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA]
     ).prefetch_related("itens__veiculo")  # lucro_bruto reusa esse prefetch (sem N+1)
     total = sum((n.valor_total or Decimal("0") for n in vendas), Decimal("0"))
     lucro = sum((lucro_bruto(n) or Decimal("0") for n in vendas), Decimal("0"))
-    return {"total_vendido": total, "lucro_bruto": lucro, "quantidade": vendas.count()}
+    # Mas a CONTAGEM de negócios inclui compras também (compra também é negócio).
+    return {"total_vendido": total, "lucro_bruto": lucro, "quantidade": do_mes.count()}
