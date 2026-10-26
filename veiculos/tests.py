@@ -379,3 +379,17 @@ def test_foto_capa_usa_prefetch_sem_query_extra(settings, tmp_path, django_asser
         capas = [c.foto_capa for c in carros]
     assert len(capas) == 3
     assert all(cap is not None and cap.capa for cap in capas)
+
+
+@pytest.mark.django_db
+def test_patio_mostra_a_combinar_sem_preco(client):
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    criar_veiculo(placa="PPP1010", valor_anunciado=19500)
+    criar_veiculo(placa="PPP2020", valor_anunciado=None)  # sem preço
+    resp = client.get(reverse("veiculos:patio"))
+    assert resp.status_code == 200
+    html = resp.content.decode()
+    # Carro sem preço mostra "A combinar" (não o travessão vermelho gigante).
+    assert "A combinar" in html
+    assert "R$" in html  # o que tem preço continua mostrando o valor
