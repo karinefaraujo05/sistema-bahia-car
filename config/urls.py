@@ -13,6 +13,7 @@ from core.views import (
     consulta,
     consulta_cnpj,
     consulta_fipe,
+    favicon,
     inicio,
     manifest,
     saude,
@@ -35,6 +36,7 @@ urlpatterns = [
     path("backup/", baixar_backup, name="backup"),
     path("manifest.webmanifest", manifest, name="manifest"),
     path("sw.js", service_worker, name="service_worker"),
+    path("favicon.ico", favicon, name="favicon"),
     path("saude/", saude, name="saude"),
     path("", inicio, name="inicio"),
 ]

@@ -316,3 +316,10 @@ def test_painel_carros_parados_ignora_menos_de_90_dias(client):
     _entrar_como_dono(client)
     resp = client.get(reverse("inicio"))
     assert resp.context["total_parados"] == 0
+
+
+def test_favicon_responde_na_raiz(client):
+    # Navegadores pedem /favicon.ico direto; antes dava 404. Agora redireciona pro icone.
+    resp = client.get("/favicon.ico")
+    assert resp.status_code == 302
+    assert "favicon" in resp.url and resp.url.endswith(".ico")

@@ -9,7 +9,8 @@ from django.db import connection
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 from django.http import FileResponse, HttpResponse, HttpResponseForbidden, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.templatetags.static import static as static_url
 from django.utils import timezone
 
 from negocios.models import Negocio, StatusNegocio, TipoNegocio
@@ -35,6 +36,11 @@ def saude(request):
         cursor.execute("SELECT 1")
         cursor.fetchone()
     return HttpResponse("ok", content_type="text/plain")
+
+
+def favicon(request):
+    """Os navegadores pedem /favicon.ico na raiz; mandamos pro ícone estático."""
+    return redirect(static_url("img/favicon.ico"))
 
 
 def _vendas_por_mes(hoje):
