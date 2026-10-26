@@ -65,6 +65,8 @@ class VeiculoForm(forms.ModelForm):
         # digitar uma cor fora da lista (ex.: "Branco Perolizado").
         self.fields["cor"].widget.attrs["list"] = "cores-carro"
         self.fields["cor"].widget.attrs.setdefault("placeholder", "Escolha ou digite")
+        # Credor do financiamento: lista de bancos/financeiras comuns (dá pra digitar outro).
+        self.fields["credor_alienacao"].widget.attrs["list"] = "credores"
 
     def clean_placa(self):
         placa = normalizar_placa(self.cleaned_data["placa"])

@@ -177,6 +177,31 @@ def test_cadastro_rapido_pela_tela_deduplica(client):
 
 
 @pytest.mark.django_db
+def test_form_pessoa_uf_e_estado_civil_viram_selecao(client):
+    logar(client)
+    html = client.get(reverse("pessoas:novo")).content.decode()
+    assert 'id="nacionalidades"' in html  # datalist de nacionalidade
+    assert "Bahia" in html and "São Paulo" in html  # opções de UF no select
+    assert "Casado(a)" in html and "União estável" in html  # opções de estado civil
+    # Salvar com UF e estado civil escolhidos da lista funciona.
+    resp = client.post(
+        reverse("pessoas:novo"),
+        {
+            "tipo": TipoPessoa.FISICA,
+            "nome": "Fulana da Lista",
+            "cpf_cnpj": CPF_VALIDO,
+            "uf": "BA",
+            "estado_civil": "Casado(a)",
+            "nacionalidade": "Brasileira",
+        },
+    )
+    assert resp.status_code == 302
+    p = Pessoa.objetos.get(nome="Fulana da Lista")
+    assert p.uf == "BA"
+    assert p.estado_civil == "Casado(a)"
+
+
+@pytest.mark.django_db
 def test_buscar_cpf_encontra(client):
     logar(client)
     p = Pessoa.objetos.create(nome="Carla", cpf_cnpj=CPF_VALIDO)

@@ -69,6 +69,14 @@
         {% include "pessoas/partials/campo.html" with campo=form.estado_civil %}
         {% include "pessoas/partials/campo.html" with campo=form.profissao %}
       </div>
+      <datalist id="nacionalidades">
+        <option value="Brasileira"></option>
+        <option value="Brasileiro"></option>
+        <option value="Estrangeira"></option>
+        <option value="Estrangeiro"></option>
+        <option value="Portuguesa"></option>
+        <option value="Português"></option>
+      </datalist>
     </fieldset>
 
     <fieldset id="campos-juridica" class="space-y-4">

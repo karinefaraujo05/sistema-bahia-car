@@ -389,6 +389,9 @@ def test_form_carro_tem_lista_de_cores(client):
     assert 'id="cores-carro"' in html  # datalist com as cores
     assert 'list="cores-carro"' in html  # campo "cor" ligado à lista
     assert "Branco" in html and "Grafite" in html and "Vinho" in html
+    # Credor do financiamento também vira lista (datalist de bancos).
+    assert 'id="credores"' in html and 'list="credores"' in html
+    assert "Bradesco" in html and "BV Financeira" in html
 
 
 @pytest.mark.django_db
