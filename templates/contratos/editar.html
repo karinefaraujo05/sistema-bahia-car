@@ -72,7 +72,7 @@
       {# Texto completo: mexer aqui faz o PDF sair deste texto. #}
       <details class="text-sm"{% if contrato.corpo_editado %} open{% endif %}>
         <summary class="cursor-pointer font-medium text-tinta-suave">Texto completo do contrato (avançado — mexer aqui muda o PDF)</summary>
-        <textarea name="corpo" rows="16" class="campo mt-2 w-full font-mono text-sm"{% if travado %} readonly{% endif %}>{{ contrato.corpo }}</textarea>
+        <textarea name="corpo" rows="10" class="campo mt-2 w-full js-autogrow"{% if travado %} readonly{% endif %}>{{ contrato.corpo }}</textarea>
         <p class="mt-1 text-xs text-tinta-suave">Enquanto você não mexer, o PDF sai no modelo pronto (montado dos dados). Se editar este texto e salvar, o PDF e o Word passam a sair exatamente com o que está aqui.</p>
       </details>
 
@@ -139,6 +139,20 @@
         if (this.classList.contains("botao-desativado")) e.preventDefault();
       });
     });
+
+    // Textarea do texto completo cresce sozinho (sem barra de rolagem apertada no celular).
+    var auto = document.querySelector("textarea.js-autogrow");
+    if (auto) {
+      var crescer = function () {
+        auto.style.height = "auto";
+        auto.style.height = auto.scrollHeight + "px";
+      };
+      auto.addEventListener("input", crescer);
+      // Ajusta ao abrir o <details> (quando o campo ganha altura real).
+      var det = auto.closest("details");
+      if (det) det.addEventListener("toggle", function () { if (det.open) crescer(); });
+      crescer();
+    }
 
     carregado = true;
   </script>
