@@ -8,9 +8,10 @@
     {% url 'veiculos:estoque' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar ao estoque" %}
   </div>
 
-  <div class="mb-6 flex items-start justify-between gap-3">
-    <div>
-      <h1 class="text-2xl">{{ veiculo.marca }} {{ veiculo.modelo }}</h1>
+  {# Cabeçalho: marca+modelo grande, ações à direita. #}
+  <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0">
+      <h1 class="text-2xl sm:text-3xl">{{ veiculo.marca }} {{ veiculo.modelo }}</h1>
       <p class="text-tinta-suave">
         {{ veiculo.placa_formatada }}
         {% if veiculo.eh_consignado %}
@@ -18,12 +19,13 @@
         {% endif %}
       </p>
     </div>
-    <div class="flex shrink-0 items-center gap-2">
-      <a href="{% url 'veiculos:editar' veiculo.pk %}" class="botao botao-secundario">
+    <div class="flex shrink-0 flex-wrap items-center gap-2">
+      {% include "veiculos/partials/status_badge.html" with veiculo=veiculo %}
+      <a href="{% url 'veiculos:editar' veiculo.pk %}"
+         class="inline-flex shrink-0 items-center gap-2 rounded-xl border border-acento-200 bg-superficie px-4 py-2.5 font-semibold text-acento-700 shadow-sm transition hover:bg-acento-50">
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
         Editar
       </a>
-      {% include "veiculos/partials/status_badge.html" with veiculo=veiculo %}
     </div>
   </div>
 
@@ -35,287 +37,402 @@
     </div>
   {% endif %}
 
-  <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
-  <div>
-  {# Consignação (se o carro foi deixado para vender). #}
-  {% with c=veiculo.consignacoes.first %}
-    {% if c %}
-      <section class="mb-6" aria-label="Consignação">
-        <h2 class="mb-2 text-lg">Consignação</h2>
-        <div class="rounded-xl border border-borda bg-superficie shadow-sm p-4">
-          <p>Dono: <strong>{{ c.proprietario.nome }}</strong></p>
-          <p>Valor mínimo ao dono: <strong>{{ c.valor_liquido_minimo|reais }}</strong></p>
-          <p class="text-tinta-suave">Situação: {{ c.get_status_display }}</p>
-          <div class="mt-3 flex flex-wrap gap-2">
-            {% if c.status == 'ativa' %}
-              <a href="{% url 'negocios:iniciar_consignado' c.pk %}" class="botao botao-primario">
-                Registrar venda deste carro
-              </a>
-              <form method="post" action="{% url 'negocios:devolver' c.pk %}"
-                onsubmit="return confirm('Confirmar que o dono retirou o carro?');">
-                {% csrf_token %}
-                <button type="submit" class="botao botao-secundario">Dono retirou o carro</button>
-              </form>
-            {% elif c.status == 'vendida' and not c.repasse_feito_em %}
-              <form method="post" action="{% url 'negocios:repasse' c.pk %}"
-                onsubmit="return confirm('Confirmar o repasse ao dono?');">
-                {% csrf_token %}
-                <button type="submit" class="botao botao-primario">Registrar repasse ao dono</button>
-              </form>
-            {% endif %}
-            <form method="post" action="{% url 'contratos:gerar_consignacao' c.pk %}">
-              {% csrf_token %}
-              <button type="submit" class="botao botao-secundario">Gerar contrato de consignação</button>
-            </form>
+  {# Faixa de indicadores: os números que mais importam neste carro. #}
+  <div class="painel mb-6 overflow-hidden">
+    <div class="flex flex-col divide-y divide-borda sm:flex-row sm:divide-x sm:divide-y-0">
+      <div class="flex items-center gap-3 p-5 sm:flex-1">
+        <span class="indicador-icone shrink-0 bg-verde-fundo text-verde">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><circle cx="12" cy="12" r="9"/></svg>
+        </span>
+        <div>
+          <div class="text-2xl font-bold leading-tight">{{ veiculo.valor_anunciado|reais }}</div>
+          <div class="text-sm text-tinta-suave">valor anunciado</div>
+        </div>
+      </div>
+
+      {% if user.eh_administrador and veiculo.total_gastos %}
+        <div class="flex items-center gap-3 p-5 sm:flex-1">
+          <span class="indicador-icone shrink-0 bg-ambar-fundo text-ambar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+          </span>
+          <div>
+            <div class="text-2xl font-bold leading-tight text-ambar">{{ veiculo.total_gastos|reais }}</div>
+            <div class="text-sm text-tinta-suave">gastos no carro</div>
           </div>
-          {% with contratos=c.contratos.all %}
-            {% if contratos %}
-              <ul class="mt-3 divide-y divide-borda border-t border-borda text-sm">
-                {% for contrato in contratos %}
-                  <li class="flex items-center justify-between gap-3 py-2">
-                    <span>{{ contrato.titulo }} (v{{ contrato.versao }})</span>
-                    <a href="{% url 'contratos:editar_contrato' contrato.pk %}" class="text-acento-700">Abrir / editar</a>
+        </div>
+      {% endif %}
+
+      {% if lucro is not None %}
+        <div class="flex items-center gap-3 p-5 sm:flex-1">
+          <span class="indicador-icone shrink-0 bg-verde-fundo text-verde">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          </span>
+          <div>
+            <div class="text-2xl font-bold leading-tight text-verde">{{ lucro|reais }}</div>
+            <div class="text-sm text-tinta-suave">lucro {% if veiculo.total_gastos %}(já tirando os gastos){% endif %}</div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
+    <div class="space-y-6">
+      {# Consignação (se o carro foi deixado para vender). #}
+      {% with c=veiculo.consignacoes.first %}
+        {% if c %}
+          <section class="painel overflow-hidden" aria-label="Consignação">
+            <div class="flex items-center gap-4 border-b border-borda p-5">
+              <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+              </span>
+              <div>
+                <h2 class="text-lg">Consignação</h2>
+                <p class="text-sm text-tinta-suave">Carro deixado para a loja vender.</p>
+              </div>
+            </div>
+            <div class="p-5">
+              <p>Dono: <strong>{{ c.proprietario.nome }}</strong></p>
+              <p>Valor mínimo ao dono: <strong>{{ c.valor_liquido_minimo|reais }}</strong></p>
+              <p class="text-tinta-suave">Situação: {{ c.get_status_display }}</p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                {% if c.status == 'ativa' %}
+                  <a href="{% url 'negocios:iniciar_consignado' c.pk %}" class="botao botao-primario">
+                    Registrar venda deste carro
+                  </a>
+                  <form method="post" action="{% url 'negocios:devolver' c.pk %}"
+                    onsubmit="return confirm('Confirmar que o dono retirou o carro?');">
+                    {% csrf_token %}
+                    <button type="submit" class="botao botao-secundario">Dono retirou o carro</button>
+                  </form>
+                {% elif c.status == 'vendida' and not c.repasse_feito_em %}
+                  <form method="post" action="{% url 'negocios:repasse' c.pk %}"
+                    onsubmit="return confirm('Confirmar o repasse ao dono?');">
+                    {% csrf_token %}
+                    <button type="submit" class="botao botao-primario">Registrar repasse ao dono</button>
+                  </form>
+                {% endif %}
+                <form method="post" action="{% url 'contratos:gerar_consignacao' c.pk %}">
+                  {% csrf_token %}
+                  <button type="submit" class="botao botao-secundario">Gerar contrato de consignação</button>
+                </form>
+              </div>
+              {% with contratos=c.contratos.all %}
+                {% if contratos %}
+                  <ul class="mt-3 divide-y divide-borda border-t border-borda text-sm">
+                    {% for contrato in contratos %}
+                      <li class="flex items-center justify-between gap-3 py-2">
+                        <span>{{ contrato.titulo }} (v{{ contrato.versao }})</span>
+                        <a href="{% url 'contratos:editar_contrato' contrato.pk %}" class="text-acento-700">Abrir / editar</a>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                {% endif %}
+              {% endwith %}
+            </div>
+          </section>
+        {% endif %}
+      {% endwith %}
+
+      {# Fotos #}
+      <section class="painel overflow-hidden" aria-label="Fotos">
+        <div class="flex items-center justify-between gap-3 border-b border-borda p-5">
+          <div class="flex items-center gap-4">
+            <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            </span>
+            <div>
+              <h2 class="text-lg">Fotos</h2>
+              <p class="text-sm text-tinta-suave">As fotos que aparecem no anúncio.</p>
+            </div>
+          </div>
+          <form class="shrink-0">
+            {% csrf_token %}
+            <label class="botao botao-secundario cursor-pointer">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <span class="hidden sm:inline">Adicionar foto</span>
+              <input
+                type="file"
+                name="fotos"
+                accept="image/*"
+                capture="environment"
+                multiple
+                class="hidden"
+                hx-post="{% url 'veiculos:adicionar_fotos' veiculo.pk %}"
+                hx-target="#galeria"
+                hx-swap="outerHTML"
+                hx-encoding="multipart/form-data"
+                hx-trigger="change"
+              />
+            </label>
+          </form>
+        </div>
+        <div class="p-5">
+          {% include "veiculos/partials/galeria.html" with veiculo=veiculo %}
+        </div>
+      </section>
+
+      {# Documentos do carro (foto do CRLV, consulta, procuração, etc.). #}
+      <section class="painel overflow-hidden" aria-label="Documentos do carro">
+        <div class="flex items-center gap-4 border-b border-borda p-5">
+          <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+          </span>
+          <div>
+            <h2 class="text-lg">Documentos do carro</h2>
+            <p class="text-sm text-tinta-suave">CRLV, consulta, procuração e afins.</p>
+          </div>
+        </div>
+        <div class="p-5">
+          {% with docs=veiculo.documentos.all %}
+            {% if docs %}
+              <ul class="mb-3 divide-y divide-borda overflow-hidden rounded-xl border border-borda">
+                {% for documento in docs %}
+                  <li class="flex items-center justify-between gap-3 px-4 py-3">
+                    <div class="flex min-w-0 items-center gap-3">
+                      <span class="chip h-9 w-9 shrink-0 bg-acento-50 text-acento-700">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>
+                      </span>
+                      <div class="min-w-0">
+                        <div class="truncate font-medium">{{ documento.get_tipo_display }}</div>
+                        {% if documento.descricao %}
+                          <div class="truncate text-sm text-tinta-suave">{{ documento.descricao }}</div>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <a href="{{ documento.arquivo.url }}" target="_blank" class="shrink-0 font-medium text-acento-700">Abrir</a>
                   </li>
                 {% endfor %}
               </ul>
+            {% else %}
+              <p class="mb-3 rounded-xl border border-borda bg-fundo px-4 py-6 text-center text-tinta-suave">
+                Nenhum documento guardado ainda.
+              </p>
             {% endif %}
           {% endwith %}
+
+          <form
+            method="post"
+            action="{% url 'veiculos:adicionar_documento' veiculo.pk %}"
+            enctype="multipart/form-data"
+            class="space-y-3 rounded-xl border border-borda bg-fundo p-4"
+          >
+            {% csrf_token %}
+            <p class="font-medium">Guardar documento</p>
+            <div>
+              <label for="doc-tipo" class="mb-1 block text-sm">Tipo</label>
+              <select id="doc-tipo" name="tipo" class="campo">
+                <option value="doc_veiculo">Documento do veículo (CRV/CRLV)</option>
+                <option value="consulta">Consulta de situação</option>
+                <option value="procuracao">Procuração/autorização</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+            <div>
+              <label for="doc-arquivo" class="mb-1 block text-sm">Foto ou PDF</label>
+              <input id="doc-arquivo" type="file" name="arquivo" accept="image/*,application/pdf" capture="environment" class="campo-arquivo" />
+            </div>
+            <button type="submit" class="botao botao-secundario">Guardar documento</button>
+          </form>
         </div>
       </section>
-    {% endif %}
-  {% endwith %}
+    </div>
 
-  {# Fotos #}
-  <section class="mb-6" aria-label="Fotos">
-    <h2 class="mb-2 text-lg">Fotos</h2>
-    <form class="mb-3">
-      {% csrf_token %}
-      <label class="botao botao-secundario cursor-pointer">
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-        Adicionar foto
-        <input
-          type="file"
-          name="fotos"
-          accept="image/*"
-          capture="environment"
-          multiple
-          class="hidden"
-          hx-post="{% url 'veiculos:adicionar_fotos' veiculo.pk %}"
-          hx-target="#galeria"
-          hx-swap="outerHTML"
-          hx-encoding="multipart/form-data"
-          hx-trigger="change"
-        />
-      </label>
-    </form>
-    {% include "veiculos/partials/galeria.html" with veiculo=veiculo %}
-  </section>
+    <div class="space-y-6">
+      {# Dados do carro (ficha técnica). #}
+      <section class="painel overflow-hidden" aria-label="Dados do carro">
+        <div class="flex items-center gap-4 border-b border-borda p-5">
+          <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+          </span>
+          <div>
+            <h2 class="text-lg">Dados do carro</h2>
+            <p class="text-sm text-tinta-suave">Ficha técnica do veículo.</p>
+          </div>
+        </div>
+        <dl class="divide-y divide-borda">
+          <div class="flex justify-between gap-4 px-4 py-3">
+            <dt class="text-tinta-suave">Ano</dt>
+            <dd class="text-right font-medium">{{ veiculo.ano_fabricacao }}/{{ veiculo.ano_modelo }}</dd>
+          </div>
+          {% include "veiculos/partials/dado.html" with rotulo="Cor" valor=veiculo.cor %}
+          {% include "veiculos/partials/dado.html" with rotulo="Quilometragem" valor=veiculo.km %}
+          {% include "veiculos/partials/dado.html" with rotulo="Combustível" valor=veiculo.get_combustivel_display %}
+          {% include "veiculos/partials/dado.html" with rotulo="Câmbio" valor=veiculo.get_cambio_display %}
+          {% include "veiculos/partials/dado.html" with rotulo="Chassi" valor=veiculo.chassi %}
+          {% include "veiculos/partials/dado.html" with rotulo="Renavam" valor=veiculo.renavam %}
+          {% include "veiculos/partials/dado.html" with rotulo="Situação" valor=veiculo.get_situacao_display %}
+          {% include "veiculos/partials/dado.html" with rotulo="Proprietário no documento" valor=veiculo.proprietario_registral %}
+        </dl>
+      </section>
 
-  {# Documentos do carro (foto do CRLV, consulta, procuração, etc.). #}
-  <section class="mb-6" aria-label="Documentos do carro">
-    <h2 class="mb-2 text-lg">Documentos do carro</h2>
-
-    {% with docs=veiculo.documentos.all %}
-      {% if docs %}
-        <ul class="mb-3 divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-          {% for documento in docs %}
-            <li class="flex items-center justify-between gap-3 px-4 py-3">
-              <div class="min-w-0">
-                <div class="truncate font-medium">{{ documento.get_tipo_display }}</div>
-                {% if documento.descricao %}
-                  <div class="truncate text-sm text-tinta-suave">{{ documento.descricao }}</div>
-                {% endif %}
+      {# Financeiro: valores de referência e de compra. #}
+      {% if veiculo.valor_fipe or user.eh_administrador %}
+        <section class="painel overflow-hidden" aria-label="Financeiro">
+          <div class="flex items-center gap-4 border-b border-borda p-5">
+            <span class="indicador-icone shrink-0 bg-verde-fundo text-verde">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </span>
+            <div>
+              <h2 class="text-lg">Financeiro</h2>
+              <p class="text-sm text-tinta-suave">Referência de preço e compra.</p>
+            </div>
+          </div>
+          <dl class="divide-y divide-borda">
+            {% if veiculo.valor_fipe %}
+              <div class="flex justify-between gap-4 px-4 py-3">
+                <dt class="text-tinta-suave">Referência FIPE</dt>
+                <dd class="text-right font-medium">
+                  {{ veiculo.valor_fipe|reais }}
+                  {% with c=veiculo.anunciado_vs_fipe %}
+                    {% if c %}
+                      <span class="block text-xs {% if c.acima %}text-ambar{% else %}text-verde{% endif %}">anúncio {{ c.pct }}% {% if c.acima %}acima{% else %}abaixo{% endif %} da FIPE</span>
+                    {% endif %}
+                  {% endwith %}
+                </dd>
               </div>
-              <a href="{{ documento.arquivo.url }}" target="_blank" class="shrink-0 text-acento-700">Abrir</a>
+            {% endif %}
+            {% if user.eh_administrador %}
+              <div class="flex justify-between gap-4 px-4 py-3">
+                <dt class="text-tinta-suave">Valor de compra</dt>
+                <dd class="text-right font-medium">{{ veiculo.valor_compra|reais }}</dd>
+              </div>
+            {% endif %}
+          </dl>
+        </section>
+      {% endif %}
+
+      {# Gastos do carro (só admin): entram no cálculo do lucro. #}
+      {% if gasto_form %}
+        <section class="painel overflow-hidden" aria-label="Gastos do carro">
+          <div class="flex items-center gap-4 border-b border-borda p-5">
+            <span class="indicador-icone shrink-0 bg-ambar-fundo text-ambar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>
+            </span>
+            <div>
+              <h2 class="text-lg">Gastos do carro</h2>
+              <p class="text-sm text-tinta-suave">Descontados do lucro do carro.</p>
+            </div>
+          </div>
+          {% if gastos %}
+            <ul class="divide-y divide-borda">
+              {% for g in gastos %}
+                <li class="flex items-center justify-between gap-3 px-4 py-3">
+                  <div class="min-w-0">
+                    <div class="truncate font-medium">{{ g.descricao }}</div>
+                    <div class="text-sm text-tinta-suave">{{ g.data|date:"d/m/Y" }}</div>
+                  </div>
+                  <div class="flex shrink-0 items-center gap-3">
+                    <span class="font-medium">{{ g.valor|reais }}</span>
+                    <form method="post" action="{% url 'veiculos:remover_gasto' g.pk %}" onsubmit="return confirm('Remover este gasto?');">
+                      {% csrf_token %}
+                      <button type="submit" class="text-ambar" title="Remover gasto" aria-label="Remover gasto">✕</button>
+                    </form>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+            <div class="flex justify-between gap-4 border-t border-borda px-4 py-3">
+              <span class="font-medium">Total de gastos</span>
+              <span class="font-bold text-ambar">{{ veiculo.total_gastos|reais }}</span>
+            </div>
+          {% else %}
+            <p class="px-4 py-6 text-center text-tinta-suave">Nenhum gasto lançado ainda.</p>
+          {% endif %}
+          <form method="post" action="{% url 'veiculos:adicionar_gasto' veiculo.pk %}" class="space-y-3 border-t border-borda p-5">
+            {% csrf_token %}
+            <p class="font-medium">Lançar gasto</p>
+            {% include "veiculos/partials/campo.html" with campo=gasto_form.descricao %}
+            <div class="grid gap-3 sm:grid-cols-2">
+              {% include "veiculos/partials/campo.html" with campo=gasto_form.valor %}
+              {% include "veiculos/partials/campo.html" with campo=gasto_form.data %}
+            </div>
+            <button type="submit" class="botao botao-secundario">Lançar gasto</button>
+          </form>
+        </section>
+      {% endif %}
+
+      {# Financiamento #}
+      {% if veiculo.alienado %}
+        <section class="painel overflow-hidden" aria-label="Financiamento">
+          <div class="flex items-center gap-4 border-b border-borda p-5">
+            <span class="indicador-icone shrink-0 bg-ambar-fundo text-ambar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            </span>
+            <div>
+              <h2 class="text-lg">Financiamento</h2>
+              <p class="text-sm text-tinta-suave">Carro com alienação ativa.</p>
+            </div>
+          </div>
+          <div class="space-y-1 p-5">
+            <p>Carro com financiamento ativo em <strong>{{ veiculo.credor_alienacao|default:"—" }}</strong>.</p>
+            <p>Saldo devedor: <strong>{{ veiculo.saldo_devedor|reais }}</strong></p>
+          </div>
+        </section>
+      {% endif %}
+
+      {# Estado e observações #}
+      <section class="painel overflow-hidden" aria-label="Estado">
+        <div class="flex items-center gap-4 border-b border-borda p-5">
+          <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>
+          </span>
+          <div>
+            <h2 class="text-lg">Estado</h2>
+            <p class="text-sm text-tinta-suave">Condição e observações do carro.</p>
+          </div>
+        </div>
+        <dl class="divide-y divide-borda">
+          <div class="flex justify-between gap-4 px-4 py-3">
+            <dt class="text-tinta-suave">Chave reserva</dt>
+            <dd class="text-right font-medium">
+              {% if veiculo.tem_chave_reserva is None %}—{% elif veiculo.tem_chave_reserva %}Sim{% else %}Não{% endif %}
+            </dd>
+          </div>
+          {% include "veiculos/partials/dado.html" with rotulo="Avarias declaradas" valor=veiculo.avarias_declaradas %}
+          {% if veiculo.sinistro_declarado %}
+            {% include "veiculos/partials/dado.html" with rotulo="Sinistro" valor=veiculo.sinistro_descricao|default:"declarado" %}
+          {% endif %}
+          {% include "veiculos/partials/dado.html" with rotulo="Observações" valor=veiculo.observacoes %}
+        </dl>
+      </section>
+
+      {# Linha do tempo de negócios deste carro. #}
+      <section class="painel overflow-hidden" aria-label="Negócios">
+        <div class="flex items-center gap-4 border-b border-borda p-5">
+          <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          </span>
+          <div>
+            <h2 class="text-lg">Negócios deste carro</h2>
+            <p class="text-sm text-tinta-suave">Compras, vendas e trocas ligadas a ele.</p>
+          </div>
+        </div>
+        <ul class="divide-y divide-borda">
+          {% for item in veiculo.itens_negocio.all %}
+            <li>
+              <a href="{% url 'negocios:detalhe' item.negocio.pk %}" class="group flex items-center gap-3 px-5 py-4 hover:bg-acento-50">
+                <span class="chip h-10 w-10 shrink-0 bg-acento-50 text-acento-700">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                </span>
+                <div class="min-w-0 flex-1">
+                  <div class="truncate font-medium">
+                    {{ item.negocio.get_tipo_display }}{% if item.negocio.numero_contrato %} nº {{ item.negocio.numero_contrato }}{% endif %}
+                  </div>
+                  <div class="truncate text-sm text-tinta-suave">
+                    {{ item.de_pessoa.nome|default:"Loja" }} → {{ item.para_pessoa.nome|default:"Loja" }}
+                    · {{ item.negocio.get_status_display }}
+                  </div>
+                </div>
+                <span class="shrink-0 text-sm text-tinta-suave">{{ item.negocio.data|date:"d/m/Y" }}</span>
+                <svg class="h-5 w-5 shrink-0 text-tinta-suave transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </a>
             </li>
+          {% empty %}
+            <li class="px-5 py-10 text-center text-tinta-suave">Ainda não há negócios com este carro.</li>
           {% endfor %}
         </ul>
-      {% else %}
-        <p class="mb-3 rounded-xl border border-borda bg-superficie px-4 py-4 text-center text-tinta-suave shadow-sm">
-          Nenhum documento guardado ainda.
-        </p>
-      {% endif %}
-    {% endwith %}
-
-    <form
-      method="post"
-      action="{% url 'veiculos:adicionar_documento' veiculo.pk %}"
-      enctype="multipart/form-data"
-      class="space-y-3 rounded-xl border border-borda bg-superficie p-4 shadow-sm"
-    >
-      {% csrf_token %}
-      <p class="font-medium">Guardar documento</p>
-      <div>
-        <label for="doc-tipo" class="mb-1 block text-sm">Tipo</label>
-        <select id="doc-tipo" name="tipo" class="campo">
-          <option value="doc_veiculo">Documento do veículo (CRV/CRLV)</option>
-          <option value="consulta">Consulta de situação</option>
-          <option value="procuracao">Procuração/autorização</option>
-          <option value="outro">Outro</option>
-        </select>
-      </div>
-      <div>
-        <label for="doc-arquivo" class="mb-1 block text-sm">Foto ou PDF</label>
-        <input id="doc-arquivo" type="file" name="arquivo" accept="image/*,application/pdf" capture="environment" class="campo-arquivo" />
-      </div>
-      <button type="submit" class="botao botao-secundario">Guardar documento</button>
-    </form>
-  </section>
-  </div>
-
-  <div>
-  {# Dados do carro #}
-  <section class="mb-6" aria-label="Dados">
-    <h2 class="mb-2 text-lg">Dados do carro</h2>
-    <dl class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-      <div class="flex justify-between gap-4 px-4 py-3">
-        <dt class="text-tinta-suave">Ano</dt>
-        <dd class="text-right font-medium">{{ veiculo.ano_fabricacao }}/{{ veiculo.ano_modelo }}</dd>
-      </div>
-      {% include "veiculos/partials/dado.html" with rotulo="Cor" valor=veiculo.cor %}
-      {% include "veiculos/partials/dado.html" with rotulo="Quilometragem" valor=veiculo.km %}
-      {% include "veiculos/partials/dado.html" with rotulo="Combustível" valor=veiculo.get_combustivel_display %}
-      {% include "veiculos/partials/dado.html" with rotulo="Câmbio" valor=veiculo.get_cambio_display %}
-      {% include "veiculos/partials/dado.html" with rotulo="Chassi" valor=veiculo.chassi %}
-      {% include "veiculos/partials/dado.html" with rotulo="Renavam" valor=veiculo.renavam %}
-      {% include "veiculos/partials/dado.html" with rotulo="Situação" valor=veiculo.get_situacao_display %}
-      {% include "veiculos/partials/dado.html" with rotulo="Proprietário no documento" valor=veiculo.proprietario_registral %}
-      <div class="flex justify-between gap-4 px-4 py-3">
-        <dt class="text-tinta-suave">Valor anunciado</dt>
-        <dd class="text-right font-medium">{{ veiculo.valor_anunciado|reais }}</dd>
-      </div>
-      {% if veiculo.valor_fipe %}
-        <div class="flex justify-between gap-4 px-4 py-3">
-          <dt class="text-tinta-suave">Referência FIPE</dt>
-          <dd class="text-right font-medium">
-            {{ veiculo.valor_fipe|reais }}
-            {% with c=veiculo.anunciado_vs_fipe %}
-              {% if c %}
-                <span class="block text-xs {% if c.acima %}text-ambar{% else %}text-verde{% endif %}">anúncio {{ c.pct }}% {% if c.acima %}acima{% else %}abaixo{% endif %} da FIPE</span>
-              {% endif %}
-            {% endwith %}
-          </dd>
-        </div>
-      {% endif %}
-      {% if user.eh_administrador %}
-        <div class="flex justify-between gap-4 px-4 py-3">
-          <dt class="text-tinta-suave">Valor de compra</dt>
-          <dd class="text-right font-medium">{{ veiculo.valor_compra|reais }}</dd>
-        </div>
-        {% if veiculo.total_gastos %}
-          <div class="flex justify-between gap-4 px-4 py-3">
-            <dt class="text-tinta-suave">Gastos no carro</dt>
-            <dd class="text-right font-medium text-ambar">{{ veiculo.total_gastos|reais }}</dd>
-          </div>
-        {% endif %}
-      {% endif %}
-      {% if lucro is not None %}
-        <div class="flex justify-between gap-4 px-4 py-3">
-          <dt class="text-tinta-suave">Lucro {% if veiculo.total_gastos %}<span class="text-xs">(já tirando os gastos)</span>{% endif %}</dt>
-          <dd class="text-right font-medium text-verde">{{ lucro|reais }}</dd>
-        </div>
-      {% endif %}
-    </dl>
-  </section>
-
-  {# Gastos do carro (só admin): entram no cálculo do lucro. #}
-  {% if gasto_form %}
-    <section class="mb-6" aria-label="Gastos do carro">
-      <h2 class="mb-2 text-lg">Gastos do carro</h2>
-      <div class="rounded-xl border border-borda bg-superficie shadow-sm">
-        {% if gastos %}
-          <ul class="divide-y divide-borda">
-            {% for g in gastos %}
-              <li class="flex items-center justify-between gap-3 px-4 py-3">
-                <div class="min-w-0">
-                  <div class="truncate font-medium">{{ g.descricao }}</div>
-                  <div class="text-sm text-tinta-suave">{{ g.data|date:"d/m/Y" }}</div>
-                </div>
-                <div class="flex shrink-0 items-center gap-3">
-                  <span class="font-medium">{{ g.valor|reais }}</span>
-                  <form method="post" action="{% url 'veiculos:remover_gasto' g.pk %}" onsubmit="return confirm('Remover este gasto?');">
-                    {% csrf_token %}
-                    <button type="submit" class="text-ambar" title="Remover gasto" aria-label="Remover gasto">✕</button>
-                  </form>
-                </div>
-              </li>
-            {% endfor %}
-          </ul>
-          <div class="flex justify-between gap-4 border-t border-borda px-4 py-3">
-            <span class="font-medium">Total de gastos</span>
-            <span class="font-bold text-ambar">{{ veiculo.total_gastos|reais }}</span>
-          </div>
-        {% else %}
-          <p class="px-4 py-4 text-center text-tinta-suave">Nenhum gasto lançado ainda.</p>
-        {% endif %}
-        <form method="post" action="{% url 'veiculos:adicionar_gasto' veiculo.pk %}" class="space-y-3 border-t border-borda p-4">
-          {% csrf_token %}
-          <p class="font-medium">Lançar gasto</p>
-          {% include "veiculos/partials/campo.html" with campo=gasto_form.descricao %}
-          <div class="grid gap-3 sm:grid-cols-2">
-            {% include "veiculos/partials/campo.html" with campo=gasto_form.valor %}
-            {% include "veiculos/partials/campo.html" with campo=gasto_form.data %}
-          </div>
-          <button type="submit" class="botao botao-secundario">Lançar gasto</button>
-        </form>
-      </div>
-      <p class="mt-2 text-xs text-tinta-suave">Os gastos são descontados do lucro do carro.</p>
-    </section>
-  {% endif %}
-
-  {# Financiamento #}
-  {% if veiculo.alienado %}
-    <section class="mb-6" aria-label="Financiamento">
-      <h2 class="mb-2 text-lg">Financiamento</h2>
-      <div class="aviso aviso-atencao">
-        <p>Carro com financiamento ativo em <strong>{{ veiculo.credor_alienacao|default:"—" }}</strong>.</p>
-        <p>Saldo devedor: <strong>{{ veiculo.saldo_devedor|reais }}</strong></p>
-      </div>
-    </section>
-  {% endif %}
-
-  {# Estado e observações #}
-  <section class="mb-6" aria-label="Estado">
-    <h2 class="mb-2 text-lg">Estado</h2>
-    <dl class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-      <div class="flex justify-between gap-4 px-4 py-3">
-        <dt class="text-tinta-suave">Chave reserva</dt>
-        <dd class="text-right font-medium">
-          {% if veiculo.tem_chave_reserva is None %}—{% elif veiculo.tem_chave_reserva %}Sim{% else %}Não{% endif %}
-        </dd>
-      </div>
-      {% include "veiculos/partials/dado.html" with rotulo="Avarias declaradas" valor=veiculo.avarias_declaradas %}
-      {% if veiculo.sinistro_declarado %}
-        {% include "veiculos/partials/dado.html" with rotulo="Sinistro" valor=veiculo.sinistro_descricao|default:"declarado" %}
-      {% endif %}
-      {% include "veiculos/partials/dado.html" with rotulo="Observações" valor=veiculo.observacoes %}
-    </dl>
-  </section>
-
-  {# Linha do tempo de negócios deste carro. #}
-  <section class="mb-6" aria-label="Negócios">
-    <h2 class="mb-2 text-lg">Negócios deste carro</h2>
-    <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-      {% for item in veiculo.itens_negocio.all %}
-        <li>
-          <a href="{% url 'negocios:detalhe' item.negocio.pk %}" class="block px-4 py-3 hover:bg-acento-50">
-            <div class="flex items-center justify-between gap-2">
-              <span class="font-medium">
-                {{ item.negocio.get_tipo_display }}{% if item.negocio.numero_contrato %} nº {{ item.negocio.numero_contrato }}{% endif %}
-              </span>
-              <span class="text-sm text-tinta-suave">{{ item.negocio.data|date:"d/m/Y" }}</span>
-            </div>
-            <div class="text-sm text-tinta-suave">
-              {{ item.de_pessoa.nome|default:"Loja" }} → {{ item.para_pessoa.nome|default:"Loja" }}
-              · {{ item.negocio.get_status_display }}
-            </div>
-          </a>
-        </li>
-      {% empty %}
-        <li class="px-4 py-6 text-center text-tinta-suave">Ainda não há negócios com este carro.</li>
-      {% endfor %}
-    </ul>
-  </section>
-  </div>
+      </section>
+    </div>
   </div>
 {% endblock %}
