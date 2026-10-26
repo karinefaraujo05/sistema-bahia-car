@@ -8,14 +8,30 @@ maior lado) e uma miniatura, sempre corrigindo a orientação da câmera.
 import io
 import uuid
 
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
-from PIL import Image, ImageOps
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 from .models import FotoVeiculo, Situacao, StatusVeiculo, Veiculo
 
 LADO_MAXIMO = 1600
 LADO_MINIATURA = 400
+
+
+class FotoError(Exception):
+    """Erro ao receber uma foto, com mensagem em linguagem simples pro usuário."""
+
+
+def _validar_foto(arquivo):
+    tipo = getattr(arquivo, "content_type", "") or ""
+    if not tipo.startswith("image/"):
+        raise FotoError(f"{arquivo.name}: isso não parece uma foto (envie uma imagem).")
+    limite = settings.TAMANHO_MAXIMO_UPLOAD_MB * 1024 * 1024
+    if arquivo.size and arquivo.size > limite:
+        raise FotoError(
+            f"A foto {arquivo.name} passa de {settings.TAMANHO_MAXIMO_UPLOAD_MB} MB."
+        )
 
 
 def _redimensionar(arquivo, lado_maximo):
@@ -33,13 +49,24 @@ def _redimensionar(arquivo, lado_maximo):
 
 @transaction.atomic
 def adicionar_foto(veiculo, arquivo, *, usuario=None):
-    """Adiciona uma foto ao veículo, gerando versão grande e miniatura."""
+    """Adiciona uma foto ao veículo, gerando versão grande e miniatura.
+
+    Levanta FotoError (mensagem amigável) se o arquivo não for imagem, passar do
+    limite de tamanho ou estiver corrompido — a view trata e avisa o usuário.
+    """
+    _validar_foto(arquivo)
     nome = f"{veiculo.placa or 'foto'}-{uuid.uuid4().hex[:8]}.jpg"
+
+    try:
+        grande = _redimensionar(arquivo, LADO_MAXIMO)
+        miniatura = _redimensionar(arquivo, LADO_MINIATURA)
+    except (OSError, UnidentifiedImageError, Image.DecompressionBombError) as erro:
+        raise FotoError(f"Não consegui abrir a foto {arquivo.name}. Tente outra.") from erro
 
     foto = FotoVeiculo(veiculo=veiculo, criado_por=usuario, atualizado_por=usuario)
     foto.ordem = veiculo.fotos.count()
-    foto.imagem.save(nome, _redimensionar(arquivo, LADO_MAXIMO), save=False)
-    foto.miniatura.save(nome, _redimensionar(arquivo, LADO_MINIATURA), save=False)
+    foto.imagem.save(nome, grande, save=False)
+    foto.miniatura.save(nome, miniatura, save=False)
     foto.save()
 
     # A primeira foto do veículo vira capa automaticamente.

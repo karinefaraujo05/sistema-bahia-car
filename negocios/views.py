@@ -4,6 +4,7 @@ from datetime import date
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -553,25 +554,31 @@ def consignar(request):
         termos_form = ConsignacaoTermosForm(request.POST)
         if pessoa_form.is_valid() and veiculo_form.is_valid() and termos_form.is_valid():
             dono = pessoa_form.resolver(usuario=request.user)
-            veiculo = veiculo_form.save(commit=False)
-            veiculo.criado_por = request.user
-            veiculo.atualizado_por = request.user
-            veiculo.save()
             t = termos_form.cleaned_data
-            criar_consignacao(
-                veiculo=veiculo,
-                proprietario=dono,
-                valor_liquido_minimo=t["valor_liquido_minimo"],
-                comissao_tipo=t["comissao_tipo"],
-                comissao_valor=t.get("comissao_valor"),
-                prazo_dias=t["prazo_dias"],
-                aviso_dias=t["aviso_dias"],
-                prazo_repasse_dias=t["prazo_repasse_dias"],
-                documentos_entregues=t.get("documentos_entregues", ""),
-                usuario=request.user,
-            )
-            messages.success(request, "Carro recebido em consignação.")
-            return redirect("veiculos:detalhe", pk=veiculo.pk)
+            try:
+                # Tudo junto: se a regra de negócio barrar, nada é salvo (sem carro órfão).
+                with transaction.atomic():
+                    veiculo = veiculo_form.save(commit=False)
+                    veiculo.criado_por = request.user
+                    veiculo.atualizado_por = request.user
+                    veiculo.save()
+                    criar_consignacao(
+                        veiculo=veiculo,
+                        proprietario=dono,
+                        valor_liquido_minimo=t["valor_liquido_minimo"],
+                        comissao_tipo=t["comissao_tipo"],
+                        comissao_valor=t.get("comissao_valor"),
+                        prazo_dias=t["prazo_dias"],
+                        aviso_dias=t["aviso_dias"],
+                        prazo_repasse_dias=t["prazo_repasse_dias"],
+                        documentos_entregues=t.get("documentos_entregues", ""),
+                        usuario=request.user,
+                    )
+            except RegraNegocioError as erro:
+                messages.error(request, str(erro))
+            else:
+                messages.success(request, "Carro recebido em consignação.")
+                return redirect("veiculos:detalhe", pk=veiculo.pk)
     else:
         selecionar = request.GET.get("selecionar")
         pessoa_form = EscolherPessoaForm(

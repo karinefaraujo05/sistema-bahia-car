@@ -52,6 +52,7 @@
       <div class="grid gap-4 sm:grid-cols-3">
         {% include "pessoas/partials/campo.html" with campo=form.cep %}
       </div>
+      <p id="cep-aviso" class="hidden text-sm text-ambar"></p>
       {% include "pessoas/partials/campo.html" with campo=form.endereco %}
       <div class="grid gap-4 sm:grid-cols-3">
         <div class="sm:col-span-2">{% include "pessoas/partials/campo.html" with campo=form.cidade %}</div>
@@ -114,19 +115,26 @@
       var endereco = document.getElementById("{{ form.endereco.id_for_label }}");
       var cidade = document.getElementById("{{ form.cidade.id_for_label }}");
       var uf = document.getElementById("{{ form.uf.id_for_label }}");
+      var aviso = document.getElementById("cep-aviso");
       if (!cep) return;
+      function avisarCep(msg) {
+        if (!aviso) return;
+        aviso.textContent = msg || "";
+        aviso.classList.toggle("hidden", !msg);
+      }
       cep.addEventListener("blur", function () {
         var v = (cep.value || "").replace(/\D/g, "");
         if (v.length !== 8) return;
+        avisarCep("");
         fetch("https://viacep.com.br/ws/" + v + "/json/")
           .then(function (r) { return r.json(); })
           .then(function (d) {
-            if (d.erro) return;
+            if (d.erro) { avisarCep("CEP não encontrado. Preencha o endereço à mão."); return; }
             if (endereco && !endereco.value) endereco.value = d.logradouro || "";
             if (cidade) cidade.value = d.localidade || "";
             if (uf) uf.value = (d.uf || "").toUpperCase();
           })
-          .catch(function () {});
+          .catch(function () { avisarCep("Não consegui buscar o CEP agora. Preencha o endereço à mão."); });
       });
     })();
   </script>

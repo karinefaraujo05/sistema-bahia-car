@@ -6,6 +6,7 @@ Agenda de pendências: cada lembrete já aponta pro lugar exato de resolver
 from datetime import timedelta
 
 from django.urls import reverse
+from django.utils import timezone
 
 from negocios.models import (
     Consignacao,
@@ -20,6 +21,30 @@ DIAS_CARRO_PARADO = 90
 RASCUNHO_ANTIGO_DIAS = 2
 
 PESO_NIVEL = {"atrasado": 0, "atencao": 1, "neutro": 2}
+
+
+def carros_parados(hoje, dias_minimo=DIAS_CARRO_PARADO):
+    """
+    Carros próprios em estoque parados há mais de `dias_minimo`, do mais antigo pro
+    mais novo. O filtro é feito no banco (por criado_em), não em Python.
+    dias_na_loja > dias_minimo  <=>  criado_em.date() < hoje - dias_minimo.
+    """
+    limite = hoje - timedelta(days=dias_minimo)
+    return (
+        Veiculo.objetos.filter(status=StatusVeiculo.EM_ESTOQUE)
+        .exclude(situacao=Situacao.TERCEIRO)
+        .filter(criado_em__date__lt=limite)
+        .order_by("criado_em")
+    )
+
+
+def lembretes_do_request(request):
+    """lembretes() calculado uma única vez por request (o painel e o sininho compartilham)."""
+    cache = getattr(request, "_lembretes_cache", None)
+    if cache is None:
+        cache = lembretes(timezone.localdate())
+        request._lembretes_cache = cache
+    return cache
 
 
 def _nome_carro(veiculo):
@@ -82,22 +107,18 @@ def lembretes(hoje):
                 }
             )
 
-    # Carros próprios parados há muito tempo.
-    proprios = Veiculo.objetos.filter(status=StatusVeiculo.EM_ESTOQUE).exclude(
-        situacao=Situacao.TERCEIRO
-    )
-    for v in proprios:
-        if v.dias_na_loja > DIAS_CARRO_PARADO:
-            itens.append(
-                {
-                    "nivel": "neutro",
-                    "categoria": "parado",
-                    "titulo": f"{_nome_carro(v)} parado há {v.dias_na_loja} dias",
-                    "detalhe": "Pensar em baixar o preço ou anunciar de novo.",
-                    "url": reverse("veiculos:detalhe", args=[v.pk]),
-                    "ordem": 1000 - v.dias_na_loja,
-                }
-            )
+    # Carros próprios parados há muito tempo (filtrados no banco).
+    for v in carros_parados(hoje):
+        itens.append(
+            {
+                "nivel": "neutro",
+                "categoria": "parado",
+                "titulo": f"{_nome_carro(v)} parado há {v.dias_na_loja} dias",
+                "detalhe": "Pensar em baixar o preço ou anunciar de novo.",
+                "url": reverse("veiculos:detalhe", args=[v.pk]),
+                "ordem": 1000 - v.dias_na_loja,
+            }
+        )
 
     # Negócios começados e não terminados.
     limite = hoje - timedelta(days=RASCUNHO_ANTIGO_DIAS)

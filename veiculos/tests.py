@@ -321,6 +321,48 @@ def test_consulta_placa_normalizar_tolera_nomes_de_campo():
     assert dados["combustivel"] == "Gasolina"
 
 
+# --- Onda 4: carros parados filtrados no banco e validacao de foto ---
+
+
+@pytest.mark.django_db
+def test_carros_parados_filtra_no_banco():
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from core.agenda import carros_parados
+
+    velho = criar_veiculo(placa="AAA1234")
+    novo = criar_veiculo(placa="BBB2345")
+    agora = timezone.now()
+    Veiculo.todos.filter(pk=velho.pk).update(criado_em=agora - timedelta(days=100))
+    Veiculo.todos.filter(pk=novo.pk).update(criado_em=agora - timedelta(days=10))
+
+    parados = list(carros_parados(timezone.localdate()))
+    assert velho in parados
+    assert novo not in parados
+
+
+@pytest.mark.django_db
+def test_adicionar_foto_rejeita_arquivo_que_nao_e_imagem(settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    veiculo = criar_veiculo()
+    arquivo = SimpleUploadedFile("doc.txt", b"nao sou imagem", content_type="text/plain")
+    with pytest.raises(services.FotoError):
+        services.adicionar_foto(veiculo, arquivo)
+    assert veiculo.fotos.count() == 0
+
+
+@pytest.mark.django_db
+def test_adicionar_foto_rejeita_imagem_corrompida(settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    veiculo = criar_veiculo()
+    arquivo = SimpleUploadedFile("foto.jpg", b"isto nao abre", content_type="image/jpeg")
+    with pytest.raises(services.FotoError):
+        services.adicionar_foto(veiculo, arquivo)
+    assert veiculo.fotos.count() == 0
+
+
 # --- Item 6.1: foto_capa usa o prefetch (sem N+1) ---
 
 

@@ -1,11 +1,13 @@
 import io
 import zipfile
+from datetime import date
 
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import default_storage
 from django.core.management import call_command
 from django.db import connection
-from django.db.models import Sum
+from django.db.models import Count, Sum
+from django.db.models.functions import TruncMonth
 from django.http import FileResponse, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -14,23 +16,13 @@ from negocios.models import Negocio, StatusNegocio, TipoNegocio
 from negocios.services import repasses_pendentes, resumo_de_vendas
 from veiculos.models import Situacao, StatusVeiculo, Veiculo
 
-from .agenda import DIAS_CARRO_PARADO, lembretes
+from .agenda import DIAS_CARRO_PARADO, carros_parados, lembretes_do_request
 from .busca import buscar as buscar_tudo
 
 MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"]
 
-# Painel e agenda usam o MESMO limite de "carro parado" (DIAS_CARRO_PARADO, em core.agenda).
-
-
-def _carros_parados(dias_minimo):
-    """Carros próprios em estoque parados há mais de `dias_minimo`, do mais antigo
-    pro mais novo. dias_na_loja é property (vem de criado_em), então filtra em Python."""
-    proprios = Veiculo.objetos.filter(status=StatusVeiculo.EM_ESTOQUE).exclude(
-        situacao=Situacao.TERCEIRO
-    )
-    parados = [v for v in proprios if v.dias_na_loja > dias_minimo]
-    parados.sort(key=lambda v: v.dias_na_loja, reverse=True)
-    return parados
+# Painel e agenda usam o MESMO limite de "carro parado" (DIAS_CARRO_PARADO, em core.agenda)
+# e a mesma consulta (carros_parados), filtrada no banco.
 
 
 def saude(request):
@@ -56,15 +48,23 @@ def _vendas_por_mes(hoje):
             mes, ano = 12, ano - 1
     pares.reverse()
 
-    dados = []
-    for ano, mes in pares:
-        quantidade = Negocio.objetos.filter(
+    # Uma query só: conta por mês (TruncMonth) e preenche os 6 baldes.
+    inicio_periodo = date(pares[0][0], pares[0][1], 1)
+    linhas = (
+        Negocio.objetos.filter(
             status=StatusNegocio.CONCLUIDO,
             tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA],
-            data__year=ano,
-            data__month=mes,
-        ).count()
-        dados.append({"rotulo": MESES_ABREV[mes - 1], "valor": quantidade})
+            data__gte=inicio_periodo,
+        )
+        .annotate(mes_ref=TruncMonth("data"))
+        .values("mes_ref")
+        .annotate(n=Count("id"))
+    )
+    contagem = {(linha["mes_ref"].year, linha["mes_ref"].month): linha["n"] for linha in linhas}
+
+    dados = []
+    for ano, mes in pares:
+        dados.append({"rotulo": MESES_ABREV[mes - 1], "valor": contagem.get((ano, mes), 0)})
 
     maximo = max((d["valor"] for d in dados), default=0) or 1
     for d in dados:
@@ -108,7 +108,7 @@ def inicio(request):
     lucro_do_mes = resumo_de_vendas(hoje.year, hoje.month)["lucro_bruto"] if eh_admin else None
 
     # Carros parados: card com os 3 mais antigos (mesmo limite da agenda).
-    parados = _carros_parados(DIAS_CARRO_PARADO)
+    parados = list(carros_parados(hoje, DIAS_CARRO_PARADO))
 
     # Onboarding: aparece sozinho toda segunda-feira (uma vez por semana).
     # "?onboarding=1" força a abrir (pra rever quando quiser).
@@ -119,7 +119,7 @@ def inicio(request):
         request.session["onboarding_semana"] = ano_semana
     mostrar_onboarding = auto_segunda or request.GET.get("onboarding") == "1"
 
-    pendencias = lembretes(hoje)
+    pendencias = lembretes_do_request(request)
     contexto = {
         "carros_na_loja": na_loja,
         "valor_estoque": valor_estoque,
@@ -143,7 +143,7 @@ def inicio(request):
 @login_required
 def agenda(request):
     """Agenda: todas as pendências, cada uma com link pro lugar certo."""
-    return render(request, "agenda.html", {"itens": lembretes(timezone.localdate())})
+    return render(request, "agenda.html", {"itens": lembretes_do_request(request)})
 
 
 @login_required
