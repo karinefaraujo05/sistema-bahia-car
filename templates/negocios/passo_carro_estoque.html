@@ -17,34 +17,39 @@
       <form id="form-carro" method="post">{% csrf_token %}</form>
 
       <p class="mb-3 text-tinta-suave">Toque no carro que você vendeu.</p>
-      <ul class="space-y-2">
-        {% for c in carros %}
-          <li>
-            <button type="submit" form="form-carro" name="veiculo" value="{{ c.pk }}"
-                    class="flex w-full items-center gap-3 rounded-xl border border-borda bg-superficie p-3 text-left shadow-sm transition hover:border-acento-300 hover:bg-acento-50">
-              <span class="h-14 w-20 shrink-0 overflow-hidden rounded bg-cinza-fundo">
-                {% if c.foto_capa %}
-                  <img src="{% if c.foto_capa.miniatura %}{{ c.foto_capa.miniatura.url }}{% else %}{{ c.foto_capa.imagem.url }}{% endif %}" alt="" class="h-full w-full object-cover" />
-                {% endif %}
-              </span>
-              <span class="min-w-0 flex-1">
-                <span class="block truncate text-lg font-medium">{{ c.marca }} {{ c.modelo }}</span>
-                <span class="block text-sm text-tinta-suave">{{ c.placa_formatada }}{% if c.valor_anunciado %} · {{ c.valor_anunciado|reais }}{% endif %}</span>
-              </span>
-              <svg class="h-5 w-5 shrink-0 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-          </li>
-        {% endfor %}
-      </ul>
+      <div class="painel overflow-hidden">
+        <ul class="divide-y divide-borda">
+          {% for c in carros %}
+            <li>
+              <button type="submit" form="form-carro" name="veiculo" value="{{ c.pk }}"
+                      class="group flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-acento-50">
+                <span class="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-cinza-fundo">
+                  {% if c.foto_capa %}
+                    <img src="{% if c.foto_capa.miniatura %}{{ c.foto_capa.miniatura.url }}{% else %}{{ c.foto_capa.imagem.url }}{% endif %}" alt="" class="h-full w-full object-cover" />
+                  {% endif %}
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-lg font-medium">{{ c.marca }} {{ c.modelo }}</span>
+                  <span class="block text-sm text-tinta-suave">{{ c.placa_formatada }}{% if c.valor_anunciado %} · {{ c.valor_anunciado|reais }}{% endif %}</span>
+                </span>
+                <svg class="h-5 w-5 shrink-0 text-tinta-suave transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
 
       <div class="mt-4">
         <a href="{% url 'negocios:passo_pessoa' negocio.pk %}" class="botao botao-secundario">Voltar</a>
       </div>
     {% else %}
-      <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-6 text-tinta-suave">
-        Não há carros disponíveis para venda no estoque.
-        <a href="{% url 'veiculos:novo' %}" class="text-acento-700">Cadastrar um carro</a>.
-      </p>
+      <div class="painel p-8 text-center">
+        <span class="chip mx-auto mb-3 h-12 w-12 bg-cinza-fundo text-cinza">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+        </span>
+        <p class="font-medium">Não há carros disponíveis para venda no estoque.</p>
+        <a href="{% url 'veiculos:novo' %}" class="botao botao-primario mt-4">Cadastrar um carro</a>
+      </div>
     {% endif %}
   {% endwith %}
 {% endblock %}

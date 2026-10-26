@@ -1,17 +1,24 @@
 {% load formato %}
 {% if termo %}
   {% if not carros and not pessoas and not negocios %}
-    <p class="rounded-xl border border-borda bg-superficie shadow-sm px-4 py-6 text-center text-tinta-suave">
-      Nada encontrado para "{{ termo }}".
-    </p>
+    <div class="flex flex-col items-center gap-2 rounded-xl border border-borda bg-superficie px-4 py-10 text-center shadow-sm">
+      <span class="chip h-11 w-11 bg-cinza-fundo text-cinza">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
+      <p class="font-medium">Nada encontrado</p>
+      <p class="text-sm text-tinta-suave">Nenhum resultado para "{{ termo }}".</p>
+    </div>
   {% endif %}
 
   {% if negocios %}
     <h2 class="mb-2 text-lg">Contratos e negócios</h2>
     <ul class="mb-5 divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
       {% for negocio in negocios %}
-        <li class="flex items-center gap-3 px-3 py-2">
-          <a href="{% url 'negocios:detalhe' negocio.pk %}" class="min-w-0 flex-1 hover:text-acento-700">
+        <li class="flex items-center gap-3 px-3 py-2.5 hover:bg-acento-50">
+          <span class="chip h-10 w-10 shrink-0 bg-acento-50 text-acento-700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          </span>
+          <a href="{% url 'negocios:detalhe' negocio.pk %}" class="min-w-0 flex-1">
             <span class="block truncate font-medium">{{ negocio.descricao_busca }}</span>
             <span class="block text-sm text-tinta-suave">{{ negocio.data|date:"d/m/Y" }}</span>
           </a>
@@ -33,14 +40,16 @@
     <ul class="mb-5 divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
       {% for carro in carros %}
         <li>
-          <a href="{% url 'veiculos:detalhe' carro.pk %}" class="flex items-center gap-3 px-3 py-2 hover:bg-acento-50">
-            <span class="h-12 w-16 shrink-0 overflow-hidden rounded bg-cinza-fundo">
+          <a href="{% url 'veiculos:detalhe' carro.pk %}" class="group flex items-center gap-3 px-3 py-2.5 hover:bg-acento-50">
+            <span class="flex h-12 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-cinza-fundo text-tinta-suave">
               {% if carro.foto_capa %}
                 <img
                   src="{% if carro.foto_capa.miniatura %}{{ carro.foto_capa.miniatura.url }}{% else %}{{ carro.foto_capa.imagem.url }}{% endif %}"
                   alt=""
                   class="h-full w-full object-cover"
                 />
+              {% else %}
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
               {% endif %}
             </span>
             <span class="min-w-0 flex-1">
@@ -48,6 +57,7 @@
               <span class="block text-sm text-tinta-suave">{{ carro.placa_formatada }}</span>
             </span>
             {% include "veiculos/partials/status_badge.html" with veiculo=carro %}
+            <svg class="h-5 w-5 shrink-0 text-tinta-suave transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
           </a>
         </li>
       {% endfor %}
@@ -59,12 +69,16 @@
     <ul class="divide-y divide-borda overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
       {% for pessoa in pessoas %}
         <li>
-          <a href="{% url 'pessoas:detalhe' pessoa.pk %}" class="block px-3 py-2 hover:bg-acento-50">
-            <span class="block font-medium">{{ pessoa.nome }}</span>
-            <span class="block text-sm text-tinta-suave">
-              {% if pessoa.cpf_cnpj %}{{ pessoa.cpf_cnpj_formatado }}{% endif %}
-              {% if pessoa.telefone %} · {{ pessoa.telefone_formatado }}{% endif %}
+          <a href="{% url 'pessoas:detalhe' pessoa.pk %}" class="group flex items-center gap-3 px-3 py-2.5 hover:bg-acento-50">
+            <span class="avatar shrink-0">{{ pessoa.nome|first|upper }}</span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate font-medium">{{ pessoa.nome }}</span>
+              <span class="block truncate text-sm text-tinta-suave">
+                {% if pessoa.cpf_cnpj %}{{ pessoa.cpf_cnpj_formatado }}{% endif %}
+                {% if pessoa.telefone %} · {{ pessoa.telefone_formatado }}{% endif %}
+              </span>
             </span>
+            <svg class="h-5 w-5 shrink-0 text-tinta-suave transition group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
           </a>
         </li>
       {% endfor %}

@@ -8,22 +8,35 @@
     {% if proximo %}{% include "partials/voltar.html" with href=proximo texto="Voltar ao negócio" %}{% else %}{% url 'pessoas:lista' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar para pessoas" %}{% endif %}
   </div>
 
-  <h1 class="mb-1 text-2xl">Cadastro rápido</h1>
+  <h1 class="mb-1 text-2xl sm:text-3xl">Cadastro rápido</h1>
   <p class="mb-5 text-tinta-suave">Só o essencial agora (com o CPF, pra não duplicar). O resto você completa depois.</p>
 
   {% if form.non_field_errors %}
     <div class="mb-4 aviso aviso-atencao">{{ form.non_field_errors }}</div>
   {% endif %}
 
-  <form method="post" action="?{{ request.GET.urlencode }}" class="space-y-4">
+  <form method="post" action="?{{ request.GET.urlencode }}" class="space-y-6">
     {% csrf_token %}
-    {% include "pessoas/partials/campo.html" with campo=form.tipo %}
-    <div>
-      {% include "pessoas/partials/campo.html" with campo=form.cpf_cnpj %}
-      <p id="cpf-aviso" class="hidden"></p>
-    </div>
-    {% include "pessoas/partials/campo.html" with campo=form.nome %}
-    {% include "pessoas/partials/campo.html" with campo=form.telefone %}
+    <section class="painel overflow-hidden">
+      <div class="flex items-center gap-4 border-b border-borda p-5">
+        <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <div>
+          <h2 class="text-lg">Dados básicos</h2>
+          <p class="text-sm text-tinta-suave">Nome, CPF e telefone.</p>
+        </div>
+      </div>
+      <div class="space-y-4 p-5">
+        {% include "pessoas/partials/campo.html" with campo=form.tipo %}
+        <div>
+          {% include "pessoas/partials/campo.html" with campo=form.cpf_cnpj %}
+          <p id="cpf-aviso" class="hidden"></p>
+        </div>
+        {% include "pessoas/partials/campo.html" with campo=form.nome %}
+        {% include "pessoas/partials/campo.html" with campo=form.telefone %}
+      </div>
+    </section>
 
     <div class="flex gap-2">
       <button type="submit" class="botao botao-primario">Salvar</button>

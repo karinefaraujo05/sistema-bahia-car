@@ -8,7 +8,7 @@
     {% if veiculo %}{% url 'veiculos:detalhe' veiculo.pk as voltar_url %}{% else %}{% url 'veiculos:estoque' as voltar_url %}{% endif %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar" %}
   </div>
 
-  <h1 class="mb-5 text-2xl">{% if veiculo %}Editar carro{% else %}Cadastrar carro{% endif %}</h1>
+  <h1 class="mb-5 text-2xl sm:text-3xl">{% if veiculo %}Editar carro{% else %}Cadastrar carro{% endif %}</h1>
 
   {% if form.non_field_errors %}
     <div class="mb-4 aviso aviso-atencao">
@@ -21,22 +21,29 @@
 
     {% include "veiculos/partials/campos_carro.html" with form=form modo_edicao=veiculo %}
 
-    <fieldset class="space-y-2">
-      <legend class="mb-2 text-lg font-semibold">Fotos</legend>
-      <input
-        id="fotos-novo"
-        type="file"
-        name="fotos"
-        accept="image/*"
-        capture="environment"
-        multiple
-        class="campo-arquivo"
-        aria-label="Escolher fotos do carro"
-      />
-      <p class="text-sm text-tinta-suave">
-        Pode tirar na hora pela câmera ou escolher várias da galeria.
-      </p>
-    </fieldset>
+    <section class="painel overflow-hidden">
+      <div class="flex items-center gap-4 border-b border-borda p-5">
+        <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+        </span>
+        <div>
+          <h2 class="text-lg">Fotos</h2>
+          <p class="text-sm text-tinta-suave">Tire na hora pela câmera ou escolha da galeria.</p>
+        </div>
+      </div>
+      <div class="p-5">
+        <input
+          id="fotos-novo"
+          type="file"
+          name="fotos"
+          accept="image/*"
+          capture="environment"
+          multiple
+          class="campo-arquivo"
+          aria-label="Escolher fotos do carro"
+        />
+      </div>
+    </section>
 
     <div class="flex gap-2">
       <button type="submit" class="botao botao-primario">Salvar</button>

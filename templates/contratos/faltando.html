@@ -4,19 +4,31 @@
 {% block titulo %}Faltam dados · Bahia Car{% endblock %}
 
 {% block conteudo %}
-  <h1 class="mb-3 text-2xl">Faltam dados para gerar o contrato</h1>
-  <p class="mb-4 text-tinta-suave">Preencha os itens abaixo e tente gerar de novo.</p>
+  <div class="mb-6">
+    <h1 class="text-2xl sm:text-3xl">Faltam dados para gerar o contrato</h1>
+    <p class="text-tinta-suave">Preencha os itens abaixo e tente gerar de novo.</p>
+  </div>
 
-  <ul class="divide-y divide-borda rounded-xl border border-borda bg-superficie shadow-sm">
-    {% for item in faltando %}
-      <li class="flex items-center justify-between gap-3 px-4 py-3">
-        <span>{{ item.texto }}</span>
-        <a href="{{ item.url }}" class="shrink-0 text-acento-700">Preencher</a>
-      </li>
-    {% endfor %}
-  </ul>
+  <div class="aviso aviso-atencao mb-5">
+    <p class="font-medium">Alguns dados ainda estão em branco.</p>
+    <p class="text-sm">Sem eles o contrato não fica completo. Toque em “Preencher” em cada item.</p>
+  </div>
 
-  <p class="mt-4">
+  <section class="painel overflow-hidden">
+    <ul class="divide-y divide-borda">
+      {% for item in faltando %}
+        <li class="flex items-center gap-3 px-5 py-4">
+          <span class="chip h-9 w-9 shrink-0 bg-ambar-fundo text-ambar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          </span>
+          <span class="min-w-0 flex-1 font-medium">{{ item.texto }}</span>
+          <a href="{{ item.url }}" class="shrink-0 font-medium text-acento-700">Preencher</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <p class="mt-5">
     <a href="{% url 'inicio' %}" class="botao botao-secundario">Voltar ao início</a>
   </p>
 {% endblock %}

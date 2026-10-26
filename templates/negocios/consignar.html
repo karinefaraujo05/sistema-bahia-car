@@ -7,8 +7,11 @@
   <div class="mb-2">
     {% url 'inicio' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Início" %}
   </div>
-  <h1 class="mb-1 text-2xl">Carro deixado para vender</h1>
-  <p class="mb-5 text-tinta-suave">O carro continua do dono; a loja só vende por ele.</p>
+
+  <div class="mb-6">
+    <h1 class="text-2xl sm:text-3xl">Carro deixado para vender</h1>
+    <p class="text-tinta-suave">O carro continua do dono; a loja só vende por ele.</p>
+  </div>
 
   {% if pessoa_form.non_field_errors %}
     <div class="mb-4 aviso aviso-atencao">
@@ -19,35 +22,61 @@
   <form method="post" class="space-y-6">
     {% csrf_token %}
 
-    <fieldset class="space-y-4">
-      <legend class="mb-2 text-lg font-semibold">Dono do carro</legend>
-      {% include "negocios/partials/campo.html" with campo=pessoa_form.pessoa %}
-      <p class="text-sm text-tinta-suave">
-        O dono ainda não está cadastrado?
-        <a href="{% url 'pessoas:novo' %}?next={% url 'negocios:consignar' %}" class="font-medium text-acento-700">Cadastre primeiro</a>
-        e você volta pra cá com ele já selecionado.
-      </p>
-    </fieldset>
+    <section class="painel overflow-hidden" aria-label="Dono do carro">
+      <div class="flex items-center gap-4 border-b border-borda p-5">
+        <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <div>
+          <h2 class="text-lg">Dono do carro</h2>
+          <p class="text-sm text-tinta-suave">Quem deixou o carro para a loja vender.</p>
+        </div>
+      </div>
+      <div class="space-y-4 p-5">
+        {% include "negocios/partials/campo.html" with campo=pessoa_form.pessoa %}
+        <p class="text-sm text-tinta-suave">
+          O dono ainda não está cadastrado?
+          <a href="{% url 'pessoas:novo' %}?next={% url 'negocios:consignar' %}" class="font-medium text-acento-700">Cadastre primeiro</a>
+          e você volta pra cá com ele já selecionado.
+        </p>
+      </div>
+    </section>
 
-    <fieldset class="space-y-4">
-      <legend class="mb-2 text-lg font-semibold">O carro</legend>
-      <div class="grid gap-4 sm:grid-cols-2">
+    <section class="painel overflow-hidden" aria-label="O carro">
+      <div class="flex items-center gap-4 border-b border-borda p-5">
+        <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+        </span>
+        <div>
+          <h2 class="text-lg">O carro</h2>
+          <p class="text-sm text-tinta-suave">Dados do veículo recebido.</p>
+        </div>
+      </div>
+      <div class="grid gap-4 p-5 sm:grid-cols-2">
         {% for campo in veiculo_form %}
           {% include "negocios/partials/campo.html" with campo=campo %}
         {% endfor %}
       </div>
-    </fieldset>
+    </section>
 
-    <fieldset class="space-y-4">
-      <legend class="mb-2 text-lg font-semibold">Combinado da consignação</legend>
-      <div class="grid gap-4 sm:grid-cols-2">
+    <section class="painel overflow-hidden" aria-label="Combinado da consignação">
+      <div class="flex items-center gap-4 border-b border-borda p-5">
+        <span class="indicador-icone shrink-0 bg-ambar-fundo text-ambar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+        </span>
+        <div>
+          <h2 class="text-lg">Combinado da consignação</h2>
+          <p class="text-sm text-tinta-suave">Valores e condições com o dono.</p>
+        </div>
+      </div>
+      <div class="grid gap-4 p-5 sm:grid-cols-2">
         {% for campo in termos_form %}
           {% include "negocios/partials/campo.html" with campo=campo %}
         {% endfor %}
       </div>
-    </fieldset>
+    </section>
 
-    <div class="flex gap-2">
+    <div class="flex flex-wrap gap-2">
       <button type="submit" class="botao botao-primario">Receber em consignação</button>
       <a href="{% url 'inicio' %}" class="botao botao-secundario">Cancelar</a>
     </div>

@@ -3,19 +3,29 @@
 {% block titulo %}Busca · Bahia Car{% endblock %}
 
 {% block conteudo %}
-  <h1 class="mb-3 text-2xl">Busca</h1>
-  <input
-    type="search"
-    name="q"
-    value="{{ termo }}"
-    class="campo text-lg"
-    placeholder="Buscar por placa, carro ou pessoa"
-    autocomplete="off"
-    autofocus
-    hx-get="{% url 'buscar' %}"
-    hx-trigger="keyup changed delay:300ms, search"
-    hx-target="#resultados-busca"
-  />
+  <div class="mb-6">
+    <h1 class="text-2xl sm:text-3xl">Busca</h1>
+    <p class="text-tinta-suave">Encontre carros, pessoas e negócios rápido.</p>
+  </div>
+
+  <div class="relative">
+    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-tinta-suave">
+      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    </span>
+    <input
+      type="search"
+      name="q"
+      value="{{ termo }}"
+      class="campo pl-10 text-lg"
+      placeholder="Buscar por placa, carro ou pessoa"
+      autocomplete="off"
+      autofocus
+      hx-get="{% url 'buscar' %}"
+      hx-trigger="keyup changed delay:300ms, search"
+      hx-target="#resultados-busca"
+    />
+  </div>
+
   <div id="resultados-busca" class="mt-4">
     {% include "busca/resultados.html" %}
   </div>

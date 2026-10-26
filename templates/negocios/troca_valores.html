@@ -8,20 +8,23 @@
 
   <p class="mb-4 text-tinta-suave">Confira os valores (já trouxemos o valor anunciado de cada carro) e ajuste se precisar.</p>
 
-  <form method="post" class="space-y-4">
+  <form method="post" class="space-y-6">
     {% csrf_token %}
-    <div class="grid gap-4 sm:grid-cols-2">
-      {% include "negocios/partials/campo.html" with campo=form.valor_loja %}
-      {% include "negocios/partials/campo.html" with campo=form.valor_cliente %}
-      {% include "negocios/partials/campo.html" with campo=form.km_loja %}
-      {% include "negocios/partials/campo.html" with campo=form.km_cliente %}
-      {% include "negocios/partials/campo.html" with campo=form.forma_pagamento %}
-      {% include "negocios/partials/campo.html" with campo=form.data %}
-    </div>
-    {% include "negocios/partials/campo.html" with campo=form.detalhes_pagamento %}
-    <div class="grid gap-4 sm:grid-cols-2">
-      {% include "negocios/partials/campo.html" with campo=form.data_hora_entrega %}
-      {% include "negocios/partials/campo.html" with campo=form.local_entrega %}
+
+    <div class="painel space-y-4 p-5">
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "negocios/partials/campo.html" with campo=form.valor_loja %}
+        {% include "negocios/partials/campo.html" with campo=form.valor_cliente %}
+        {% include "negocios/partials/campo.html" with campo=form.km_loja %}
+        {% include "negocios/partials/campo.html" with campo=form.km_cliente %}
+        {% include "negocios/partials/campo.html" with campo=form.forma_pagamento %}
+        {% include "negocios/partials/campo.html" with campo=form.data %}
+      </div>
+      {% include "negocios/partials/campo.html" with campo=form.detalhes_pagamento %}
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "negocios/partials/campo.html" with campo=form.data_hora_entrega %}
+        {% include "negocios/partials/campo.html" with campo=form.local_entrega %}
+      </div>
     </div>
 
     <div class="flex flex-wrap gap-2 pt-2">

@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#10303a" />
+    <meta name="theme-color" content="#cb4628" />
     <title>{% block titulo %}Bahia Car{% endblock %}</title>
 
     {# App no celular: instalável na tela inicial. #}
@@ -76,7 +76,7 @@
                 aria-expanded="false"
                 class="flex items-center gap-2.5 rounded-lg p-1 hover:bg-acento-50 sm:pr-2.5"
               >
-                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-acento-600 text-sm font-semibold text-white">
+                <span class="selo-marca flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-white">
                   {{ user.get_full_name|default:user.username|first|upper }}
                 </span>
                 <span class="hidden text-left leading-tight sm:block">
