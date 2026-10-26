@@ -552,6 +552,17 @@ def test_whatsapp_gera_documento_e_redireciona(client, settings, tmp_path):
     assert Documento.objetos.filter(negocio=contrato.negocio, gerado_pelo_sistema=True).exists()
 
 
+def test_detalhe_traz_marcadores_de_anexo_no_whatsapp(client):
+    """Onda 3: o botão WhatsApp traz os dados pro Web Share anexar o PDF no celular."""
+    Usuario.objects.create_user(username="karine", password="x-123456")
+    client.login(username="karine", password="x-123456")
+    contrato = _contrato_venda(telefone="71988887777")
+    resp = client.get(reverse("negocios:detalhe", args=[contrato.negocio.pk]))
+    html = resp.content.decode()
+    assert 'class="js-whatsapp"' in html
+    assert f'data-pdf-url="{reverse("contratos:baixar_pdf", args=[contrato.pk])}"' in html
+
+
 # --- Item 3.4: botão Imprimir (PDF inline + window.print) ---
 
 
