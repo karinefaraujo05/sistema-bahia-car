@@ -61,6 +61,10 @@ class VeiculoForm(forms.ModelForm):
             widget.attrs.setdefault("class", "campo")
             if nome in self._NUMERICOS:
                 widget.attrs.setdefault("inputmode", "numeric")
+        # Cor: dropdown com todas as cores (datalist no template), mas ainda dá pra
+        # digitar uma cor fora da lista (ex.: "Branco Perolizado").
+        self.fields["cor"].widget.attrs["list"] = "cores-carro"
+        self.fields["cor"].widget.attrs.setdefault("placeholder", "Escolha ou digite")
 
     def clean_placa(self):
         placa = normalizar_placa(self.cleaned_data["placa"])

@@ -382,6 +382,16 @@ def test_foto_capa_usa_prefetch_sem_query_extra(settings, tmp_path, django_asser
 
 
 @pytest.mark.django_db
+def test_form_carro_tem_lista_de_cores(client):
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    html = client.get(reverse("veiculos:novo")).content.decode()
+    assert 'id="cores-carro"' in html  # datalist com as cores
+    assert 'list="cores-carro"' in html  # campo "cor" ligado à lista
+    assert "Branco" in html and "Grafite" in html and "Vinho" in html
+
+
+@pytest.mark.django_db
 def test_patio_mostra_a_combinar_sem_preco(client):
     Usuario.objects.create_user(username="karine", password="segredo-123")
     client.login(username="karine", password="segredo-123")
