@@ -310,6 +310,14 @@ def test_consultar_placa_desligado_por_padrao(client):
     assert resp.json() == {"ativo": False}
 
 
+@pytest.mark.django_db
+def test_ler_documento_carro_desligado_por_padrao(client):
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    resp = client.post(reverse("veiculos:ler_documento"))
+    assert resp.json() == {"ativo": False}
+
+
 def test_consulta_placa_normalizar_tolera_nomes_de_campo():
     from veiculos.consulta_placa import _normalizar
 

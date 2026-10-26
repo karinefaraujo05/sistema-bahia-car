@@ -118,6 +118,22 @@ def editar(request, pk):
 
 
 @login_required
+@require_POST
+def ler_documento(request):
+    """Lê a foto do documento da pessoa (CNH/RG) com IA e devolve os campos."""
+    from core.ocr_ia import ler_documento as ler
+    from core.ocr_ia import provedor_ativo
+
+    if provedor_ativo() != "claude":
+        return JsonResponse({"ativo": False})
+    arquivo = request.FILES.get("documento")
+    dados = ler(arquivo, "pessoa") if arquivo else None
+    if not dados:
+        return JsonResponse({"ativo": True, "ok": False})
+    return JsonResponse({"ativo": True, "ok": True, "dados": dados})
+
+
+@login_required
 def buscar_cpf(request):
     """Procura uma pessoa pelo CPF/CNPJ (usado no cadastro, pra não duplicar)."""
     documento = so_digitos(request.GET.get("cpf", ""))

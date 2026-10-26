@@ -84,6 +84,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "core.context_processors.pendencias",
+                "core.context_processors.recursos",
             ],
         },
     },
@@ -152,5 +153,12 @@ CONSULTA_PLACA_PROVIDER = env("CONSULTA_PLACA_PROVIDER", default="none")
 CONSULTA_PLACA_TOKEN = env("CONSULTA_PLACA_TOKEN", default="")
 # Sobrescreve a URL base do provedor, se a API mudar de endereço (opcional).
 CONSULTA_PLACA_URL = env("CONSULTA_PLACA_URL", default="")
+
+# Ler documento por FOTO com IA (opcional). Desligado por padrão ("none").
+# Provedores: none | claude. Com "claude", precisa da ANTHROPIC_API_KEY.
+OCR_IA_PROVIDER = env("OCR_IA_PROVIDER", default="none")
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
+# Modelo da IA: opus é mais preciso; claude-haiku-4-5 é ~5x mais barato.
+OCR_IA_MODELO = env("OCR_IA_MODELO", default="claude-opus-4-8")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
