@@ -15,6 +15,7 @@ from .models import FotoVeiculo, StatusVeiculo, Veiculo
 from .services import (
     ABAS_ESTOQUE,
     ORIGENS_ESTOQUE,
+    FotoError,
     adicionar_foto,
     arquivar_veiculo,
     consultar_estoque,
@@ -22,6 +23,18 @@ from .services import (
     remover_foto,
 )
 from .validators import normalizar_placa
+
+
+def _salvar_fotos(veiculo, arquivos, usuario):
+    """Salva as fotos enviadas, pulando as que derem problema. Devolve (ok, erros)."""
+    ok, erros = 0, []
+    for arquivo in arquivos:
+        try:
+            adicionar_foto(veiculo, arquivo, usuario=usuario)
+            ok += 1
+        except FotoError as erro:
+            erros.append(str(erro))
+    return ok, erros
 
 
 @login_required
@@ -126,8 +139,9 @@ def novo(request):
             veiculo.criado_por = request.user
             veiculo.atualizado_por = request.user
             veiculo.save()
-            for arquivo in request.FILES.getlist("fotos"):
-                adicionar_foto(veiculo, arquivo, usuario=request.user)
+            _, erros = _salvar_fotos(veiculo, request.FILES.getlist("fotos"), request.user)
+            for erro in erros:
+                messages.warning(request, erro)
             messages.success(request, "Carro cadastrado.")
             return redirect("veiculos:detalhe", pk=veiculo.pk)
     else:
@@ -144,8 +158,9 @@ def editar(request, pk):
             veiculo = form.save(commit=False)
             veiculo.atualizado_por = request.user
             veiculo.save()
-            for arquivo in request.FILES.getlist("fotos"):
-                adicionar_foto(veiculo, arquivo, usuario=request.user)
+            _, erros = _salvar_fotos(veiculo, request.FILES.getlist("fotos"), request.user)
+            for erro in erros:
+                messages.warning(request, erro)
             messages.success(request, "Carro atualizado.")
             return redirect("veiculos:detalhe", pk=veiculo.pk)
     else:
@@ -201,12 +216,12 @@ def _galeria(request, veiculo):
 @require_POST
 def adicionar_fotos(request, pk):
     veiculo = get_object_or_404(Veiculo.objetos, pk=pk)
-    enviadas = request.FILES.getlist("fotos")
-    for arquivo in enviadas:
-        adicionar_foto(veiculo, arquivo, usuario=request.user)
+    ok, erros = _salvar_fotos(veiculo, request.FILES.getlist("fotos"), request.user)
     if request.htmx:
         return _galeria(request, veiculo)
-    messages.success(request, f"{len(enviadas)} foto(s) adicionada(s).")
+    for erro in erros:
+        messages.warning(request, erro)
+    messages.success(request, f"{ok} foto(s) adicionada(s).")
     return redirect("veiculos:detalhe", pk=veiculo.pk)
 
 
