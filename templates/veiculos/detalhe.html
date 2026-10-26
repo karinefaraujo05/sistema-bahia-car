@@ -189,15 +189,66 @@
           <dt class="text-tinta-suave">Valor de compra</dt>
           <dd class="text-right font-medium">{{ veiculo.valor_compra|reais }}</dd>
         </div>
+        {% if veiculo.total_gastos %}
+          <div class="flex justify-between gap-4 px-4 py-3">
+            <dt class="text-tinta-suave">Gastos no carro</dt>
+            <dd class="text-right font-medium text-ambar">{{ veiculo.total_gastos|reais }}</dd>
+          </div>
+        {% endif %}
       {% endif %}
       {% if lucro is not None %}
         <div class="flex justify-between gap-4 px-4 py-3">
-          <dt class="text-tinta-suave">Lucro bruto</dt>
+          <dt class="text-tinta-suave">Lucro {% if veiculo.total_gastos %}<span class="text-xs">(já tirando os gastos)</span>{% endif %}</dt>
           <dd class="text-right font-medium text-verde">{{ lucro|reais }}</dd>
         </div>
       {% endif %}
     </dl>
   </section>
+
+  {# Gastos do carro (só admin): entram no cálculo do lucro. #}
+  {% if gasto_form %}
+    <section class="mb-6" aria-label="Gastos do carro">
+      <h2 class="mb-2 text-lg">Gastos do carro</h2>
+      <div class="rounded-xl border border-borda bg-superficie shadow-sm">
+        {% if gastos %}
+          <ul class="divide-y divide-borda">
+            {% for g in gastos %}
+              <li class="flex items-center justify-between gap-3 px-4 py-3">
+                <div class="min-w-0">
+                  <div class="truncate font-medium">{{ g.descricao }}</div>
+                  <div class="text-sm text-tinta-suave">{{ g.data|date:"d/m/Y" }}</div>
+                </div>
+                <div class="flex shrink-0 items-center gap-3">
+                  <span class="font-medium">{{ g.valor|reais }}</span>
+                  <form method="post" action="{% url 'veiculos:remover_gasto' g.pk %}" onsubmit="return confirm('Remover este gasto?');">
+                    {% csrf_token %}
+                    <button type="submit" class="text-ambar" title="Remover gasto" aria-label="Remover gasto">✕</button>
+                  </form>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+          <div class="flex justify-between gap-4 border-t border-borda px-4 py-3">
+            <span class="font-medium">Total de gastos</span>
+            <span class="font-bold text-ambar">{{ veiculo.total_gastos|reais }}</span>
+          </div>
+        {% else %}
+          <p class="px-4 py-4 text-center text-tinta-suave">Nenhum gasto lançado ainda.</p>
+        {% endif %}
+        <form method="post" action="{% url 'veiculos:adicionar_gasto' veiculo.pk %}" class="space-y-3 border-t border-borda p-4">
+          {% csrf_token %}
+          <p class="font-medium">Lançar gasto</p>
+          {% include "veiculos/partials/campo.html" with campo=gasto_form.descricao %}
+          <div class="grid gap-3 sm:grid-cols-2">
+            {% include "veiculos/partials/campo.html" with campo=gasto_form.valor %}
+            {% include "veiculos/partials/campo.html" with campo=gasto_form.data %}
+          </div>
+          <button type="submit" class="botao botao-secundario">Lançar gasto</button>
+        </form>
+      </div>
+      <p class="mt-2 text-xs text-tinta-suave">Os gastos são descontados do lucro do carro.</p>
+    </section>
+  {% endif %}
 
   {# Financiamento #}
   {% if veiculo.alienado %}

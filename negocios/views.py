@@ -698,7 +698,7 @@ def vendas(request):
     negocios = (
         (base.filter(tipo=tipo) if tipo else base)
         .order_by("-data", "-numero_contrato")
-        .prefetch_related("itens__veiculo")
+        .prefetch_related("itens__veiculo__gastos")
     )
 
     paginador = Paginator(negocios, 50)

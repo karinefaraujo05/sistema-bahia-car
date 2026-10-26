@@ -1,7 +1,22 @@
 from django import forms
 
-from .models import Veiculo
+from .models import GastoVeiculo, Veiculo
 from .validators import normalizar_placa
+
+
+class GastoVeiculoForm(forms.ModelForm):
+    class Meta:
+        model = GastoVeiculo
+        fields = ["descricao", "valor", "data"]
+        widgets = {"data": forms.DateInput(attrs={"type": "date"})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["data"].required = False
+        for campo in self.fields.values():
+            campo.widget.attrs.setdefault("class", "campo")
+        self.fields["valor"].widget.attrs["inputmode"] = "numeric"
+        self.fields["descricao"].widget.attrs["placeholder"] = "Ex.: funilaria, documentação, pneus"
 
 
 class VeiculoForm(forms.ModelForm):

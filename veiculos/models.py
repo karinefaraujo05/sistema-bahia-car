@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
@@ -170,6 +172,14 @@ class Veiculo(ModeloBase):
                 faltando.append(self._meta.get_field(campo).verbose_name)
         return faltando
 
+    @property
+    def total_gastos(self):
+        """Soma dos gastos lançados no carro (reparo, documentação, etc.).
+
+        Itera sobre self.gastos.all() para reusar o prefetch e não gerar N+1.
+        """
+        return sum((g.valor for g in self.gastos.all()), Decimal("0"))
+
 
 class FotoVeiculo(ModeloBase):
     veiculo = models.ForeignKey(
@@ -196,3 +206,22 @@ class FotoVeiculo(ModeloBase):
 
     def __str__(self):
         return f"Foto de {self.veiculo_id}"
+
+
+class GastoVeiculo(ModeloBase):
+    """Gasto lançado num carro (reparo, documentação, lavagem...) para o lucro real."""
+
+    veiculo = models.ForeignKey(
+        Veiculo, verbose_name="veículo", on_delete=models.CASCADE, related_name="gastos"
+    )
+    descricao = models.CharField("descrição", max_length=120)
+    valor = models.DecimalField("valor", max_digits=10, decimal_places=2)
+    data = models.DateField("data", default=timezone.localdate)
+
+    class Meta(ModeloBase.Meta):
+        verbose_name = "gasto do veículo"
+        verbose_name_plural = "gastos do veículo"
+        ordering = ["-data", "-criado_em"]
+
+    def __str__(self):
+        return f"{self.descricao}: {self.valor}"
