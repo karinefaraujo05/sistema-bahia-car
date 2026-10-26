@@ -184,6 +184,19 @@
         <dt class="text-tinta-suave">Valor anunciado</dt>
         <dd class="text-right font-medium">{{ veiculo.valor_anunciado|reais }}</dd>
       </div>
+      {% if veiculo.valor_fipe %}
+        <div class="flex justify-between gap-4 px-4 py-3">
+          <dt class="text-tinta-suave">Referência FIPE</dt>
+          <dd class="text-right font-medium">
+            {{ veiculo.valor_fipe|reais }}
+            {% with c=veiculo.anunciado_vs_fipe %}
+              {% if c %}
+                <span class="block text-xs {% if c.acima %}text-ambar{% else %}text-verde{% endif %}">anúncio {{ c.pct }}% {% if c.acima %}acima{% else %}abaixo{% endif %} da FIPE</span>
+              {% endif %}
+            {% endwith %}
+          </dd>
+        </div>
+      {% endif %}
       {% if user.eh_administrador %}
         <div class="flex justify-between gap-4 px-4 py-3">
           <dt class="text-tinta-suave">Valor de compra</dt>

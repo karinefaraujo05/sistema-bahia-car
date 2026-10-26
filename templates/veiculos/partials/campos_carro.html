@@ -17,6 +17,9 @@ pra já deixar a seção de documentação aberta e os campos livres).
   <p id="placa-resultado" class="mt-2 hidden text-sm"></p>
 </div>
 
+{# Guarda o preço de referência da FIPE (preenchido pelo JS abaixo) pra comparar depois. #}
+{{ form.valor_fipe }}
+
 {# 2) FIPE: caminho principal pra preencher marca, modelo, ano e combustível. #}
 <div class="rounded-2xl border border-acento-200 bg-acento-50 p-4">
   <div class="mb-1 flex items-center gap-2">
@@ -167,6 +170,7 @@ pra já deixar a seção de documentação aberta e os campos livres).
       fAnoMod = document.getElementById("{{ form.ano_modelo.id_for_label }}"),
       fCor = document.getElementById("{{ form.cor.id_for_label }}"),
       fValor = document.getElementById("{{ form.valor_anunciado.id_for_label }}"),
+      fValorFipe = document.getElementById("{{ form.valor_fipe.id_for_label }}"),
       fComb = document.getElementById("{{ form.combustivel.id_for_label }}"),
       fChassi = document.getElementById("{{ form.chassi.id_for_label }}");
 
@@ -330,6 +334,8 @@ pra já deixar a seção de documentação aberta e os campos livres).
           }
           var v = (dados.Valor || "").replace(/[^\d,]/g, "").replace(",", ".");
           precoFipe = parseFloat(v) || 0;
+          // Guarda a referência FIPE (pra comparar com o anúncio na ficha do carro).
+          if (fValorFipe && precoFipe) fValorFipe.value = Math.round(precoFipe);
           if (fValor && precoFipe && !fValor.value) fValor.value = Math.round(precoFipe);
           precoEl.textContent = dados.Valor;
           resultado.classList.remove("hidden");

@@ -110,6 +110,10 @@ class Veiculo(ModeloBase):
     valor_anunciado = models.DecimalField(
         "valor anunciado", max_digits=10, decimal_places=2, null=True, blank=True
     )
+    # Preço de referência da FIPE capturado no cadastro (pra comparar com o anunciado).
+    valor_fipe = models.DecimalField(
+        "valor de referência FIPE", max_digits=10, decimal_places=2, null=True, blank=True
+    )
     status = models.CharField(
         "status", max_length=12, choices=StatusVeiculo.choices, default=StatusVeiculo.EM_ESTOQUE,
         db_index=True,
@@ -171,6 +175,15 @@ class Veiculo(ModeloBase):
             if not getattr(self, campo):
                 faltando.append(self._meta.get_field(campo).verbose_name)
         return faltando
+
+    @property
+    def anunciado_vs_fipe(self):
+        """Compara o anunciado com a FIPE: {pct, acima} ou None se faltar algum valor."""
+        if not (self.valor_fipe and self.valor_anunciado):
+            return None
+        delta = self.valor_anunciado - self.valor_fipe
+        pct = round(delta / self.valor_fipe * 100)
+        return {"pct": abs(pct), "acima": delta >= 0}
 
     @property
     def total_gastos(self):

@@ -450,3 +450,53 @@ def test_patio_mostra_a_combinar_sem_preco(client):
     # Carro sem preço mostra "A combinar" (não o travessão vermelho gigante).
     assert "A combinar" in html
     assert "R$" in html  # o que tem preço continua mostrando o valor
+
+
+@pytest.mark.django_db
+def test_anunciado_vs_fipe():
+    from decimal import Decimal
+
+    acima = criar_veiculo(valor_fipe=Decimal("20000"), valor_anunciado=Decimal("22000"))
+    assert acima.anunciado_vs_fipe == {"pct": 10, "acima": True}
+    abaixo = criar_veiculo(
+        placa="XYZ9099", valor_fipe=Decimal("20000"), valor_anunciado=Decimal("18000")
+    )
+    assert abaixo.anunciado_vs_fipe == {"pct": 10, "acima": False}
+    assert criar_veiculo(placa="YYZ8088").anunciado_vs_fipe is None  # sem FIPE
+
+
+@pytest.mark.django_db
+def test_ficha_mostra_comparacao_fipe(client):
+    from decimal import Decimal
+
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    v = criar_veiculo(valor_fipe=Decimal("20000"), valor_anunciado=Decimal("22000"))
+    html = client.get(reverse("veiculos:detalhe", args=[v.pk])).content.decode()
+    assert "Referência FIPE" in html
+    assert "acima da FIPE" in html
+
+
+@pytest.mark.django_db
+def test_cadastro_salva_valor_fipe(client):
+    from decimal import Decimal
+
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    resp = client.post(
+        reverse("veiculos:novo"),
+        {
+            "placa": "FIP1234",
+            "marca": "Fiat",
+            "modelo": "Mobi",
+            "ano_fabricacao": 2020,
+            "ano_modelo": 2021,
+            "cor": "Branco",
+            "valor_anunciado": "40000",
+            "valor_fipe": "38000",
+            "situacao": Situacao.PROPRIO,
+            "status": StatusVeiculo.EM_ESTOQUE,
+        },
+    )
+    assert resp.status_code == 302
+    assert Veiculo.objetos.get(placa="FIP1234").valor_fipe == Decimal("38000")

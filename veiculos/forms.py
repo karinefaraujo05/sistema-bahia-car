@@ -38,6 +38,7 @@ class VeiculoForm(forms.ModelForm):
             "proprietario_registral",
             "valor_compra",
             "valor_anunciado",
+            "valor_fipe",
             "status",
             "alienado",
             "credor_alienacao",
@@ -82,6 +83,8 @@ class VeiculoForm(forms.ModelForm):
         self.fields["cor"].widget.attrs.setdefault("placeholder", "Escolha ou digite")
         # Credor do financiamento: lista de bancos/financeiras comuns (dá pra digitar outro).
         self.fields["credor_alienacao"].widget.attrs["list"] = "credores"
+        # valor_fipe é preenchido pela consulta FIPE (JS) e fica escondido no form.
+        self.fields["valor_fipe"].widget = forms.HiddenInput()
 
     def clean_placa(self):
         placa = normalizar_placa(self.cleaned_data["placa"])
