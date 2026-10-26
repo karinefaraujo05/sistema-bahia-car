@@ -27,6 +27,14 @@
     </div>
   </div>
 
+  {% if faltando_contrato %}
+    <div class="mb-6 aviso aviso-atencao">
+      <p class="font-medium">Faltam dados pro contrato deste carro.</p>
+      <p>Sem <strong>{{ faltando_contrato|join:" e " }}</strong> não dá pra gerar o contrato.
+        <a href="{% url 'veiculos:editar' veiculo.pk %}" class="font-medium underline">Completar agora</a>.</p>
+    </div>
+  {% endif %}
+
   <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
   <div>
   {# Consignação (se o carro foi deixado para vender). #}

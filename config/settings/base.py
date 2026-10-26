@@ -146,4 +146,11 @@ MEDIA_ROOT = BASE_DIR / "media"
 # Limite padrão de upload de documento (20 MB), configurável.
 TAMANHO_MAXIMO_UPLOAD_MB = env.int("TAMANHO_MAXIMO_UPLOAD_MB", default=20)
 
+# Consulta de placa externa (API paga, opcional). Desligada por padrão ("none").
+# Provedores suportados: none | apibrasil | simplesapi | credify (ver veiculos/consulta_placa.py).
+CONSULTA_PLACA_PROVIDER = env("CONSULTA_PLACA_PROVIDER", default="none")
+CONSULTA_PLACA_TOKEN = env("CONSULTA_PLACA_TOKEN", default="")
+# Sobrescreve a URL base do provedor, se a API mudar de endereço (opcional).
+CONSULTA_PLACA_URL = env("CONSULTA_PLACA_URL", default="")
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
