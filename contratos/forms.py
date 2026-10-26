@@ -1,9 +1,13 @@
 from django import forms
 
+from core.dados_br import UF_CHOICES
+
 from .models import ConfiguracaoLoja, TipoDocumento
 
 
 class ConfiguracaoLojaForm(forms.ModelForm):
+    uf = forms.ChoiceField(label="UF", required=False, choices=[("", "escolher…"), *UF_CHOICES])
+
     class Meta:
         model = ConfiguracaoLoja
         fields = [
@@ -30,6 +34,10 @@ class ConfiguracaoLojaForm(forms.ModelForm):
             campo.widget.attrs.setdefault("class", "campo")
             if nome in self._NUMERICOS:
                 campo.widget.attrs.setdefault("inputmode", "numeric")
+        # Mantém uma UF antiga fora da lista (se houver) ao editar.
+        atual = getattr(self.instance, "uf", "") or ""
+        if atual and atual not in [v for v, _ in self.fields["uf"].choices]:
+            self.fields["uf"].choices = [(atual, atual), *self.fields["uf"].choices]
 
 
 class DocumentoUploadForm(forms.Form):

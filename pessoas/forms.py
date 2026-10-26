@@ -1,5 +1,7 @@
 from django import forms
 
+from core.dados_br import ESTADO_CIVIL_CHOICES, UF_CHOICES
+
 from .models import Pessoa, TipoPessoa
 from .validators import so_digitos
 
@@ -51,6 +53,12 @@ class PessoaRapidaForm(forms.ModelForm):
 
 
 class PessoaForm(forms.ModelForm):
+    # Campos que viram seleção (menos digitação, menos erro).
+    uf = forms.ChoiceField(label="UF", required=False, choices=[("", "escolher…"), *UF_CHOICES])
+    estado_civil = forms.ChoiceField(
+        label="estado civil", required=False, choices=[("", "escolher…"), *ESTADO_CIVIL_CHOICES]
+    )
+
     class Meta:
         model = Pessoa
         fields = [
@@ -82,6 +90,15 @@ class PessoaForm(forms.ModelForm):
         self.fields["cep"].required = False
         self.fields["cep"].help_text = "Digite o CEP e o endereço é preenchido sozinho."
         self.fields["observacoes"].label = "Observações sobre a pessoa"
+        # Nacionalidade: lista de sugestões (datalist) com padrão "Brasileira".
+        self.fields["nacionalidade"].widget.attrs["list"] = "nacionalidades"
+        if not self.instance.pk and not self.is_bound:
+            self.fields["nacionalidade"].initial = "Brasileira"
+        # Não perder valores antigos fora da lista ao editar (ex.: estado civil digitado antes).
+        for campo in ("uf", "estado_civil"):
+            atual = getattr(self.instance, campo, "") or ""
+            if atual and atual not in [v for v, _ in self.fields[campo].choices]:
+                self.fields[campo].choices = [(atual, atual), *self.fields[campo].choices]
 
     def clean_cpf_cnpj(self):
         documento = so_digitos(self.cleaned_data.get("cpf_cnpj"))

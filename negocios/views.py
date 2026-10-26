@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from core.busca import _pessoas as buscar_pessoas
+from core.dados_br import UF_POR_EXTENSO
 from core.tenancy import empresa_atual
 from veiculos.forms import VeiculoForm
 from veiculos.models import Situacao, StatusVeiculo, Veiculo
@@ -246,17 +247,6 @@ def passo_pagamento(request, pk):
         "negocios/passo_pagamento.html",
         {"negocio": negocio, "form": form, "titulo": "Valores, pagamento e entrega", "passo": 3},
     )
-
-
-UF_POR_EXTENSO = {
-    "AC": "Acre", "AL": "Alagoas", "AP": "Amapá", "AM": "Amazonas", "BA": "Bahia",
-    "CE": "Ceará", "DF": "Distrito Federal", "ES": "Espírito Santo", "GO": "Goiás",
-    "MA": "Maranhão", "MT": "Mato Grosso", "MS": "Mato Grosso do Sul", "MG": "Minas Gerais",
-    "PA": "Pará", "PB": "Paraíba", "PR": "Paraná", "PE": "Pernambuco", "PI": "Piauí",
-    "RJ": "Rio de Janeiro", "RN": "Rio Grande do Norte", "RS": "Rio Grande do Sul",
-    "RO": "Rondônia", "RR": "Roraima", "SC": "Santa Catarina", "SP": "São Paulo",
-    "SE": "Sergipe", "TO": "Tocantins",
-}
 
 
 def local_entrega_padrao():

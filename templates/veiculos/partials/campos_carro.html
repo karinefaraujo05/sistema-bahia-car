@@ -111,6 +111,26 @@ pra já deixar a seção de documentação aberta e os campos livres).
         {{ form.alienado }}
         <span>{{ form.alienado.label }}</span>
       </label>
+      <datalist id="credores">
+        <option value="Banco do Brasil"></option>
+        <option value="Caixa Econômica Federal"></option>
+        <option value="Itaú"></option>
+        <option value="Bradesco"></option>
+        <option value="Santander"></option>
+        <option value="BV Financeira"></option>
+        <option value="Aymoré"></option>
+        <option value="Omni"></option>
+        <option value="Banco Pan"></option>
+        <option value="Banco Safra"></option>
+        <option value="Sicoob"></option>
+        <option value="Sicredi"></option>
+        <option value="Banco Votorantim"></option>
+        <option value="Daycoval"></option>
+        <option value="Banco Volkswagen"></option>
+        <option value="Banco Toyota"></option>
+        <option value="Banco Honda"></option>
+        <option value="Porto Seguro"></option>
+      </datalist>
       <div id="bloco-financiamento" class="grid gap-4 sm:grid-cols-2">
         {% include "veiculos/partials/campo.html" with campo=form.credor_alienacao %}
         {% include "veiculos/partials/campo.html" with campo=form.saldo_devedor %}
