@@ -59,6 +59,30 @@ pra já deixar a seção de documentação aberta e os campos livres).
     {% include "veiculos/partials/campo.html" with campo=form.ano_modelo %}
     {% include "veiculos/partials/campo.html" with campo=form.cor %}
     {% include "veiculos/partials/campo.html" with campo=form.km %}
+    {# Lista de cores de carro: vira dropdown no campo Cor (dá pra digitar outra também). #}
+    <datalist id="cores-carro">
+      <option value="Branco"></option>
+      <option value="Preto"></option>
+      <option value="Prata"></option>
+      <option value="Cinza"></option>
+      <option value="Grafite"></option>
+      <option value="Chumbo"></option>
+      <option value="Vermelho"></option>
+      <option value="Azul"></option>
+      <option value="Azul-marinho"></option>
+      <option value="Verde"></option>
+      <option value="Amarelo"></option>
+      <option value="Laranja"></option>
+      <option value="Marrom"></option>
+      <option value="Bege"></option>
+      <option value="Dourado"></option>
+      <option value="Vinho"></option>
+      <option value="Bordô"></option>
+      <option value="Rosa"></option>
+      <option value="Roxo"></option>
+      <option value="Champagne"></option>
+      <option value="Fantasia"></option>
+    </datalist>
     {% include "veiculos/partials/campo.html" with campo=form.combustivel %}
     {% include "veiculos/partials/campo.html" with campo=form.valor_anunciado %}
   </div>
