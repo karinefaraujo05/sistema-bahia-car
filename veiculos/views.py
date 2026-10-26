@@ -10,8 +10,8 @@ from contratos.models import Documento, TipoDocumento
 from core.tenancy import empresa_atual
 
 from .consulta_placa import consultar_placa_externa, provedor_ativo
-from .forms import VeiculoForm
-from .models import FotoVeiculo, StatusVeiculo, Veiculo
+from .forms import GastoVeiculoForm, VeiculoForm
+from .models import FotoVeiculo, GastoVeiculo, StatusVeiculo, Veiculo
 from .services import (
     ABAS_ESTOQUE,
     ORIGENS_ESTOQUE,
@@ -76,8 +76,9 @@ def detalhe(request, pk):
     from negocios.services import lucro_do_veiculo
 
     veiculo = get_object_or_404(Veiculo.objetos, pk=pk)
+    eh_admin = request.user.eh_administrador
     lucro = None
-    if request.user.eh_administrador and veiculo.status == StatusVeiculo.VENDIDO:
+    if eh_admin and veiculo.status == StatusVeiculo.VENDIDO:
         lucro = lucro_do_veiculo(veiculo)
     return render(
         request,
@@ -87,8 +88,45 @@ def detalhe(request, pk):
             "lucro": lucro,
             # Avisa, na ficha, o que falta pro contrato (chassi/renavam).
             "faltando_contrato": veiculo.campos_faltando_contrato(),
+            # Gastos do carro (só o administrador vê/lança — é número financeiro).
+            "gastos": veiculo.gastos.all() if eh_admin else None,
+            "gasto_form": GastoVeiculoForm() if eh_admin else None,
         },
     )
+
+
+@login_required
+@require_POST
+def adicionar_gasto(request, pk):
+    if not request.user.eh_administrador:
+        messages.error(request, "Só o administrador lança gastos.")
+        return redirect("veiculos:detalhe", pk=pk)
+    veiculo = get_object_or_404(Veiculo.objetos, pk=pk)
+    form = GastoVeiculoForm(request.POST)
+    if form.is_valid():
+        gasto = form.save(commit=False)
+        gasto.veiculo = veiculo
+        gasto.criado_por = request.user
+        gasto.atualizado_por = request.user
+        gasto.save()
+        messages.success(request, "Gasto lançado.")
+    else:
+        messages.error(request, "Confira a descrição e o valor do gasto.")
+    return redirect("veiculos:detalhe", pk=veiculo.pk)
+
+
+@login_required
+@require_POST
+def remover_gasto(request, gasto_pk):
+    gasto = get_object_or_404(GastoVeiculo.objetos, pk=gasto_pk)
+    if not request.user.eh_administrador:
+        messages.error(request, "Só o administrador remove gastos.")
+        return redirect("veiculos:detalhe", pk=gasto.veiculo_id)
+    veiculo_id = gasto.veiculo_id
+    gasto.atualizado_por = request.user
+    gasto.arquivar()
+    messages.success(request, "Gasto removido.")
+    return redirect("veiculos:detalhe", pk=veiculo_id)
 
 
 @login_required

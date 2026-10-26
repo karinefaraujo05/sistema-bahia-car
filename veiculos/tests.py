@@ -395,6 +395,50 @@ def test_form_carro_tem_lista_de_cores(client):
 
 
 @pytest.mark.django_db
+def test_admin_lanca_e_remove_gasto(client):
+    from decimal import Decimal
+
+    from veiculos.models import GastoVeiculo
+
+    Usuario.objects.create_user(
+        username="dono", password="x-123456", papel=Usuario.Papel.ADMINISTRADOR
+    )
+    client.login(username="dono", password="x-123456")
+    carro = criar_veiculo()
+    resp = client.post(
+        reverse("veiculos:adicionar_gasto", args=[carro.pk]),
+        {"descricao": "Funilaria", "valor": "1500"},
+    )
+    assert resp.status_code == 302
+    gasto = GastoVeiculo.objetos.get(veiculo=carro)
+    assert gasto.valor == Decimal("1500")
+    carro.refresh_from_db()
+    assert carro.total_gastos == Decimal("1500")
+
+    client.post(reverse("veiculos:remover_gasto", args=[gasto.pk]))
+    carro.refresh_from_db()
+    assert carro.total_gastos == Decimal("0")
+
+
+@pytest.mark.django_db
+def test_vendedor_nao_lanca_nem_ve_gastos(client):
+    from veiculos.models import GastoVeiculo
+
+    Usuario.objects.create_user(
+        username="vend", password="x-123456", papel=Usuario.Papel.VENDEDOR
+    )
+    client.login(username="vend", password="x-123456")
+    carro = criar_veiculo()
+    resp = client.post(
+        reverse("veiculos:adicionar_gasto", args=[carro.pk]), {"descricao": "x", "valor": "100"}
+    )
+    assert resp.status_code == 302
+    assert GastoVeiculo.objetos.filter(veiculo=carro).count() == 0
+    html = client.get(reverse("veiculos:detalhe", args=[carro.pk])).content.decode()
+    assert "Lançar gasto" not in html
+
+
+@pytest.mark.django_db
 def test_patio_mostra_a_combinar_sem_preco(client):
     Usuario.objects.create_user(username="karine", password="segredo-123")
     client.login(username="karine", password="segredo-123")

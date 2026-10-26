@@ -584,6 +584,17 @@ def test_lucro_do_veiculo():
     assert services.lucro_do_veiculo(carro) == Decimal("7000")
 
 
+def test_lucro_desconta_gastos_do_carro():
+    from veiculos.models import GastoVeiculo
+
+    negocio, carro = _venda_concluida("LLL3039")
+    GastoVeiculo.objetos.create(veiculo=carro, descricao="funilaria", valor=Decimal("1000"))
+    carro.refresh_from_db()
+    # Lucro cai pelos gastos: 7000 - 1000 = 6000.
+    assert services.lucro_do_veiculo(carro) == Decimal("6000")
+    assert services.lucro_bruto(negocio) == Decimal("6000")
+
+
 def test_resumo_de_vendas_do_mes():
     _venda_concluida("LLL3032")
     hoje = timezone.localdate()
@@ -824,9 +835,9 @@ def test_lucro_bruto_reusa_prefetch_sem_query_extra(django_assert_num_queries):
         neg = Negocio.objetos.create(tipo=TipoNegocio.VENDA, status=StatusNegocio.CONCLUIDO)
         item(neg, car, "50000")
     negocios = list(
-        Negocio.objetos.filter(tipo=TipoNegocio.VENDA).prefetch_related("itens__veiculo")
+        Negocio.objetos.filter(tipo=TipoNegocio.VENDA).prefetch_related("itens__veiculo__gastos")
     )
-    # Com o prefetch, calcular o lucro de todos não gera query nova por negócio.
+    # Com o prefetch (incluindo os gastos), calcular o lucro de todos não gera query nova.
     with django_assert_num_queries(0):
         lucros = [services.lucro_bruto(n) for n in negocios]
     assert sorted(lucros) == [Decimal("10000"), Decimal("20000"), Decimal("25000")]

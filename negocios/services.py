@@ -349,9 +349,9 @@ def repasses_pendentes():
 
 def lucro_bruto(negocio):
     """
-    Lucro bruto de um negócio concluído:
-    - venda própria: preço de venda menos valor de compra;
-    - troca própria: preço do carro da loja menos o valor de compra dele;
+    Lucro de um negócio concluído, já descontando os gastos do carro:
+    - venda própria: preço de venda menos valor de compra menos gastos;
+    - troca própria: preço do carro da loja menos o valor de compra e gastos dele;
     - intermediação: a comissão da loja;
     - compra: não há lucro (é aquisição).
     Devolve None quando não dá para calcular (ex.: falta o valor de compra).
@@ -361,19 +361,19 @@ def lucro_bruto(negocio):
     if negocio.modalidade == Modalidade.INTERMEDIACAO:
         return negocio.comissao_valor or Decimal("0")
 
-    # itens.all() reusa o prefetch_related("itens__veiculo") da lista de vendas
-    # (evita 1 query nova por negócio). Em chamadas avulsas faz 1 query, sem problema.
+    # itens.all() reusa o prefetch_related("itens__veiculo__gastos") da lista de vendas
+    # (evita queries novas por negócio). Em chamadas avulsas faz poucas queries, sem problema.
     itens = list(negocio.itens.all())
     if negocio.tipo == TipoNegocio.VENDA and itens:
         item = itens[0]
         if item.veiculo.valor_compra is None:
             return None
-        return item.valor - item.veiculo.valor_compra
+        return item.valor - item.veiculo.valor_compra - item.veiculo.total_gastos
     if negocio.tipo == TipoNegocio.TROCA:
         saida = next((i for i in itens if i.sai_da_loja), None)
         if not saida or saida.veiculo.valor_compra is None:
             return None
-        return saida.valor - saida.veiculo.valor_compra
+        return saida.valor - saida.veiculo.valor_compra - saida.veiculo.total_gastos
     return None
 
 
@@ -391,7 +391,7 @@ def lucro_do_veiculo(veiculo):
     )
     if not item or veiculo.valor_compra is None:
         return None
-    return item.valor - veiculo.valor_compra
+    return item.valor - veiculo.valor_compra - veiculo.total_gastos
 
 
 def resumo_de_vendas(ano, mes):
@@ -404,7 +404,7 @@ def resumo_de_vendas(ano, mes):
     # "Vendido" e "lucro" só fazem sentido para o que SAI da loja (venda/troca).
     vendas = do_mes.filter(
         tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA]
-    ).prefetch_related("itens__veiculo")  # lucro_bruto reusa esse prefetch (sem N+1)
+    ).prefetch_related("itens__veiculo__gastos")  # lucro_bruto reusa esse prefetch (sem N+1)
     total = sum((n.valor_total or Decimal("0") for n in vendas), Decimal("0"))
     lucro = sum((lucro_bruto(n) or Decimal("0") for n in vendas), Decimal("0"))
     # Mas a CONTAGEM de negócios inclui compras também (compra também é negócio).
