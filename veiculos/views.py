@@ -157,6 +157,22 @@ def buscar_placa(request):
 
 
 @login_required
+@require_POST
+def ler_documento(request):
+    """Lê a foto do documento do carro (CRLV) com IA e devolve os campos pra preencher."""
+    from core.ocr_ia import ler_documento as ler
+    from core.ocr_ia import provedor_ativo
+
+    if provedor_ativo() != "claude":
+        return JsonResponse({"ativo": False})
+    arquivo = request.FILES.get("documento")
+    dados = ler(arquivo, "carro") if arquivo else None
+    if not dados:
+        return JsonResponse({"ativo": True, "ok": False})
+    return JsonResponse({"ativo": True, "ok": True, "dados": dados})
+
+
+@login_required
 def consultar_placa(request):
     """Consulta a placa numa API externa (se um provedor estiver configurado)."""
     if provedor_ativo() == "none":

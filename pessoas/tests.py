@@ -202,6 +202,14 @@ def test_form_pessoa_uf_e_estado_civil_viram_selecao(client):
 
 
 @pytest.mark.django_db
+def test_ler_documento_pessoa_desligado_por_padrao(client):
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    resp = client.post(reverse("pessoas:ler_documento"))
+    assert resp.json() == {"ativo": False}
+
+
+@pytest.mark.django_db
 def test_buscar_cpf_encontra(client):
     logar(client)
     p = Pessoa.objetos.create(nome="Carla", cpf_cnpj=CPF_VALIDO)

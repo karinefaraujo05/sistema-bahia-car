@@ -31,6 +31,17 @@
 
     <fieldset class="space-y-4">
       <legend class="mb-2 text-lg font-semibold">Identificação</legend>
+      {% if ocr_ia_ativo %}
+        <div class="rounded-xl border border-borda bg-superficie p-3">
+          <label class="botao botao-secundario cursor-pointer">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            Tirar foto do documento (CNH/RG)
+            <input type="file" id="doc-pessoa" accept="image/*" capture="environment" class="hidden" />
+          </label>
+          <p class="mt-1 text-xs text-tinta-suave">Fotografe a CNH ou o RG e a gente preenche nome e CPF. Depois confira.</p>
+          <p id="doc-pessoa-aviso" class="mt-1 hidden text-sm"></p>
+        </div>
+      {% endif %}
       {% include "pessoas/partials/campo.html" with campo=form.tipo %}
       <div>
         {% include "pessoas/partials/campo.html" with campo=form.cpf_cnpj %}
@@ -148,4 +159,41 @@
   </script>
 
   {% if not pessoa %}{% include "pessoas/partials/busca_cpf_js.html" %}{% endif %}
+
+  {% if ocr_ia_ativo %}
+  <script>
+    (function () {
+      var input = document.getElementById("doc-pessoa"),
+        aviso = document.getElementById("doc-pessoa-aviso");
+      if (!input) return;
+      var fNome = document.getElementById("{{ form.nome.id_for_label }}"),
+        fCpf = document.getElementById("{{ form.cpf_cnpj.id_for_label }}"),
+        fRg = document.getElementById("{{ form.rg.id_for_label }}");
+      function msg(t, c) {
+        aviso.textContent = t;
+        aviso.className = "mt-1 text-sm " + (c || "text-tinta-suave");
+        aviso.classList.remove("hidden");
+      }
+      input.addEventListener("change", function () {
+        if (!input.files || !input.files[0]) return;
+        msg("Lendo o documento… aguarde uns segundos.");
+        var dados = new FormData();
+        dados.append("documento", input.files[0]);
+        var csrf = document.querySelector("[name=csrfmiddlewaretoken]");
+        if (csrf) dados.append("csrfmiddlewaretoken", csrf.value);
+        fetch("{% url 'pessoas:ler_documento' %}", { method: "POST", body: dados })
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            if (!d.ativo) { msg("A leitura por foto não está ligada.", "text-ambar"); return; }
+            if (!d.ok) { msg("Não consegui ler o documento. Tente outra foto ou preencha à mão.", "text-ambar"); return; }
+            var v = d.dados || {};
+            function por(campo, valor) { if (campo && valor && !campo.value) campo.value = valor; }
+            por(fNome, v.nome); por(fCpf, v.cpf_cnpj); por(fRg, v.rg);
+            msg("Dados preenchidos a partir da foto. Confira e corrija o que precisar.", "text-verde");
+          })
+          .catch(function () { msg("Não consegui ler o documento agora. Preencha à mão.", "text-ambar"); });
+      });
+    })();
+  </script>
+  {% endif %}
 {% endblock %}

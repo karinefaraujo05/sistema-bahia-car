@@ -7,6 +7,7 @@ app_name = "pessoas"
 urlpatterns = [
     path("pessoas/", views.lista, name="lista"),
     path("pessoas/buscar-cpf/", views.buscar_cpf, name="buscar_cpf"),
+    path("pessoas/ler-documento/", views.ler_documento, name="ler_documento"),
     path("pessoas/nova/", views.novo, name="novo"),
     path("pessoas/nova-rapida/", views.novo_rapido, name="novo_rapido"),
     path("pessoas/<int:pk>/", views.detalhe, name="detalhe"),

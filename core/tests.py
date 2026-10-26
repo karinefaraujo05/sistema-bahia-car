@@ -336,6 +336,14 @@ def test_painel_carros_parados_ignora_menos_de_90_dias(client):
     assert resp.context["total_parados"] == 0
 
 
+def test_ocr_ia_desligado_por_padrao():
+    from core.ocr_ia import ler_documento, provedor_ativo
+
+    assert provedor_ativo() == "none"
+    assert ler_documento(None, "carro") is None
+    assert ler_documento(None, "pessoa") is None
+
+
 def test_favicon_responde_na_raiz(client):
     # Navegadores pedem /favicon.ico direto; antes dava 404. Agora redireciona pro icone.
     resp = client.get("/favicon.ico")
