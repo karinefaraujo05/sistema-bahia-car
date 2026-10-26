@@ -256,6 +256,24 @@ def test_painel_valor_estoque_soma_so_proprios_em_estoque(client):
     assert resp.context["valor_estoque"] == 50000  # 30000 + 20000
 
 
+def test_painel_capital_parado_soma_valor_compra_dos_proprios_em_estoque(client):
+    _carro("AAA1C11", situacao=Situacao.PROPRIO, valor_compra=18000)
+    _carro("BBB2C22", situacao=Situacao.PROPRIO, valor_compra=22000)
+    _carro("CCC3C33", situacao=Situacao.CONSIGNADO, valor_compra=99000)  # não é da loja
+    _entrar_como_dono(client)
+    resp = client.get(reverse("inicio"))
+    assert resp.context["capital_parado"] == 40000  # 18000 + 22000
+
+
+def test_painel_financeiro_so_para_admin(client):
+    Usuario.objects.create_user(username="vend", password="x-123456", papel=Usuario.Papel.VENDEDOR)
+    client.login(username="vend", password="x-123456")
+    resp = client.get(reverse("inicio"))
+    assert resp.context["capital_parado"] is None
+    assert resp.context["ticket_medio"] is None
+    assert resp.context["a_repassar"] is None
+
+
 def test_painel_conta_carros_de_terceiros(client):
     # Item 2.2: consignados e de terceiros contam como "carros de terceiros na loja".
     _carro("EEE5E55", situacao=Situacao.PROPRIO)

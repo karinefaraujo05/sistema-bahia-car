@@ -402,10 +402,17 @@ def resumo_de_vendas(ano, mes):
         data__month=mes,
     )
     # "Vendido" e "lucro" só fazem sentido para o que SAI da loja (venda/troca).
-    vendas = do_mes.filter(
-        tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA]
-    ).prefetch_related("itens__veiculo__gastos")  # lucro_bruto reusa esse prefetch (sem N+1)
+    vendas = list(
+        do_mes.filter(tipo__in=[TipoNegocio.VENDA, TipoNegocio.TROCA]).prefetch_related(
+            "itens__veiculo__gastos"  # lucro_bruto reusa esse prefetch (sem N+1)
+        )
+    )
     total = sum((n.valor_total or Decimal("0") for n in vendas), Decimal("0"))
     lucro = sum((lucro_bruto(n) or Decimal("0") for n in vendas), Decimal("0"))
     # Mas a CONTAGEM de negócios inclui compras também (compra também é negócio).
-    return {"total_vendido": total, "lucro_bruto": lucro, "quantidade": do_mes.count()}
+    return {
+        "total_vendido": total,
+        "lucro_bruto": lucro,
+        "quantidade": do_mes.count(),
+        "vendidos": len(vendas),  # só venda/troca (pra ticket médio)
+    }
