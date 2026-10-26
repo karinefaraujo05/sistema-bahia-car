@@ -109,9 +109,21 @@ def inicio(request):
         data__month=hoje.month,
     ).count()
 
-    # Lucro do mês: número sensível, só o administrador vê (reusa resumo_de_vendas).
+    # Números financeiros: só o administrador vê (reusa um único resumo_de_vendas).
     eh_admin = request.user.eh_administrador
-    lucro_do_mes = resumo_de_vendas(hoje.year, hoje.month)["lucro_bruto"] if eh_admin else None
+    resumo = resumo_de_vendas(hoje.year, hoje.month) if eh_admin else None
+    lucro_do_mes = resumo["lucro_bruto"] if resumo else None
+    capital_parado = ticket_medio = a_repassar = None
+    if eh_admin:
+        # Capital parado: quanto a loja pagou nos carros próprios que ainda estão no estoque.
+        capital_parado = Veiculo.objetos.filter(
+            status=StatusVeiculo.EM_ESTOQUE, situacao=Situacao.PROPRIO
+        ).aggregate(total=Sum("valor_compra"))["total"]
+        # Ticket médio do mês (só venda/troca).
+        if resumo["vendidos"]:
+            ticket_medio = resumo["total_vendido"] / resumo["vendidos"]
+        # Quanto a loja deve repassar aos donos de consignados já vendidos.
+        a_repassar = repasses_pendentes().aggregate(total=Sum("valor_liquido_minimo"))["total"]
 
     # Carros parados: card com os 3 mais antigos (mesmo limite da agenda).
     parados = list(carros_parados(hoje, DIAS_CARRO_PARADO))
@@ -133,6 +145,9 @@ def inicio(request):
         "vendas_no_mes": vendas_no_mes,
         "eh_admin": eh_admin,
         "lucro_do_mes": lucro_do_mes,
+        "capital_parado": capital_parado,
+        "ticket_medio": ticket_medio,
+        "a_repassar": a_repassar,
         "carros_parados": parados[:3],
         "total_parados": len(parados),
         "dias_parado_painel": DIAS_CARRO_PARADO,

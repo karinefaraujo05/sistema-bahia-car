@@ -130,6 +130,36 @@
           <div class="text-lg text-tinta-suave">lucro do mês</div>
         </div>
       </div>
+
+      <div class="indicador flex items-center gap-4">
+        <span class="indicador-icone bg-verde-fundo text-verde">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M12 11v5"/></svg>
+        </span>
+        <div>
+          <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ capital_parado|reais }}">••••</div>
+          <div class="text-lg text-tinta-suave">capital parado no estoque</div>
+        </div>
+      </div>
+
+      <div class="indicador flex items-center gap-4">
+        <span class="indicador-icone bg-verde-fundo text-verde">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.2"/></svg>
+        </span>
+        <div>
+          <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ ticket_medio|reais }}">••••</div>
+          <div class="text-lg text-tinta-suave">ticket médio no mês</div>
+        </div>
+      </div>
+
+      <div class="indicador flex items-center gap-4">
+        <span class="indicador-icone bg-ambar-fundo text-ambar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </span>
+        <div>
+          <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ a_repassar|reais }}">••••</div>
+          <div class="text-lg text-tinta-suave">a repassar aos donos</div>
+        </div>
+      </div>
     {% endif %}
 
     <div class="indicador flex items-center gap-4">
