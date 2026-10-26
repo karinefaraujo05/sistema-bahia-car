@@ -1,0 +1,298 @@
+{% comment %}
+Corpo do formulário de carro (placa primeiro, FIPE como caminho principal e cadastro
+em duas camadas). Usado na tela de cadastro/edição (veiculos/form.html) e dentro do
+wizard de compra/troca (negocios/passo_carro_novo.html), pra não repetir campos nem JS.
+
+Espera no contexto: `form` (VeiculoForm). Opcional: `modo_edicao` (True numa edição,
+pra já deixar a seção de documentação aberta e os campos livres).
+{% endcomment %}
+
+{# 1) Placa primeiro: ao digitar, confere no sistema e (se ligado) busca os dados. #}
+<div class="rounded-2xl border border-borda bg-superficie p-4 shadow-sm">
+  {% include "veiculos/partials/campo.html" with campo=form.placa %}
+  <button type="button" id="btn-buscar-placa" class="botao botao-secundario mt-3">
+    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    Buscar dados da placa
+  </button>
+  <p id="placa-resultado" class="mt-2 hidden text-sm"></p>
+</div>
+
+{# 2) FIPE: caminho principal pra preencher marca, modelo, ano e combustível. #}
+<div class="rounded-2xl border border-acento-200 bg-acento-50 p-4">
+  <div class="mb-1 flex items-center gap-2">
+    <span class="chip h-8 w-8 bg-acento-600 text-white">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    </span>
+    <p class="font-semibold">Escolher pela Tabela FIPE</p>
+  </div>
+  <p class="mb-3 text-sm text-tinta-suave">Escolha o tipo, a marca, o modelo e o ano. A cada escolha, a gente já preenche os dados lá embaixo automaticamente. 👇</p>
+  <div class="grid gap-3 sm:grid-cols-2">
+    <select id="fipe-tipo" class="campo" aria-label="Tipo de veículo">
+      <option value="carros">Carro</option>
+      <option value="motos">Moto</option>
+      <option value="caminhoes">Caminhão</option>
+    </select>
+    <select id="fipe-marca" class="campo" aria-label="Marca (FIPE)"><option value="">1. Marca…</option></select>
+    <select id="fipe-modelo" class="campo" aria-label="Modelo (FIPE)" disabled><option value="">2. Modelo…</option></select>
+    <select id="fipe-ano" class="campo" aria-label="Ano (FIPE)" disabled><option value="">3. Ano…</option></select>
+  </div>
+  <div id="fipe-resultado" class="mt-3 hidden items-center gap-3 rounded-lg border border-acento-200 bg-superficie p-3">
+    <svg class="h-5 w-5 shrink-0 text-verde" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+    <div>
+      <div class="text-xs text-tinta-suave">Preço de referência (FIPE) — é só uma sugestão, ajuste o valor de venda pra sua margem de lucro</div>
+      <div id="fipe-preco" class="text-lg font-bold text-acento-700">—</div>
+    </div>
+  </div>
+  <p id="fipe-erro" class="mt-2 hidden text-sm text-ambar"></p>
+  <p class="mt-2 text-xs text-tinta-suave">Carro fora da tabela?
+    <button type="button" id="fipe-destravar" class="font-medium text-acento-700 underline">Não achei na FIPE — digitar na mão</button>
+  </p>
+</div>
+
+{# 3) Essencial pra entrar no estoque. O resto fica logo abaixo, pra completar depois. #}
+<fieldset class="space-y-4">
+  <legend class="mb-2 text-lg font-semibold">Dados principais</legend>
+  <div class="grid gap-4 sm:grid-cols-2">
+    {% include "veiculos/partials/campo.html" with campo=form.marca %}
+    {% include "veiculos/partials/campo.html" with campo=form.modelo %}
+    {% include "veiculos/partials/campo.html" with campo=form.ano_fabricacao %}
+    {% include "veiculos/partials/campo.html" with campo=form.ano_modelo %}
+    {% include "veiculos/partials/campo.html" with campo=form.cor %}
+    {% include "veiculos/partials/campo.html" with campo=form.km %}
+    {% include "veiculos/partials/campo.html" with campo=form.combustivel %}
+    {% include "veiculos/partials/campo.html" with campo=form.valor_anunciado %}
+  </div>
+</fieldset>
+
+{# 4) Documentação e condição: não precisa pra salvar; dá pra completar depois. #}
+<details class="rounded-2xl border border-borda bg-superficie p-4 shadow-sm" {% if modo_edicao %}open{% endif %}>
+  <summary class="cursor-pointer select-none text-lg font-semibold">Documentação e condição <span class="text-sm font-normal text-tinta-suave">(pode completar depois)</span></summary>
+
+  <div class="mt-4 space-y-6">
+    <div class="space-y-4">
+      <p class="text-sm text-tinta-suave">Chassi e renavam são obrigatórios só na hora de gerar o contrato.</p>
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "veiculos/partials/campo.html" with campo=form.chassi %}
+        {% include "veiculos/partials/campo.html" with campo=form.renavam %}
+        {% include "veiculos/partials/campo.html" with campo=form.cambio %}
+        {% include "veiculos/partials/campo.html" with campo=form.situacao %}
+        {% include "veiculos/partials/campo.html" with campo=form.proprietario_registral %}
+        {% include "veiculos/partials/campo.html" with campo=form.valor_compra %}
+        {% include "veiculos/partials/campo.html" with campo=form.status %}
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      <label class="flex items-center gap-2">
+        {{ form.alienado }}
+        <span>{{ form.alienado.label }}</span>
+      </label>
+      <div id="bloco-financiamento" class="grid gap-4 sm:grid-cols-2">
+        {% include "veiculos/partials/campo.html" with campo=form.credor_alienacao %}
+        {% include "veiculos/partials/campo.html" with campo=form.saldo_devedor %}
+        {% include "veiculos/partials/campo.html" with campo=form.parcelas_restantes %}
+        {% include "veiculos/partials/campo.html" with campo=form.valor_parcela %}
+        {% include "veiculos/partials/campo.html" with campo=form.dia_vencimento %}
+        {% include "veiculos/partials/campo.html" with campo=form.parcelas_vencidas %}
+      </div>
+    </div>
+
+    <div class="space-y-4">
+      {% include "veiculos/partials/campo.html" with campo=form.tem_chave_reserva %}
+      {% include "veiculos/partials/campo.html" with campo=form.avarias_declaradas %}
+      <label class="flex items-center gap-2">
+        {{ form.sinistro_declarado }}
+        <span>{{ form.sinistro_declarado.label }}</span>
+      </label>
+      <div id="bloco-sinistro">
+        {% include "veiculos/partials/campo.html" with campo=form.sinistro_descricao %}
+      </div>
+      {% include "veiculos/partials/campo.html" with campo=form.observacoes %}
+    </div>
+  </div>
+</details>
+
+<script>
+  (function () {
+    var editando = {% if modo_edicao %}true{% else %}false{% endif %};
+
+    var fPlaca = document.getElementById("{{ form.placa.id_for_label }}"),
+      fMarca = document.getElementById("{{ form.marca.id_for_label }}"),
+      fModelo = document.getElementById("{{ form.modelo.id_for_label }}"),
+      fAnoFab = document.getElementById("{{ form.ano_fabricacao.id_for_label }}"),
+      fAnoMod = document.getElementById("{{ form.ano_modelo.id_for_label }}"),
+      fCor = document.getElementById("{{ form.cor.id_for_label }}"),
+      fValor = document.getElementById("{{ form.valor_anunciado.id_for_label }}"),
+      fComb = document.getElementById("{{ form.combustivel.id_for_label }}"),
+      fChassi = document.getElementById("{{ form.chassi.id_for_label }}");
+
+    // FIPE como caminho principal: marca/modelo/ano_modelo travados até preencher
+    // (só no cadastro; na edição deixamos livre). O link "não achei" destrava.
+    var travaveis = [fMarca, fModelo, fAnoMod];
+    function travar(v) {
+      travaveis.forEach(function (c) {
+        if (!c) return;
+        c.readOnly = v;
+        c.classList.toggle("bg-neutro-50", v);
+        c.classList.toggle("text-tinta-suave", v);
+      });
+    }
+    if (!editando) travar(true);
+    var destravar = document.getElementById("fipe-destravar");
+    if (destravar) destravar.addEventListener("click", function () { travar(false); if (fMarca) fMarca.focus(); });
+
+    // Campos condicionais: financiamento (alienado) e sinistro.
+    function liga(checkboxLabel, blocoId) {
+      var cb = document.getElementById(checkboxLabel),
+        bloco = document.getElementById(blocoId);
+      if (!cb || !bloco) return;
+      function sincronizar() { bloco.classList.toggle("hidden", !cb.checked); }
+      cb.addEventListener("change", sincronizar);
+      sincronizar();
+    }
+    liga("{{ form.alienado.id_for_label }}", "bloco-financiamento");
+    liga("{{ form.sinistro_declarado.id_for_label }}", "bloco-sinistro");
+
+    // Placa: busca no próprio sistema e (se ligado) numa API externa.
+    var btnPlaca = document.getElementById("btn-buscar-placa"),
+      placaResultado = document.getElementById("placa-resultado");
+    function msgPlaca(texto, classe) {
+      placaResultado.innerHTML = texto;
+      placaResultado.className = "mt-2 text-sm " + (classe || "text-tinta-suave");
+      placaResultado.classList.remove("hidden");
+    }
+    function buscarPlaca() {
+      var placa = (fPlaca.value || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+      if (placa.length < 7) { msgPlaca("Digite a placa completa.", "text-ambar"); return; }
+      fetch("{% url 'veiculos:buscar_placa' %}?placa=" + placa)
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (d.encontrado && !d.arquivado) {
+            msgPlaca("Esse carro já está no sistema: <strong>" + (d.resumo || "") + "</strong>. " +
+              '<a href="' + d.url + '" class="font-medium underline text-acento-700">Abrir</a>.', "text-ambar");
+            return;
+          }
+          if (d.encontrado && d.arquivado) {
+            msgPlaca("Esse carro já passou pela loja (arquivado). Peça ao responsável para reativar.", "text-ambar");
+            return;
+          }
+          consultarExterna(placa);
+        })
+        .catch(function () { consultarExterna(placa); });
+    }
+    function consultarExterna(placa) {
+      fetch("{% url 'veiculos:consultar_placa' %}?placa=" + placa)
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.ativo) { msgPlaca("Placa livre. Preencha os dados abaixo (ou use a FIPE).", "text-verde"); return; }
+          if (!d.ok) { msgPlaca("Não consegui consultar a placa agora. Preencha à mão.", "text-ambar"); return; }
+          var v = d.dados || {};
+          function por(campo, valor) { if (campo && valor && !campo.value) campo.value = valor; }
+          if (v.marca || v.modelo) travar(false);
+          por(fMarca, v.marca); por(fModelo, v.modelo); por(fCor, v.cor);
+          por(fAnoFab, v.ano_fabricacao); por(fAnoMod, v.ano_modelo); por(fChassi, v.chassi);
+          msgPlaca("Dados da placa preenchidos. Confira e complete o que faltar.", "text-verde");
+        })
+        .catch(function () { msgPlaca("Não consegui consultar a placa agora. Preencha à mão.", "text-ambar"); });
+    }
+    if (btnPlaca) btnPlaca.addEventListener("click", buscarPlaca);
+
+    // FIPE (selects encadeados)
+    var API = "{% url 'fipe' %}";
+    var tipo = document.getElementById("fipe-tipo"),
+      marca = document.getElementById("fipe-marca"),
+      modelo = document.getElementById("fipe-modelo"),
+      ano = document.getElementById("fipe-ano"),
+      resultado = document.getElementById("fipe-resultado"),
+      precoEl = document.getElementById("fipe-preco"),
+      erroEl = document.getElementById("fipe-erro");
+    if (!tipo) return;
+    var precoFipe = 0;
+
+    function mapComb(s) {
+      s = (s || "").toLowerCase();
+      if (s.indexOf("diesel") >= 0) return "diesel";
+      if (s.indexOf("álcool") >= 0 || s.indexOf("alcool") >= 0 || s.indexOf("etanol") >= 0) return "etanol";
+      if (s.indexOf("flex") >= 0) return "flex";
+      if (s.indexOf("gasolina") >= 0) return "gasolina";
+      return "";
+    }
+    function erro(msg) {
+      erroEl.textContent = msg || "";
+      erroEl.classList.toggle("hidden", !msg);
+    }
+    function opcoes(sel, itens, label) {
+      sel.innerHTML = '<option value="">' + label + "</option>";
+      (itens || []).forEach(function (i) {
+        var o = document.createElement("option");
+        o.value = i.codigo;
+        o.textContent = i.nome;
+        sel.appendChild(o);
+      });
+    }
+    function buscar(params) {
+      return fetch(API + "?" + params).then(function (r) { return r.json(); });
+    }
+    function textoDe(sel) {
+      return sel.value ? sel.options[sel.selectedIndex].text : "";
+    }
+    function carregarMarcas() {
+      marca.innerHTML = '<option value="">Carregando…</option>';
+      modelo.disabled = true; ano.disabled = true;
+      resultado.classList.add("hidden"); erro("");
+      buscar("q=marcas&tipo=" + tipo.value)
+        .then(function (d) {
+          if (d.erro) { erro(d.erro); opcoes(marca, [], "Marca…"); return; }
+          opcoes(marca, d.dados, "Marca…");
+        })
+        .catch(function () { erro("Não deu pra buscar as marcas. Você pode digitar na mão."); });
+    }
+    tipo.addEventListener("change", carregarMarcas);
+    marca.addEventListener("change", function () {
+      modelo.disabled = true; ano.disabled = true; resultado.classList.add("hidden"); erro("");
+      if (fMarca) fMarca.value = textoDe(marca);
+      if (!marca.value) { opcoes(modelo, [], "2. Modelo…"); return; }
+      modelo.innerHTML = '<option value="">Carregando…</option>';
+      buscar("q=modelos&tipo=" + tipo.value + "&marca=" + marca.value)
+        .then(function (d) { opcoes(modelo, d.dados, "2. Modelo…"); modelo.disabled = false; })
+        .catch(function () { erro("Não deu pra buscar os modelos."); });
+    });
+    modelo.addEventListener("change", function () {
+      ano.disabled = true; resultado.classList.add("hidden"); erro("");
+      if (fModelo) fModelo.value = textoDe(modelo);
+      if (!modelo.value) { opcoes(ano, [], "3. Ano…"); return; }
+      ano.innerHTML = '<option value="">Carregando…</option>';
+      buscar("q=anos&tipo=" + tipo.value + "&marca=" + marca.value + "&modelo=" + modelo.value)
+        .then(function (d) { opcoes(ano, d.dados, "3. Ano…"); ano.disabled = false; })
+        .catch(function () { erro("Não deu pra buscar os anos."); });
+    });
+    ano.addEventListener("change", function () {
+      resultado.classList.add("hidden"); erro("");
+      if (!ano.value) return;
+      buscar("q=preco&tipo=" + tipo.value + "&marca=" + marca.value + "&modelo=" + modelo.value + "&ano=" + ano.value)
+        .then(function (d) {
+          if (d.erro || !d.dados || !d.dados.Valor) { erro("Não achei o preço, mas pode seguir preenchendo na mão."); return; }
+          var dados = d.dados;
+          if (fMarca && dados.Marca) fMarca.value = dados.Marca;
+          if (fModelo && dados.Modelo) fModelo.value = dados.Modelo;
+          var am = parseInt(dados.AnoModelo, 10);
+          if (am && am > 1900 && am < 2100) {
+            if (fAnoMod) fAnoMod.value = am;
+            if (fAnoFab && !fAnoFab.value) fAnoFab.value = am - 1;
+          }
+          if (fComb && !fComb.value) {
+            var cv = mapComb(dados.Combustivel);
+            if (cv) fComb.value = cv;
+          }
+          var v = (dados.Valor || "").replace(/[^\d,]/g, "").replace(",", ".");
+          precoFipe = parseFloat(v) || 0;
+          if (fValor && precoFipe && !fValor.value) fValor.value = Math.round(precoFipe);
+          precoEl.textContent = dados.Valor;
+          resultado.classList.remove("hidden");
+          resultado.classList.add("flex");
+        })
+        .catch(function () { erro("Não deu pra buscar o preço."); });
+    });
+    carregarMarcas();
+  })();
+</script>

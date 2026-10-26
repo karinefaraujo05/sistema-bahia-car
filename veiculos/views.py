@@ -1,11 +1,15 @@
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from contratos.models import Documento, TipoDocumento
+from core.tenancy import empresa_atual
 
+from .consulta_placa import consultar_placa_externa, provedor_ativo
 from .forms import VeiculoForm
 from .models import FotoVeiculo, StatusVeiculo, Veiculo
 from .services import (
@@ -17,6 +21,7 @@ from .services import (
     definir_capa,
     remover_foto,
 )
+from .validators import normalizar_placa
 
 
 @login_required
@@ -61,7 +66,55 @@ def detalhe(request, pk):
     lucro = None
     if request.user.eh_administrador and veiculo.status == StatusVeiculo.VENDIDO:
         lucro = lucro_do_veiculo(veiculo)
-    return render(request, "veiculos/detalhe.html", {"veiculo": veiculo, "lucro": lucro})
+    return render(
+        request,
+        "veiculos/detalhe.html",
+        {
+            "veiculo": veiculo,
+            "lucro": lucro,
+            # Avisa, na ficha, o que falta pro contrato (chassi/renavam).
+            "faltando_contrato": veiculo.campos_faltando_contrato(),
+        },
+    )
+
+
+@login_required
+def buscar_placa(request):
+    """
+    Busca a placa no PRÓPRIO banco (inclusive carros arquivados), na empresa atual.
+    Usado no cadastro: carro que já passou pela loja volta preenchido, sem digitar tudo.
+    """
+    placa = normalizar_placa(request.GET.get("placa", ""))
+    if len(placa) < 7:
+        return JsonResponse({"encontrado": False})
+    qs = Veiculo.todos.filter(placa=placa)
+    empresa = empresa_atual()
+    if empresa is not None:
+        qs = qs.filter(empresa=empresa)
+    veiculo = qs.order_by("-criado_em").first()
+    if veiculo is None:
+        return JsonResponse({"encontrado": False})
+    return JsonResponse(
+        {
+            "encontrado": True,
+            "arquivado": veiculo.arquivado,
+            "pk": veiculo.pk,
+            "url": reverse("veiculos:detalhe", args=[veiculo.pk]),
+            "resumo": f"{veiculo.marca} {veiculo.modelo}".strip(),
+        }
+    )
+
+
+@login_required
+def consultar_placa(request):
+    """Consulta a placa numa API externa (se um provedor estiver configurado)."""
+    if provedor_ativo() == "none":
+        return JsonResponse({"ativo": False})
+    placa = normalizar_placa(request.GET.get("placa", ""))
+    dados = consultar_placa_externa(placa) if len(placa) >= 7 else None
+    if not dados:
+        return JsonResponse({"ativo": True, "ok": False})
+    return JsonResponse({"ativo": True, "ok": True, "dados": dados})
 
 
 @login_required

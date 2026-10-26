@@ -32,8 +32,11 @@
     <fieldset class="space-y-4">
       <legend class="mb-2 text-lg font-semibold">Identificação</legend>
       {% include "pessoas/partials/campo.html" with campo=form.tipo %}
+      <div>
+        {% include "pessoas/partials/campo.html" with campo=form.cpf_cnpj %}
+        <p id="cpf-aviso" class="hidden"></p>
+      </div>
       {% include "pessoas/partials/campo.html" with campo=form.nome %}
-      {% include "pessoas/partials/campo.html" with campo=form.cpf_cnpj %}
     </fieldset>
 
     <fieldset class="space-y-4">
@@ -127,4 +130,6 @@
       });
     })();
   </script>
+
+  {% if not pessoa %}{% include "pessoas/partials/busca_cpf_js.html" %}{% endif %}
 {% endblock %}

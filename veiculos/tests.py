@@ -238,6 +238,89 @@ def test_tela_de_detalhe_abre(client, settings, tmp_path):
     assert "Gol" in resp.content.decode()
 
 
+# --- Onda 1: cadastro de carro (placa primeiro, duas camadas, consulta de placa) ---
+
+
+@pytest.mark.django_db
+def test_campos_faltando_contrato():
+    v = criar_veiculo(chassi="", renavam="")
+    assert v.campos_faltando_contrato() == ["chassi", "renavam"]
+    v2 = criar_veiculo(placa="XYZ9988", chassi="9BWZZZ377VT004251", renavam="12345678901")
+    assert v2.campos_faltando_contrato() == []
+
+
+@pytest.mark.django_db
+def test_detalhe_avisa_falta_de_chassi_renavam(client, settings, tmp_path):
+    settings.MEDIA_ROOT = str(tmp_path)
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    veiculo = criar_veiculo(chassi="", renavam="")
+    resp = client.get(reverse("veiculos:detalhe", args=[veiculo.pk]))
+    assert "Faltam dados pro contrato" in resp.content.decode()
+
+
+@pytest.mark.django_db
+def test_cadastro_minimo_sem_documentacao(client, settings, tmp_path):
+    """Dá pra entrar no estoque sem chassi/renavam/documentação."""
+    settings.MEDIA_ROOT = str(tmp_path)
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    dados = {
+        "placa": "QRS4D56",
+        "marca": "Fiat",
+        "modelo": "Argo",
+        "ano_fabricacao": 2020,
+        "ano_modelo": 2021,
+        "cor": "Branco",
+        "valor_anunciado": "55000.00",
+        "situacao": Situacao.PROPRIO,
+        "status": StatusVeiculo.EM_ESTOQUE,
+    }
+    resp = client.post(reverse("veiculos:novo"), dados)
+    assert resp.status_code == 302
+    v = Veiculo.objetos.get(placa="QRS4D56")
+    assert v.chassi == "" and v.renavam == ""
+
+
+@pytest.mark.django_db
+def test_buscar_placa_encontra_carro_ativo(client):
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    criar_veiculo(placa="DEF5678", marca="Ford", modelo="Ka")
+    resp = client.get(reverse("veiculos:buscar_placa"), {"placa": "def-5678"})
+    dados = resp.json()
+    assert dados["encontrado"] is True
+    assert dados["arquivado"] is False
+    assert "Ka" in dados["resumo"]
+
+
+@pytest.mark.django_db
+def test_buscar_placa_nao_encontra(client):
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    resp = client.get(reverse("veiculos:buscar_placa"), {"placa": "GHI9012"})
+    assert resp.json() == {"encontrado": False}
+
+
+@pytest.mark.django_db
+def test_consultar_placa_desligado_por_padrao(client):
+    Usuario.objects.create_user(username="karine", password="segredo-123")
+    client.login(username="karine", password="segredo-123")
+    resp = client.get(reverse("veiculos:consultar_placa"), {"placa": "JKL3456"})
+    assert resp.json() == {"ativo": False}
+
+
+def test_consulta_placa_normalizar_tolera_nomes_de_campo():
+    from veiculos.consulta_placa import _normalizar
+
+    bruto = {"response": {"MARCA": "VW", "modelo": "Gol", "anoModelo": "2016", "fuel": "Gasolina"}}
+    dados = _normalizar(bruto)
+    assert dados["marca"] == "VW"
+    assert dados["modelo"] == "Gol"
+    assert dados["ano_modelo"] == "2016"
+    assert dados["combustivel"] == "Gasolina"
+
+
 # --- Item 6.1: foto_capa usa o prefetch (sem N+1) ---
 
 

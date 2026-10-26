@@ -14,13 +14,11 @@
     </div>
   {% endif %}
 
-  <form method="post" class="space-y-4">
+  <form method="post" class="space-y-6">
     {% csrf_token %}
-    <div class="grid gap-4 sm:grid-cols-2">
-      {% for campo in form %}
-        {% include "negocios/partials/campo.html" with campo=campo %}
-      {% endfor %}
-    </div>
+
+    {% include "veiculos/partials/campos_carro.html" with form=form %}
+
     <div class="flex flex-wrap gap-2 pt-2">
       <button type="submit" class="botao botao-primario">Continuar</button>
       <button type="submit" name="rascunho" value="1" class="botao botao-secundario">

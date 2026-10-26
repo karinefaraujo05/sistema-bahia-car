@@ -24,6 +24,14 @@
       </div>
       <button type="submit" form="form-quem" name="pessoa" value="{{ parte.pessoa.pk }}" class="botao botao-primario">Continuar</button>
     </div>
+    {% if faltando_pessoa %}
+      <div class="mb-4 aviso aviso-atencao">
+        <p class="font-medium">Faltam dados dessa pessoa pro contrato.</p>
+        <p>Falta: <strong>{{ faltando_pessoa|join:", " }}</strong>.
+          <a href="{% url 'pessoas:editar' parte.pessoa.pk %}?next={% url 'negocios:passo_pessoa' negocio.pk %}" class="font-medium underline">Completar agora</a>
+          — melhor resolver enquanto o cliente está aí.</p>
+      </div>
+    {% endif %}
     <p class="mb-2 text-sm text-tinta-suave">Ou troque o cliente buscando abaixo.</p>
   {% endif %}
 

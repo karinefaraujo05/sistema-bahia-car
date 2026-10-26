@@ -159,6 +159,17 @@ class Veiculo(ModeloBase):
         # Até a Fase 4 (negócios), contamos a partir do cadastro do veículo.
         return (timezone.now().date() - self.criado_em.date()).days
 
+    # Campos do veículo que o contrato exige preenchidos (ver contratos/geracao.py).
+    CAMPOS_CONTRATO = ("chassi", "renavam")
+
+    def campos_faltando_contrato(self):
+        """Rótulos dos campos ainda vazios que o contrato precisa (chassi, renavam)."""
+        faltando = []
+        for campo in self.CAMPOS_CONTRATO:
+            if not getattr(self, campo):
+                faltando.append(self._meta.get_field(campo).verbose_name)
+        return faltando
+
 
 class FotoVeiculo(ModeloBase):
     veiculo = models.ForeignKey(
