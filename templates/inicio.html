@@ -4,19 +4,123 @@
 {% block titulo %}Início · Bahia Car{% endblock %}
 
 {% block conteudo %}
-  <div class="mb-6">
-    <h1 class="text-2xl">Início</h1>
-    <p class="text-tinta-suave">Resumo da loja e atalhos do dia a dia.</p>
+  {# Cabeçalho: saudação + data + olhinho (esconde/mostra valores sensíveis). #}
+  <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <p class="text-tinta-suave">Olá, {{ user.first_name|default:user.username|capfirst }}!</p>
+      <h1 class="text-2xl sm:text-3xl">Visão geral</h1>
+      <p class="text-tinta-suave">Acompanhe os números e as prioridades da sua loja.</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="inline-flex items-center gap-2 rounded-xl border border-borda bg-superficie px-3.5 py-2 text-sm font-medium text-tinta-suave shadow-sm">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/></svg>
+        Hoje, {% now "j \d\e b. \d\e Y" %}
+      </span>
+      <button type="button" id="toggle-sigilo" onclick="toggleSigilo()" aria-pressed="false"
+              class="inline-flex items-center gap-1.5 rounded-xl border border-borda bg-superficie px-3 py-2 text-sm font-medium text-tinta-suave shadow-sm hover:bg-acento-50">
+        <svg id="eye-open" class="hidden h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg id="eye-off" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 4.2A9.12 9.12 0 0 1 12 4c7 0 10 7 10 7a13.4 13.4 0 0 1-1.67 2.68"/><path d="M6.6 6.6A13.3 13.3 0 0 0 2 11s3 7 10 7a9 9 0 0 0 4.4-1.1"/><path d="m2 2 20 20"/></svg>
+        <span id="sigilo-label" class="hidden sm:inline">Mostrar valores</span>
+      </button>
+    </div>
   </div>
 
-  {# Avisos acionáveis: só aparece quando há algo pra resolver. Cada um leva pro lugar certo. #}
-  {% if alertas %}
-    <section class="mb-6" aria-label="Precisa de atenção">
-      <div class="painel overflow-hidden">
-        <div class="flex items-center justify-between gap-2 border-b border-borda px-5 py-3">
-          <h2 class="text-lg">Precisa de atenção</h2>
-          <a href="{% url 'agenda' %}" class="text-sm font-medium text-acento-700">Ver agenda</a>
+  {# Faixa de indicadores principais. #}
+  <div class="painel mb-6 overflow-hidden">
+    <div class="flex flex-col divide-y divide-borda sm:flex-row sm:divide-x sm:divide-y-0">
+      <div class="flex items-center gap-3 p-5 sm:flex-1">
+        <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+        </span>
+        <div>
+          <div class="text-2xl font-bold leading-tight">{{ carros_na_loja }}</div>
+          <div class="text-sm text-tinta-suave">carros na loja</div>
+          {% if carros_terceiros %}
+            <div class="text-xs text-tinta-suave">+ {{ carros_terceiros }} de terceiros</div>
+          {% endif %}
         </div>
+      </div>
+
+      <div class="flex items-center gap-3 p-5 sm:flex-1">
+        <span class="indicador-icone shrink-0 bg-verde-fundo text-verde">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><circle cx="12" cy="12" r="9"/></svg>
+        </span>
+        <div>
+          <div class="text-2xl font-bold leading-tight valor-sensivel" data-real="{{ valor_estoque|reais }}">••••</div>
+          <div class="text-sm text-tinta-suave">valor em estoque</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 p-5 sm:flex-1">
+        <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </span>
+        <div>
+          <div class="text-2xl font-bold leading-tight valor-sensivel" data-real="{{ vendas_no_mes }}">••••</div>
+          <div class="text-sm text-tinta-suave">vendas no mês</div>
+        </div>
+      </div>
+
+      {% if eh_admin %}
+        <div class="flex items-center gap-3 p-5 sm:flex-1">
+          <span class="indicador-icone shrink-0 bg-verde-fundo text-verde">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+          </span>
+          <div>
+            <div class="text-2xl font-bold leading-tight valor-sensivel" data-real="{{ lucro_do_mes|reais }}">••••</div>
+            <div class="text-sm text-tinta-suave">lucro do mês</div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Ações rápidas + Precisa de atenção, lado a lado. #}
+  <div class="mb-6 grid gap-6 lg:grid-cols-2 lg:items-start">
+    <section class="painel p-5" aria-label="Ações rápidas">
+      <h2 class="text-lg">Ações rápidas</h2>
+      <p class="mb-4 text-sm text-tinta-suave">Agilize as rotinas mais comuns da sua loja.</p>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao gap-3">
+          <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+          </span>
+          <span class="flex-1 leading-snug">Comprei um carro</span>
+          <svg class="h-5 w-5 shrink-0 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao gap-3">
+          <span class="indicador-icone shrink-0 bg-verde-fundo text-verde">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </span>
+          <span class="flex-1 leading-snug">Vendi um carro</span>
+          <svg class="h-5 w-5 shrink-0 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao gap-3">
+          <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+          </span>
+          <span class="flex-1 leading-snug">Fiz uma troca</span>
+          <svg class="h-5 w-5 shrink-0 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a href="{% url 'negocios:consignar' %}" class="cartao-acao gap-3">
+          <span class="indicador-icone shrink-0 bg-ambar-fundo text-ambar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+          </span>
+          <span class="flex-1 leading-snug">Peguei um carro pra vender</span>
+          <svg class="h-5 w-5 shrink-0 text-tinta-suave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </section>
+
+    <section class="painel overflow-hidden" aria-label="Precisa de atenção">
+      <div class="flex items-center justify-between gap-2 border-b border-borda px-5 py-4">
+        <div>
+          <h2 class="text-lg">Precisa de atenção</h2>
+          <p class="text-sm text-tinta-suave">O que precisa de um olhar seu.</p>
+        </div>
+        <a href="{% url 'agenda' %}" class="shrink-0 text-sm font-medium text-acento-700">Ver agenda</a>
+      </div>
+      {% if alertas %}
         <ul class="divide-y divide-borda">
           {% for a in alertas %}
             <li>
@@ -47,142 +151,77 @@
             + {{ mais_alertas }} na agenda
           </a>
         {% endif %}
-      </div>
+      {% else %}
+        <div class="flex flex-col items-center gap-2 px-5 py-10 text-center">
+          <span class="chip h-11 w-11 bg-verde-fundo text-verde">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
+          </span>
+          <p class="font-medium">Tudo em dia!</p>
+          <p class="text-sm text-tinta-suave">Nenhuma pendência no momento.</p>
+        </div>
+      {% endif %}
     </section>
-  {% endif %}
+  </div>
 
-  {# Atalhos em destaque. #}
-  <nav class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Ações">
-    <a href="{% url 'negocios:iniciar' 'compra' %}" class="cartao-acao gap-3">
-      <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
-      </span>
-      <span class="leading-snug">Comprei um carro</span>    </a>
-    <a href="{% url 'negocios:iniciar' 'venda' %}" class="cartao-acao gap-3">
-      <span class="indicador-icone shrink-0 bg-verde-fundo text-verde">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </span>
-      <span class="leading-snug">Vendi um carro</span>    </a>
-    <a href="{% url 'negocios:iniciar' 'troca' %}" class="cartao-acao gap-3">
-      <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
-      </span>
-      <span class="leading-snug">Fiz uma troca</span>    </a>
-    <a href="{% url 'negocios:consignar' %}" class="cartao-acao gap-3">
-      <span class="indicador-icone shrink-0 bg-ambar-fundo text-ambar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
-      </span>
-      <span class="leading-snug">Peguei um carro pra vender</span>    </a>
-  </nav>
+  {# Outros indicadores. #}
+  <section class="mb-6" aria-label="Outros indicadores">
+    <h2 class="mb-3 text-lg">Outros indicadores</h2>
+    <div class="painel overflow-hidden">
+      <div class="flex flex-col divide-y divide-borda sm:flex-row sm:divide-x sm:divide-y-0">
+        {% if eh_admin %}
+          <div class="flex items-center gap-3 p-5 sm:flex-1">
+            <span class="indicador-icone shrink-0 bg-verde-fundo text-verde">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M12 11v5"/></svg>
+            </span>
+            <div>
+              <div class="text-2xl font-bold leading-tight valor-sensivel" data-real="{{ capital_parado|reais }}">••••</div>
+              <div class="text-sm text-tinta-suave">capital parado no estoque</div>
+            </div>
+          </div>
 
-  {# Indicadores. O olhinho esconde/mostra os valores sensíveis (privacidade com cliente ao lado). #}
-  <section class="mb-6" aria-label="Resumo">
-    <div class="mb-3 flex items-center justify-between">
-      <h2 class="text-lg">Resumo da loja</h2>
-      <button type="button" id="toggle-sigilo" onclick="toggleSigilo()" aria-pressed="false"
-              class="inline-flex items-center gap-1.5 rounded-lg border border-borda px-3 py-1.5 text-sm font-medium text-tinta-suave hover:bg-acento-50">
-        <svg id="eye-open" class="hidden h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
-        <svg id="eye-off" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 4.2A9.12 9.12 0 0 1 12 4c7 0 10 7 10 7a13.4 13.4 0 0 1-1.67 2.68"/><path d="M6.6 6.6A13.3 13.3 0 0 0 2 11s3 7 10 7a9 9 0 0 0 4.4-1.1"/><path d="m2 2 20 20"/></svg>
-        <span id="sigilo-label">Mostrar valores</span>
-      </button>
-    </div>
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <div class="indicador flex items-center gap-4">
-      <span class="indicador-icone bg-acento-50 text-acento-700">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
-      </span>
-      <div>
-        <div class="text-[2rem] leading-tight font-bold lg:text-2xl">{{ carros_na_loja }}</div>
-        <div class="text-lg text-tinta-suave">carros na loja</div>
-        {% if carros_terceiros %}
-          <div class="mt-0.5 text-lg text-tinta-suave">+ {{ carros_terceiros }} carro{{ carros_terceiros|pluralize }} de terceiros na loja</div>
+          <div class="flex items-center gap-3 p-5 sm:flex-1">
+            <span class="indicador-icone shrink-0 bg-verde-fundo text-verde">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.2"/></svg>
+            </span>
+            <div>
+              <div class="text-2xl font-bold leading-tight valor-sensivel" data-real="{{ ticket_medio|reais }}">••••</div>
+              <div class="text-sm text-tinta-suave">ticket médio no mês</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 p-5 sm:flex-1">
+            <span class="indicador-icone shrink-0 bg-ambar-fundo text-ambar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </span>
+            <div>
+              <div class="text-2xl font-bold leading-tight valor-sensivel" data-real="{{ a_repassar|reais }}">••••</div>
+              <div class="text-sm text-tinta-suave">a repassar aos donos</div>
+            </div>
+          </div>
         {% endif %}
-      </div>
-    </div>
 
-    <div class="indicador flex items-center gap-4">
-      <span class="indicador-icone bg-verde-fundo text-verde">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><circle cx="12" cy="12" r="9"/></svg>
-      </span>
-      <div>
-        <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ valor_estoque|reais }}">••••</div>
-        <div class="text-lg text-tinta-suave">valor em estoque</div>
-      </div>
-    </div>
-
-    <div class="indicador flex items-center gap-4">
-      <span class="indicador-icone bg-verde-fundo text-verde">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </span>
-      <div>
-        <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ vendas_no_mes }}">••••</div>
-        <div class="text-lg text-tinta-suave">vendas no mês</div>
-      </div>
-    </div>
-
-    {% if eh_admin %}
-      <div class="indicador flex items-center gap-4">
-        <span class="indicador-icone bg-verde-fundo text-verde">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
-        </span>
-        <div>
-          <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ lucro_do_mes|reais }}">••••</div>
-          <div class="text-lg text-tinta-suave">lucro do mês</div>
+        <div class="flex items-center gap-3 p-5 sm:flex-1">
+          <span class="indicador-icone shrink-0 bg-ambar-fundo text-ambar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          </span>
+          <div>
+            <div class="text-2xl font-bold leading-tight valor-sensivel" data-real="{{ repasses_pendentes }}">••••</div>
+            <div class="text-sm text-tinta-suave">repasses a pagar</div>
+          </div>
         </div>
       </div>
-
-      <div class="indicador flex items-center gap-4">
-        <span class="indicador-icone bg-verde-fundo text-verde">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M12 11v5"/></svg>
-        </span>
-        <div>
-          <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ capital_parado|reais }}">••••</div>
-          <div class="text-lg text-tinta-suave">capital parado no estoque</div>
-        </div>
-      </div>
-
-      <div class="indicador flex items-center gap-4">
-        <span class="indicador-icone bg-verde-fundo text-verde">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.2"/></svg>
-        </span>
-        <div>
-          <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ ticket_medio|reais }}">••••</div>
-          <div class="text-lg text-tinta-suave">ticket médio no mês</div>
-        </div>
-      </div>
-
-      <div class="indicador flex items-center gap-4">
-        <span class="indicador-icone bg-ambar-fundo text-ambar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </span>
-        <div>
-          <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ a_repassar|reais }}">••••</div>
-          <div class="text-lg text-tinta-suave">a repassar aos donos</div>
-        </div>
-      </div>
-    {% endif %}
-
-    <div class="indicador flex items-center gap-4">
-      <span class="indicador-icone bg-ambar-fundo text-ambar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-      </span>
-      <div>
-        <div class="text-[2rem] leading-tight font-bold lg:text-2xl valor-sensivel" data-real="{{ repasses_pendentes }}">••••</div>
-        <div class="text-lg text-tinta-suave">repasses a pagar</div>
-      </div>
-    </div>
     </div>
   </section>
 
-  {# Carros parados há mais de 60 dias: os 3 mais antigos, pra lembrar de remarcar/anunciar. #}
+  {# Carros parados há mais de X dias: os mais antigos, pra lembrar de remarcar/anunciar. #}
   {% if carros_parados %}
     <section class="mb-6" aria-label="Carros parados">
       <div class="painel overflow-hidden">
-        <div class="flex items-center justify-between gap-2 border-b border-borda px-5 py-3">
+        <div class="flex items-center justify-between gap-2 border-b border-borda px-5 py-4">
           <h2 class="text-lg">Carros parados há mais de {{ dias_parado_painel }} dias</h2>
-          {% if total_parados > 3 %}
-            <span class="chip bg-ambar-fundo text-ambar">{{ total_parados }} no total</span>
-          {% endif %}
+          <a href="{% url 'agenda' %}" class="shrink-0 text-sm font-medium text-acento-700">
+            {% if total_parados > 3 %}Ver todos ({{ total_parados }}){% else %}Ver agenda{% endif %}
+          </a>
         </div>
         <ul class="divide-y divide-borda">
           {% for v in carros_parados %}
