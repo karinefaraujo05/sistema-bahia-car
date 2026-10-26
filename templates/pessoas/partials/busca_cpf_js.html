@@ -1,0 +1,24 @@
+{% comment %}
+Ao digitar o CPF/CNPJ, avisa se a pessoa já existe (pra não duplicar) com um link
+pra abrir o cadastro dela. Espera um <p id="cpf-aviso"> no template e o campo form.cpf_cnpj.
+{% endcomment %}
+<script>
+  (function () {
+    var cpf = document.getElementById("{{ form.cpf_cnpj.id_for_label }}");
+    var aviso = document.getElementById("cpf-aviso");
+    if (!cpf || !aviso) return;
+    cpf.addEventListener("blur", function () {
+      var v = (cpf.value || "").replace(/\D/g, "");
+      if (v.length !== 11 && v.length !== 14) { aviso.classList.add("hidden"); return; }
+      fetch("{% url 'pessoas:buscar_cpf' %}?cpf=" + v)
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.encontrado) { aviso.classList.add("hidden"); return; }
+          aviso.innerHTML = "Já existe <strong>" + d.nome + "</strong> com esse CPF/CNPJ. " +
+            '<a href="' + d.url + '" class="font-medium underline text-acento-700">Abrir cadastro</a>.';
+          aviso.className = "mt-1 text-sm text-ambar";
+        })
+        .catch(function () {});
+    });
+  })();
+</script>

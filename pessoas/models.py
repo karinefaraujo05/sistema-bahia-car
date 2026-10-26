@@ -76,3 +76,15 @@ class Pessoa(ModeloBase):
     @property
     def telefone_formatado(self):
         return formatar_telefone(self.telefone)
+
+    def campos_faltando_contrato(self):
+        """Rótulos dos dados que o contrato exige desta pessoa e ainda estão vazios."""
+        obrigatorios = {
+            "cpf_cnpj": "CPF/CNPJ",
+            "endereco": "endereço",
+            "cidade": "cidade",
+            "uf": "UF",
+        }
+        if self.tipo == TipoPessoa.FISICA:
+            obrigatorios |= {"nacionalidade": "nacionalidade", "estado_civil": "estado civil"}
+        return [rotulo for campo, rotulo in obrigatorios.items() if not getattr(self, campo)]

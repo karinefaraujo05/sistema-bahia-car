@@ -6,6 +6,8 @@
 {% block conteudo %}
   {% include "negocios/partials/cabecalho_passo.html" %}
 
+  <p class="mb-4 text-tinta-suave">Confira os valores (já trouxemos o valor anunciado de cada carro) e ajuste se precisar.</p>
+
   <form method="post" class="space-y-4">
     {% csrf_token %}
     <div class="grid gap-4 sm:grid-cols-2">

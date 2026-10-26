@@ -123,6 +123,8 @@ def passo_pessoa(request, pk):
             "negocio": negocio,
             "form": form,
             "parte": parte,
+            # O que falta nessa pessoa pro contrato (pra completar agora, com o cliente na loja).
+            "faltando_pessoa": parte.pessoa.campos_faltando_contrato() if parte else [],
             "titulo": titulos[negocio.tipo],
             "passo": 1,
         },
@@ -313,6 +315,9 @@ def troca_carro_loja(request, pk):
         if form.is_valid():
             veiculo = form.cleaned_data["veiculo"]
             if item:
+                # Trocou o carro da loja? Atualiza o valor sugerido (anunciado) junto.
+                if item.veiculo_id != veiculo.pk:
+                    item.valor = veiculo.valor_anunciado or 0
                 item.veiculo = veiculo
                 item.para_pessoa = cliente.pessoa if cliente else None
                 item.save()
@@ -354,8 +359,13 @@ def troca_carro_cliente(request, pk):
                 veiculo.proprietario = cliente.pessoa if cliente else None
             veiculo.atualizado_por = request.user
             veiculo.save()
+            # Valor do carro do cliente: usa o anunciado como ponto de partida, pra
+            # pré-preencher os valores no passo seguinte (que vira confirmação).
+            valor_inicial = veiculo.valor_anunciado or 0
             if item:
                 item.veiculo = veiculo
+                if not item.valor:
+                    item.valor = valor_inicial
                 item.save()
             else:
                 ItemNegocio.objetos.create(
@@ -363,7 +373,7 @@ def troca_carro_cliente(request, pk):
                     veiculo=veiculo,
                     de_pessoa=cliente.pessoa if cliente else None,
                     para_pessoa=None,
-                    valor=0,
+                    valor=valor_inicial,
                 )
             if "rascunho" in request.POST:
                 return redirect("negocios:detalhe", pk=negocio.pk)

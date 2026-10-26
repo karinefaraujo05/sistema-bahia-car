@@ -19,14 +19,35 @@ def _estilizar(form):
             widget.attrs.setdefault("inputmode", "numeric")
 
 
+def _checar_coerencia_documento(form, tipo, documento):
+    """Adiciona erro se o documento não bate com o tipo (física=CPF, jurídica=CNPJ)."""
+    if not documento:
+        return
+    if tipo == TipoPessoa.FISICA and len(documento) == 14:
+        form.add_error("cpf_cnpj", "Pessoa física usa CPF (11 dígitos), não CNPJ.")
+    elif tipo == TipoPessoa.JURIDICA and len(documento) == 11:
+        form.add_error("cpf_cnpj", "Pessoa jurídica usa CNPJ (14 dígitos), não CPF.")
+
+
 class PessoaRapidaForm(forms.ModelForm):
     class Meta:
         model = Pessoa
-        fields = ["tipo", "nome", "telefone"]
+        # Cadastro rápido agora pede o CPF/CNPJ: evita pessoa duplicada e já adianta
+        # o que o contrato precisa. O resto (endereço, RG...) fica pra depois.
+        fields = ["tipo", "cpf_cnpj", "nome", "telefone"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["cpf_cnpj"].required = True
         _estilizar(self)
+
+    def clean_cpf_cnpj(self):
+        return so_digitos(self.cleaned_data.get("cpf_cnpj"))
+
+    def clean(self):
+        dados = super().clean()
+        _checar_coerencia_documento(self, dados.get("tipo"), dados.get("cpf_cnpj"))
+        return dados
 
 
 class PessoaForm(forms.ModelForm):
@@ -55,7 +76,10 @@ class PessoaForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         _estilizar(self)
-        self.fields["cep"].required = True
+        # Obrigatórios: nome (do modelo) e CPF/CNPJ. O resto a pessoa completa depois
+        # (a cobrança de completude acontece na hora de gerar o contrato).
+        self.fields["cpf_cnpj"].required = True
+        self.fields["cep"].required = False
         self.fields["cep"].help_text = "Digite o CEP e o endereço é preenchido sozinho."
         self.fields["observacoes"].label = "Observações sobre a pessoa"
 
@@ -71,11 +95,5 @@ class PessoaForm(forms.ModelForm):
 
     def clean(self):
         dados = super().clean()
-        tipo = dados.get("tipo")
-        documento = dados.get("cpf_cnpj")
-        if documento:
-            if tipo == TipoPessoa.FISICA and len(documento) == 14:
-                self.add_error("cpf_cnpj", "Pessoa física usa CPF (11 dígitos), não CNPJ.")
-            elif tipo == TipoPessoa.JURIDICA and len(documento) == 11:
-                self.add_error("cpf_cnpj", "Pessoa jurídica usa CNPJ (14 dígitos), não CPF.")
+        _checar_coerencia_documento(self, dados.get("tipo"), dados.get("cpf_cnpj"))
         return dados

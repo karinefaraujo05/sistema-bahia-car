@@ -15,7 +15,6 @@ from django.urls import reverse
 
 from negocios.models import Modalidade, PapelParte, TipoNegocio
 from negocios.services import diferenca_troca
-from pessoas.models import TipoPessoa
 
 from .models import ConfiguracaoLoja, Contrato, Documento, ModeloContrato, TipoDocumento
 
@@ -46,19 +45,7 @@ def escolher_modelo(negocio):
 
 
 def _faltando_pessoa(pessoa):
-    itens = []
-    obrigatorios = {
-        "cpf_cnpj": "CPF/CNPJ",
-        "endereco": "endereço",
-        "cidade": "cidade",
-        "uf": "UF",
-    }
-    if pessoa.tipo == TipoPessoa.FISICA:
-        obrigatorios |= {"nacionalidade": "nacionalidade", "estado_civil": "estado civil"}
-    for campo, rotulo in obrigatorios.items():
-        if not getattr(pessoa, campo):
-            itens.append(f"{pessoa.nome}: {rotulo}")
-    return itens
+    return [f"{pessoa.nome}: {rotulo}" for rotulo in pessoa.campos_faltando_contrato()]
 
 
 def campos_faltando_contrato(negocio):
@@ -77,17 +64,10 @@ def campos_faltando_contrato(negocio):
 
     for it in negocio.itens.select_related("veiculo"):
         v = it.veiculo
-        if not v.chassi:
+        for rotulo in v.campos_faltando_contrato():
             faltando.append(
                 {
-                    "texto": f"{v.placa_formatada}: chassi",
-                    "url": reverse("veiculos:editar", args=[v.pk]),
-                }
-            )
-        if not v.renavam:
-            faltando.append(
-                {
-                    "texto": f"{v.placa_formatada}: renavam",
+                    "texto": f"{v.placa_formatada}: {rotulo}",
                     "url": reverse("veiculos:editar", args=[v.pk]),
                 }
             )
@@ -151,14 +131,13 @@ def campos_faltando_consignacao(consignacao):
             {"texto": item, "url": reverse("pessoas:editar", args=[consignacao.proprietario_id])}
         )
     v = consignacao.veiculo
-    for campo, rotulo in (("chassi", "chassi"), ("renavam", "renavam")):
-        if not getattr(v, campo):
-            faltando.append(
-                {
-                    "texto": f"{v.placa_formatada}: {rotulo}",
-                    "url": reverse("veiculos:editar", args=[v.pk]),
-                }
-            )
+    for rotulo in v.campos_faltando_contrato():
+        faltando.append(
+            {
+                "texto": f"{v.placa_formatada}: {rotulo}",
+                "url": reverse("veiculos:editar", args=[v.pk]),
+            }
+        )
     return faltando
 
 

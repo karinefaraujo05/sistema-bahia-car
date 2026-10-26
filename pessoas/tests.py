@@ -4,7 +4,7 @@ from django.urls import reverse
 
 from contas.models import Usuario
 from pessoas import services
-from pessoas.forms import PessoaForm
+from pessoas.forms import PessoaForm, PessoaRapidaForm
 from pessoas.models import Pessoa, TipoPessoa
 from pessoas.validators import (
     cnpj_valido,
@@ -136,15 +136,64 @@ def test_lista_exige_login(client):
 @pytest.mark.django_db
 def test_cadastro_pelo_formulario(client):
     logar(client)
+    # Regra nova (Onda 2): obrigatórios são nome e CPF; CEP não é mais obrigatório.
     dados = {
         "tipo": TipoPessoa.FISICA,
         "nome": "José Pereira",
+        "cpf_cnpj": CPF_VALIDO,
         "telefone": "71999990000",
-        "cep": "45000000",  # CEP é obrigatório no cadastro completo
     }
     resp = client.post(reverse("pessoas:novo"), dados)
     assert resp.status_code == 302
     assert Pessoa.objetos.filter(nome="José Pereira").exists()
+
+
+# --- Onda 2: CPF obrigatório no rápido, dedupe e completude ---
+
+
+@pytest.mark.django_db
+def test_form_rapido_exige_cpf():
+    sem_cpf = PessoaRapidaForm(data={"tipo": TipoPessoa.FISICA, "nome": "Maria", "telefone": "71"})
+    assert not sem_cpf.is_valid()
+    assert "cpf_cnpj" in sem_cpf.errors
+    com_cpf = PessoaRapidaForm(
+        data={"tipo": TipoPessoa.FISICA, "nome": "Maria", "cpf_cnpj": CPF_VALIDO}
+    )
+    assert com_cpf.is_valid()
+
+
+@pytest.mark.django_db
+def test_cadastro_rapido_pela_tela_deduplica(client):
+    logar(client)
+    existente = Pessoa.objetos.create(nome="João Antigo", cpf_cnpj=CPF_VALIDO)
+    resp = client.post(
+        reverse("pessoas:novo_rapido"),
+        {"tipo": TipoPessoa.FISICA, "nome": "João Novo", "cpf_cnpj": "111.444.777-35"},
+    )
+    assert resp.status_code == 302
+    # Não criou duplicata: continua tendo só uma pessoa com esse CPF.
+    assert Pessoa.objetos.filter(cpf_cnpj=CPF_VALIDO).count() == 1
+    assert resp.url == reverse("pessoas:detalhe", args=[existente.pk])
+
+
+@pytest.mark.django_db
+def test_buscar_cpf_encontra(client):
+    logar(client)
+    p = Pessoa.objetos.create(nome="Carla", cpf_cnpj=CPF_VALIDO)
+    resp = client.get(reverse("pessoas:buscar_cpf"), {"cpf": "111.444.777-35"})
+    dados = resp.json()
+    assert dados["encontrado"] is True
+    assert dados["nome"] == "Carla"
+    assert dados["url"] == reverse("pessoas:detalhe", args=[p.pk])
+
+
+@pytest.mark.django_db
+def test_campos_faltando_contrato_pessoa():
+    p = Pessoa.objetos.create(nome="Sem Dados", cpf_cnpj=CPF_VALIDO)
+    faltando = p.campos_faltando_contrato()
+    assert "endereço" in faltando and "cidade" in faltando
+    assert "nacionalidade" in faltando  # pessoa física exige
+    assert "CPF/CNPJ" not in faltando  # esse já está preenchido
 
 
 @pytest.mark.django_db

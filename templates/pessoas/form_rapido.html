@@ -5,21 +5,31 @@
 
 {% block conteudo %}
   <div class="mb-2">
-    {% url 'pessoas:lista' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar para pessoas" %}
+    {% if proximo %}{% include "partials/voltar.html" with href=proximo texto="Voltar ao negócio" %}{% else %}{% url 'pessoas:lista' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar para pessoas" %}{% endif %}
   </div>
 
   <h1 class="mb-1 text-2xl">Cadastro rápido</h1>
-  <p class="mb-5 text-tinta-suave">Só o essencial agora. O resto você completa depois.</p>
+  <p class="mb-5 text-tinta-suave">Só o essencial agora (com o CPF, pra não duplicar). O resto você completa depois.</p>
 
-  <form method="post" class="space-y-4">
+  {% if form.non_field_errors %}
+    <div class="mb-4 aviso aviso-atencao">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <form method="post" action="?{{ request.GET.urlencode }}" class="space-y-4">
     {% csrf_token %}
     {% include "pessoas/partials/campo.html" with campo=form.tipo %}
+    <div>
+      {% include "pessoas/partials/campo.html" with campo=form.cpf_cnpj %}
+      <p id="cpf-aviso" class="hidden"></p>
+    </div>
     {% include "pessoas/partials/campo.html" with campo=form.nome %}
     {% include "pessoas/partials/campo.html" with campo=form.telefone %}
 
     <div class="flex gap-2">
       <button type="submit" class="botao botao-primario">Salvar</button>
-      <a href="{% url 'pessoas:novo' %}" class="botao botao-secundario">Cadastro completo</a>
+      <a href="{% url 'pessoas:novo' %}{% if proximo %}?next={{ proximo|urlencode }}{% endif %}" class="botao botao-secundario">Cadastro completo</a>
     </div>
   </form>
+
+  {% include "pessoas/partials/busca_cpf_js.html" %}
 {% endblock %}
