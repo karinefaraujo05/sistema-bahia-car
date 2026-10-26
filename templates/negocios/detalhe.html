@@ -8,9 +8,10 @@
     {% url 'inicio' as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Início" %}
   </div>
 
-  <div class="mb-6 flex items-start justify-between gap-3">
-    <div>
-      <h1 class="text-2xl">
+  {# Cabeçalho: tipo do negócio + ação de cancelar. #}
+  <div class="mb-6 flex flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0">
+      <h1 class="text-2xl sm:text-3xl">
         {{ negocio.get_tipo_display }}{% if negocio.numero_contrato %} nº {{ negocio.numero_contrato }}{% endif %}
       </h1>
       <p class="text-tinta-suave">{{ negocio.get_modalidade_display }} · {{ negocio.data|date:"d/m/Y" }}</p>
@@ -39,49 +40,77 @@
     </div>
   {% endif %}
 
-  {# Três cartões de resumo. #}
-  <div class="mb-6 grid gap-4 sm:grid-cols-3">
-    <div class="rounded-2xl border border-borda bg-superficie p-4 shadow-sm">
-      <div class="secao-label">Status da venda</div>
-      <div class="mt-2">
-        <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium{% if negocio.status == 'concluido' %} bg-verde-fundo text-verde{% elif negocio.status == 'cancelado' %} bg-cinza-fundo text-cinza{% else %} bg-ambar-fundo text-ambar{% endif %}">
-          {% if negocio.status == 'concluido' %}<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% endif %}
-          {{ negocio.get_status_display }}
+  {# Resumo do negócio em faixa de indicadores. #}
+  <div class="painel mb-6 overflow-hidden">
+    <div class="flex flex-col divide-y divide-borda sm:flex-row sm:divide-x sm:divide-y-0">
+      <div class="flex items-start gap-3 p-5 sm:flex-1">
+        <span class="indicador-icone shrink-0
+          {% if negocio.status == 'concluido' %}bg-verde-fundo text-verde
+          {% elif negocio.status == 'cancelado' %}bg-cinza-fundo text-cinza
+          {% else %}bg-ambar-fundo text-ambar{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
         </span>
-      </div>
-      <div class="mt-2 text-xs text-tinta-suave">{{ negocio.data|date:"d \d\e F \d\e Y" }}</div>
-    </div>
-
-    <div class="rounded-2xl border border-borda bg-superficie p-4 shadow-sm">
-      <div class="secao-label">Valor total</div>
-      <div class="mt-2 text-2xl font-bold text-acento-700">{{ negocio.valor_total|reais }}</div>
-      <div class="mt-1 text-xs text-tinta-suave">
-        {% if negocio.forma_pagamento %}{{ negocio.get_forma_pagamento_display }}{% endif %}
-      </div>
-      {% if negocio.tipo == 'troca' %}
-        <div class="mt-2 border-t border-borda pt-2 text-sm">
-          {% if diferenca > 0 %}<span class="text-tinta-suave">Diferença:</span> <b class="text-tinta">Cliente paga {{ diferenca_abs|reais }}</b>
-          {% elif diferenca < 0 %}<span class="text-tinta-suave">Diferença:</span> <b class="text-tinta">Loja paga {{ diferenca_abs|reais }}</b>
-          {% else %}<span class="text-tinta-suave">Sem diferença a pagar.</span>{% endif %}
+        <div class="min-w-0">
+          <div class="secao-label">Status da venda</div>
+          <div class="mt-1.5">
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium{% if negocio.status == 'concluido' %} bg-verde-fundo text-verde{% elif negocio.status == 'cancelado' %} bg-cinza-fundo text-cinza{% else %} bg-ambar-fundo text-ambar{% endif %}">
+              {% if negocio.status == 'concluido' %}<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% endif %}
+              {{ negocio.get_status_display }}
+            </span>
+          </div>
+          <div class="mt-1.5 text-xs text-tinta-suave">{{ negocio.data|date:"d \d\e F \d\e Y" }}</div>
         </div>
-      {% endif %}
-    </div>
+      </div>
 
-    <div class="rounded-2xl border border-borda bg-superficie p-4 shadow-sm">
-      <div class="secao-label">Responsável</div>
-      <div class="mt-2 font-semibold">{% if negocio.criado_por %}{{ negocio.criado_por.get_full_name|default:negocio.criado_por.username|capfirst }}{% else %}&mdash;{% endif %}</div>
-      <div class="mt-1 text-xs text-tinta-suave">Bahia Car</div>
+      <div class="flex items-start gap-3 p-5 sm:flex-1">
+        <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </span>
+        <div class="min-w-0">
+          <div class="secao-label">Valor total</div>
+          <div class="mt-1 text-2xl font-bold text-acento-700">{{ negocio.valor_total|reais }}</div>
+          <div class="mt-0.5 text-xs text-tinta-suave">
+            {% if negocio.forma_pagamento %}{{ negocio.get_forma_pagamento_display }}{% endif %}
+          </div>
+          {% if negocio.tipo == 'troca' %}
+            <div class="mt-2 border-t border-borda pt-2 text-sm">
+              {% if diferenca > 0 %}<span class="text-tinta-suave">Diferença:</span> <b class="text-tinta">Cliente paga {{ diferenca_abs|reais }}</b>
+              {% elif diferenca < 0 %}<span class="text-tinta-suave">Diferença:</span> <b class="text-tinta">Loja paga {{ diferenca_abs|reais }}</b>
+              {% else %}<span class="text-tinta-suave">Sem diferença a pagar.</span>{% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="flex items-start gap-3 p-5 sm:flex-1">
+        <span class="indicador-icone shrink-0 bg-cinza-fundo text-cinza">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <div class="min-w-0">
+          <div class="secao-label">Responsável</div>
+          <div class="mt-1 font-semibold">{% if negocio.criado_por %}{{ negocio.criado_por.get_full_name|default:negocio.criado_por.username|capfirst }}{% else %}&mdash;{% endif %}</div>
+          <div class="mt-0.5 text-xs text-tinta-suave">Bahia Car</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
     <div class="space-y-6">
       {# Veículo(s) negociado(s) com foto. #}
-      <section aria-label="Veículo negociado">
-        <h2 class="secao-label mb-2">Veículo negociado</h2>
-        <div class="space-y-3">
+      <section class="painel overflow-hidden" aria-label="Veículo negociado">
+        <div class="flex items-center gap-4 border-b border-borda p-5">
+          <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8A3 3 0 0 0 2 13v3c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+          </span>
+          <div>
+            <h2 class="text-lg">Veículo negociado</h2>
+            <p class="text-sm text-tinta-suave">O que entrou ou saiu da loja.</p>
+          </div>
+        </div>
+        <div class="space-y-3 p-5">
           {% for item in itens %}
-            <a href="{% url 'veiculos:detalhe' item.veiculo.pk %}" class="flex gap-4 rounded-2xl border border-borda bg-superficie p-3 shadow-sm hover:border-acento-200">
+            <a href="{% url 'veiculos:detalhe' item.veiculo.pk %}" class="flex gap-4 rounded-2xl border border-borda bg-superficie p-3 transition hover:border-acento-200 hover:shadow-sm">
               {% with foto=item.veiculo.foto_capa %}
                 {% if foto %}
                   <img src="{{ foto.miniatura.url|default:foto.imagem.url }}" alt="" class="h-20 w-28 shrink-0 rounded-xl object-cover" />
@@ -122,12 +151,20 @@
       </section>
 
       {# Pessoas envolvidas. #}
-      <section aria-label="Pessoas envolvidas">
-        <h2 class="secao-label mb-2">Pessoas envolvidas</h2>
-        <ul class="divide-y divide-borda rounded-2xl border border-borda bg-superficie shadow-sm">
+      <section class="painel overflow-hidden" aria-label="Pessoas envolvidas">
+        <div class="flex items-center gap-4 border-b border-borda p-5">
+          <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </span>
+          <div>
+            <h2 class="text-lg">Pessoas envolvidas</h2>
+            <p class="text-sm text-tinta-suave">Comprador, vendedor e afins.</p>
+          </div>
+        </div>
+        <ul class="divide-y divide-borda">
           {% for parte in partes %}
             <li>
-              <a href="{% url 'pessoas:detalhe' parte.pessoa.pk %}" class="flex items-center gap-3 px-4 py-3 hover:bg-acento-50">
+              <a href="{% url 'pessoas:detalhe' parte.pessoa.pk %}" class="group flex items-center gap-3 px-5 py-4 hover:bg-acento-50">
                 <span class="avatar h-10 w-10">{{ parte.pessoa.nome|first|upper }}</span>
                 <div class="min-w-0 flex-1">
                   <div class="truncate font-medium text-tinta">{{ parte.pessoa.nome }}</div>
@@ -137,7 +174,7 @@
               </a>
             </li>
           {% empty %}
-            <li class="px-4 py-3 text-tinta-suave">Nenhuma pessoa.</li>
+            <li class="px-5 py-4 text-tinta-suave">Nenhuma pessoa.</li>
           {% endfor %}
         </ul>
       </section>
@@ -145,9 +182,17 @@
 
     <div class="space-y-6">
       {# Contratos e termos. #}
-      <section aria-label="Contratos e termos">
-        <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h2 class="secao-label">Contratos e termos</h2>
+      <section class="painel overflow-hidden" aria-label="Contratos e termos">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-borda p-5">
+          <div class="flex items-center gap-4">
+            <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+            </span>
+            <div>
+              <h2 class="text-lg">Contratos e termos</h2>
+              <p class="text-sm text-tinta-suave">Gere e compartilhe os documentos.</p>
+            </div>
+          </div>
           <div class="flex flex-wrap gap-2">
             <form method="post" action="{% url 'contratos:gerar' negocio.pk %}">
               {% csrf_token %}
@@ -168,9 +213,9 @@
           </div>
         </div>
         {% if contratos_info %}
-          <ul class="divide-y divide-borda rounded-2xl border border-borda bg-superficie shadow-sm">
+          <ul class="divide-y divide-borda">
             {% for info in contratos_info %}
-              <li class="px-4 py-3">
+              <li class="px-5 py-4">
                 <div class="flex items-center justify-between gap-3">
                   <span class="flex min-w-0 items-center gap-2">
                     <svg class="h-5 w-5 shrink-0 text-acento-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/></svg>
@@ -215,99 +260,108 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p class="rounded-2xl border border-dashed border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
+          <p class="p-5 text-center text-tinta-suave">
             Nenhum contrato gerado ainda.
           </p>
         {% endif %}
       </section>
 
       {# Documentos (arquivos da venda). #}
-      <section aria-label="Documentos">
-        <h2 class="secao-label mb-2">Documentos</h2>
-
-        {% if documentos %}
-          <ul class="mb-3 divide-y divide-borda rounded-2xl border border-borda bg-superficie shadow-sm">
-            {% for documento in documentos %}
-              <li class="flex items-center justify-between gap-3 px-4 py-3">
-                <div class="flex min-w-0 items-center gap-2.5">
-                  <span class="chip h-9 w-9 shrink-0 bg-acento-50 text-acento-700">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-                  </span>
-                  <div class="min-w-0">
-                    <div class="truncate font-medium">{{ documento.get_tipo_display }}</div>
-                    <div class="truncate text-sm text-tinta-suave">
-                      {{ documento.nome_arquivo }}{% if documento.gerado_pelo_sistema %} · gerado pelo sistema{% endif %}
+      <section class="painel overflow-hidden" aria-label="Documentos">
+        <div class="flex items-center gap-4 border-b border-borda p-5">
+          <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+          </span>
+          <div>
+            <h2 class="text-lg">Documentos</h2>
+            <p class="text-sm text-tinta-suave">Arquivos anexados a este negócio.</p>
+          </div>
+        </div>
+        <div class="p-5">
+          {% if documentos %}
+            <ul class="mb-3 divide-y divide-borda overflow-hidden rounded-xl border border-borda">
+              {% for documento in documentos %}
+                <li class="flex items-center justify-between gap-3 px-4 py-3">
+                  <div class="flex min-w-0 items-center gap-2.5">
+                    <span class="chip h-9 w-9 shrink-0 bg-acento-50 text-acento-700">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+                    </span>
+                    <div class="min-w-0">
+                      <div class="truncate font-medium">{{ documento.get_tipo_display }}</div>
+                      <div class="truncate text-sm text-tinta-suave">
+                        {{ documento.nome_arquivo }}{% if documento.gerado_pelo_sistema %} · gerado pelo sistema{% endif %}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div class="flex shrink-0 items-center gap-4 text-sm">
-                  <a href="{{ documento.arquivo.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-acento-700">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
-                    Abrir
-                  </a>
-                  <button
-                    type="button"
-                    class="inline-flex items-center gap-1.5 text-acento-700"
-                    data-url="{{ request.scheme }}://{{ request.get_host }}{{ documento.arquivo.url }}"
-                    onclick="compartilhar(this.dataset.url, '{{ documento.get_tipo_display|escapejs }}')"
-                  >
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
-                    Compartilhar
-                  </button>
-                </div>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="mb-3 rounded-2xl border border-dashed border-borda bg-superficie px-4 py-6 text-center text-tinta-suave">
-            Nenhum documento anexado ainda.
-          </p>
-        {% endif %}
+                  <div class="flex shrink-0 items-center gap-4 text-sm">
+                    <a href="{{ documento.arquivo.url }}" target="_blank" class="inline-flex items-center gap-1.5 text-acento-700">
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                      Abrir
+                    </a>
+                    <button
+                      type="button"
+                      class="inline-flex items-center gap-1.5 text-acento-700"
+                      data-url="{{ request.scheme }}://{{ request.get_host }}{{ documento.arquivo.url }}"
+                      onclick="compartilhar(this.dataset.url, '{{ documento.get_tipo_display|escapejs }}')"
+                    >
+                      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+                      Compartilhar
+                    </button>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="mb-3 rounded-xl border border-dashed border-borda bg-fundo px-4 py-6 text-center text-tinta-suave">
+              Nenhum documento anexado ainda.
+            </p>
+          {% endif %}
 
-        <form
-          method="post"
-          action="{% url 'contratos:upload_documentos' negocio.pk %}"
-          enctype="multipart/form-data"
-          class="space-y-4 rounded-2xl border border-borda bg-superficie p-5 shadow-sm"
-        >
-          {% csrf_token %}
-          <div class="flex items-center gap-2.5">
-            <span class="chip bg-acento-50 text-acento-700">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-            </span>
-            <p class="font-semibold">Anexar documento</p>
-          </div>
+          <form
+            method="post"
+            action="{% url 'contratos:upload_documentos' negocio.pk %}"
+            enctype="multipart/form-data"
+            class="space-y-4 rounded-xl border border-borda bg-fundo p-5"
+          >
+            {% csrf_token %}
+            <div class="flex items-center gap-2.5">
+              <span class="chip bg-acento-50 text-acento-700">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </span>
+              <p class="font-semibold">Anexar documento</p>
+            </div>
 
-          <div>
-            <label for="{{ doc_form.tipo.id_for_label }}" class="mb-1 block text-sm font-medium">Tipo</label>
-            {{ doc_form.tipo }}
-          </div>
+            <div>
+              <label for="{{ doc_form.tipo.id_for_label }}" class="mb-1 block text-sm font-medium">Tipo</label>
+              {{ doc_form.tipo }}
+            </div>
 
-          <div id="doc-descricao" class="hidden">
-            <label for="{{ doc_form.descricao.id_for_label }}" class="mb-1 block text-sm font-medium">Nome do documento</label>
-            {{ doc_form.descricao }}
-            <p class="mt-1 text-xs text-tinta-suave">Como é "Outro", dê um nome pra saber o que é depois.</p>
-          </div>
+            <div id="doc-descricao" class="hidden">
+              <label for="{{ doc_form.descricao.id_for_label }}" class="mb-1 block text-sm font-medium">Nome do documento</label>
+              {{ doc_form.descricao }}
+              <p class="mt-1 text-xs text-tinta-suave">Como é "Outro", dê um nome pra saber o que é depois.</p>
+            </div>
 
-          <div>
-            <label for="arquivos-doc" class="mb-1 block text-sm font-medium">Arquivo (foto ou PDF)</label>
-            <input
-              id="arquivos-doc"
-              type="file"
-              name="arquivos"
-              accept="image/*,application/pdf"
-              capture="environment"
-              multiple
-              class="campo-arquivo"
-            />
-          </div>
+            <div>
+              <label for="arquivos-doc" class="mb-1 block text-sm font-medium">Arquivo (foto ou PDF)</label>
+              <input
+                id="arquivos-doc"
+                type="file"
+                name="arquivos"
+                accept="image/*,application/pdf"
+                capture="environment"
+                multiple
+                class="campo-arquivo"
+              />
+            </div>
 
-          <label class="flex items-center gap-2 text-sm">
-            {{ doc_form.juntar_pdf }} <span>{{ doc_form.juntar_pdf.label }}</span>
-          </label>
+            <label class="flex items-center gap-2 text-sm">
+              {{ doc_form.juntar_pdf }} <span>{{ doc_form.juntar_pdf.label }}</span>
+            </label>
 
-          <button type="submit" class="botao botao-primario">Anexar documento</button>
-        </form>
+            <button type="submit" class="botao botao-primario">Anexar documento</button>
+          </form>
+        </div>
       </section>
     </div>
   </div>

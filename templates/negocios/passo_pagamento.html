@@ -6,39 +6,40 @@
 {% block conteudo %}
   {% include "negocios/partials/cabecalho_passo.html" %}
 
-  <form method="post" class="space-y-4">
+  <form method="post" class="space-y-6">
     {% csrf_token %}
-    {% include "negocios/partials/campo.html" with campo=form.valor %}
-    {% include "negocios/partials/campo.html" with campo=form.km_entrega %}
 
-    {% if form.quitacao_opcao %}
-      <div class="aviso aviso-atencao">
-        <p class="mb-2 text-sm font-medium">Esse carro tem financiamento ativo.</p>
-        {% include "negocios/partials/campo.html" with campo=form.quitacao_opcao %}
+    <div class="painel space-y-4 p-5">
+      {% include "negocios/partials/campo.html" with campo=form.valor %}
+      {% include "negocios/partials/campo.html" with campo=form.km_entrega %}
+
+      {% if form.quitacao_opcao %}
+        <div class="aviso aviso-atencao">
+          <p class="mb-2 text-sm font-medium">Esse carro tem financiamento ativo.</p>
+          {% include "negocios/partials/campo.html" with campo=form.quitacao_opcao %}
+        </div>
+      {% endif %}
+
+      {# Forma de pagamento como botões grandes (não select). #}
+      <div>
+        <label class="mb-2 block font-medium">Forma de pagamento</label>
+        <input type="hidden" name="forma_pagamento" id="forma_pagamento" value="{{ form.forma_pagamento.value|default:'' }}" />
+        <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {% for valor, rotulo in form.forma_pagamento.field.choices %}
+            {% if valor %}
+              <button type="button" data-forma="{{ valor }}" onclick="escolherForma('{{ valor }}')" class="botao-forma">{{ rotulo }}</button>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% for erro in form.forma_pagamento.errors %}<p class="mt-1 text-sm text-ambar">{{ erro }}</p>{% endfor %}
       </div>
-    {% endif %}
 
-    {# Forma de pagamento como botões grandes (não select). #}
-    <div>
-      <label class="mb-2 block font-medium">Forma de pagamento</label>
-      <input type="hidden" name="forma_pagamento" id="forma_pagamento" value="{{ form.forma_pagamento.value|default:'' }}" />
-      <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {% for valor, rotulo in form.forma_pagamento.field.choices %}
-          {% if valor %}
-            <button type="button" data-forma="{{ valor }}" onclick="escolherForma('{{ valor }}')" class="botao-forma">{{ rotulo }}</button>
-          {% endif %}
-        {% endfor %}
-      </div>
-      {% for erro in form.forma_pagamento.errors %}<p class="mt-1 text-sm text-ambar">{{ erro }}</p>{% endfor %}
-    </div>
-
-    <div>
       {% include "negocios/partials/campo.html" with campo=form.data %}
-    </div>
-    {% include "negocios/partials/campo.html" with campo=form.detalhes_pagamento %}
-    <div class="grid gap-4 sm:grid-cols-2">
-      {% include "negocios/partials/campo.html" with campo=form.data_hora_entrega %}
-      {% include "negocios/partials/campo.html" with campo=form.local_entrega %}
+      {% include "negocios/partials/campo.html" with campo=form.detalhes_pagamento %}
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% include "negocios/partials/campo.html" with campo=form.data_hora_entrega %}
+        {% include "negocios/partials/campo.html" with campo=form.local_entrega %}
+      </div>
     </div>
 
     <div class="flex flex-wrap gap-2 pt-2">

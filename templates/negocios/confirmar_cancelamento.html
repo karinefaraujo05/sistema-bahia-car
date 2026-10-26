@@ -8,20 +8,30 @@
     {% url 'negocios:detalhe' negocio.pk as voltar_url %}{% include "partials/voltar.html" with href=voltar_url texto="Voltar" %}
   </div>
 
-  <h1 class="mb-3 text-2xl">Cancelar este negócio?</h1>
+  <h1 class="mb-6 text-2xl sm:text-3xl">Cancelar este negócio?</h1>
 
-  <div class="mb-5 aviso aviso-atencao">
-    <p>
-      Isso vai desfazer as mudanças de status dos carros (e da consignação, se houver) e marcar o
-      negócio como cancelado. <strong>Nada é apagado</strong>, e fica registrado no histórico.
-    </p>
-  </div>
-
-  <form method="post" action="{% url 'negocios:cancelar' negocio.pk %}">
-    {% csrf_token %}
-    <div class="flex gap-2">
-      <button type="submit" class="botao botao-primario">Sim, cancelar o negócio</button>
-      <a href="{% url 'negocios:detalhe' negocio.pk %}" class="botao botao-secundario">Não, voltar</a>
+  <section class="painel overflow-hidden">
+    <div class="flex items-center gap-4 border-b border-borda p-5">
+      <span class="indicador-icone shrink-0 bg-ambar-fundo text-ambar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.3 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.3a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      </span>
+      <div>
+        <h2 class="text-lg">Confirmar cancelamento</h2>
+        <p class="text-sm text-tinta-suave">Essa ação pode ser revertida registrando um novo negócio.</p>
+      </div>
     </div>
-  </form>
+    <div class="space-y-5 p-5">
+      <p>
+        Isso vai desfazer as mudanças de status dos carros (e da consignação, se houver) e marcar o
+        negócio como cancelado. <strong>Nada é apagado</strong>, e fica registrado no histórico.
+      </p>
+      <form method="post" action="{% url 'negocios:cancelar' negocio.pk %}">
+        {% csrf_token %}
+        <div class="flex flex-wrap gap-2">
+          <button type="submit" class="botao botao-primario">Sim, cancelar o negócio</button>
+          <a href="{% url 'negocios:detalhe' negocio.pk %}" class="botao botao-secundario">Não, voltar</a>
+        </div>
+      </form>
+    </div>
+  </section>
 {% endblock %}

@@ -9,11 +9,19 @@
 
   {# Resumo completo numa tela só. #}
   {% if negocio.tipo == 'troca' %}
-    <div class="mb-4 space-y-3 rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
-      <p class="text-lg">Troca com <strong>{% if parte %}{{ parte.pessoa.nome }}{% endif %}</strong>:</p>
-      <ul class="space-y-2">
+    <section class="painel mb-4 overflow-hidden">
+      <div class="flex items-center gap-4 border-b border-borda p-5">
+        <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4"/><path d="M20 7H4"/><path d="m8 21-4-4 4-4"/><path d="M4 17h16"/></svg>
+        </span>
+        <div>
+          <h2 class="text-lg">Confira a troca</h2>
+          <p class="text-sm text-tinta-suave">Com {% if parte %}{{ parte.pessoa.nome }}{% else %}o cliente{% endif %}.</p>
+        </div>
+      </div>
+      <ul class="divide-y divide-borda">
         {% for item in itens %}
-          <li class="flex items-start justify-between gap-3 border-b border-borda pb-2">
+          <li class="flex items-start justify-between gap-3 px-5 py-3">
             <span>
               {% if item.sai_da_loja %}A loja entrega{% else %}O cliente entrega{% endif %}
               o <strong>{{ item.veiculo.marca }} {{ item.veiculo.modelo }}</strong>
@@ -23,47 +31,57 @@
           </li>
         {% endfor %}
       </ul>
-      <p class="text-lg">
+      <p class="border-t border-borda px-5 py-4 text-lg">
         {% if diferenca > 0 %}O cliente paga a diferença de <strong>{{ diferenca|reais }}</strong>.
         {% elif diferenca < 0 %}A loja paga a diferença de <strong>{{ diferenca|reais }}</strong>.
         {% else %}Sem diferença a pagar.{% endif %}
       </p>
-    </div>
+    </section>
   {% else %}
-    <div class="mb-4 rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+    <section class="painel mb-4 overflow-hidden">
+      <div class="flex items-center gap-4 border-b border-borda p-5">
+        <span class="indicador-icone shrink-0 bg-acento-50 text-acento-700">
+          {% if negocio.tipo == 'venda' %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          {% else %}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+          {% endif %}
+        </span>
+        <div>
+          <h2 class="text-lg">{% if negocio.tipo == 'venda' %}Confira a venda{% else %}Confira a compra{% endif %}</h2>
+          <p class="text-sm text-tinta-suave">Revise antes de confirmar.</p>
+        </div>
+      </div>
       {% with item=itens.0 %}
-        <p class="mb-3 text-lg">
-          {% if negocio.tipo == 'venda' %}Você está <strong>vendendo</strong>{% else %}Você está <strong>comprando</strong>{% endif %}:
-        </p>
-        <dl class="space-y-2.5 text-lg">
-          <div class="flex justify-between gap-3">
+        <dl class="divide-y divide-borda">
+          <div class="flex justify-between gap-3 px-5 py-3">
             <dt class="text-tinta-suave">Carro</dt>
             <dd class="text-right font-medium">
               {% if item %}{{ item.veiculo.marca }} {{ item.veiculo.modelo }} {{ item.veiculo.cor|lower }}<br>
               <span class="text-sm text-tinta-suave">{{ item.veiculo.placa_formatada }}</span>{% else %}—{% endif %}
             </dd>
           </div>
-          <div class="flex justify-between gap-3 border-t border-borda pt-2.5">
+          <div class="flex justify-between gap-3 px-5 py-3">
             <dt class="text-tinta-suave">Cliente</dt>
             <dd class="text-right font-medium">{% if parte %}{{ parte.pessoa.nome }}{% else %}—{% endif %}</dd>
           </div>
-          <div class="flex justify-between gap-3 border-t border-borda pt-2.5">
+          <div class="flex items-center justify-between gap-3 px-5 py-3">
             <dt class="text-tinta-suave">Valor</dt>
             <dd class="text-right text-2xl font-bold">{% if item %}{{ item.valor|reais }}{% else %}—{% endif %}</dd>
           </div>
           {% if negocio.forma_pagamento %}
-            <div class="flex justify-between gap-3 border-t border-borda pt-2.5">
+            <div class="flex justify-between gap-3 px-5 py-3">
               <dt class="text-tinta-suave">Pagamento</dt>
               <dd class="text-right font-medium">{{ negocio.get_forma_pagamento_display }}</dd>
             </div>
           {% endif %}
-          <div class="flex justify-between gap-3 border-t border-borda pt-2.5">
+          <div class="flex justify-between gap-3 px-5 py-3">
             <dt class="text-tinta-suave">Data</dt>
             <dd class="text-right font-medium">{{ negocio.data|date:"d/m/Y" }}</dd>
           </div>
         </dl>
       {% endwith %}
-    </div>
+    </section>
   {% endif %}
 
   {# Espaço pra não ficar escondido atrás do rodapé fixo. #}

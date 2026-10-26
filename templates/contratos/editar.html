@@ -11,7 +11,7 @@
     {% endif %}
   </div>
 
-  <h1 class="mb-1 text-2xl">{{ contrato.nome_amigavel }}</h1>
+  <h1 class="mb-1 text-2xl sm:text-3xl">{{ contrato.nome_amigavel }}</h1>
   <p class="mb-3 text-tinta-suave">{{ contrato.titulo|capfirst }} · versão {{ contrato.versao }}</p>
 
   {# Aviso claro sobre o que entra no PDF (muda conforme o texto foi editado ou não). #}
@@ -37,7 +37,7 @@
   <form method="post" class="space-y-5">
     {% csrf_token %}
 
-    <div class="space-y-5 rounded-2xl border border-borda bg-superficie p-5 shadow-sm">
+    <div class="painel space-y-5 p-5">
       {# Testemunhas #}
       <div>
         <label class="mb-2 block text-sm font-medium">Testemunhas no contrato</label>

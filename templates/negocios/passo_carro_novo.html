@@ -17,7 +17,9 @@
   <form method="post" class="space-y-6">
     {% csrf_token %}
 
-    {% include "veiculos/partials/campos_carro.html" with form=form %}
+    <div class="painel p-5">
+      {% include "veiculos/partials/campos_carro.html" with form=form %}
+    </div>
 
     <div class="flex flex-wrap gap-2 pt-2">
       <button type="submit" class="botao botao-primario">Continuar</button>
